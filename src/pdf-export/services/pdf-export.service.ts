@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as jsPDF from 'jspdf';
 import 'jspdf-customfonts';
-import './default_vfs';
+import '../../assets/js/default_vfs';
 import 'jspdf-autotable';
 
 import { Data } from '../models/data';

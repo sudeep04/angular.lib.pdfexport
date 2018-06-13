@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as angularExternals from 'webpack-angular-externals';
 import * as rxjsExternals from 'webpack-rxjs-externals';
 import * as uglifyJSPlugin from 'uglifyjs-webpack-plugin';
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 export default {
   entry: {
@@ -75,7 +76,12 @@ export default {
     new uglifyJSPlugin({
       include: /\.min\.js$/,
       sourceMap: true
-    })
+    }),
+    new CopyWebpackPlugin([
+      { from: 'src/assets', to: 'assets' }
+    ],
+      undefined
+    )
 
   ],
   target: 'node'
