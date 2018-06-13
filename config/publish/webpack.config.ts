@@ -78,7 +78,7 @@ export default {
       sourceMap: true
     }),
     new CopyWebpackPlugin([
-      { from: 'src/assets', to: 'assets' }
+      { from: 'src/pdf-export/assets', to: 'assets' }
     ],
       undefined
     )

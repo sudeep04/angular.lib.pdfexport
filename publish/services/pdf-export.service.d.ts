@@ -1,5 +1,5 @@
 import 'jspdf-customfonts';
-import '../../assets/js/default_vfs';
+import '../assets/js/default_vfs';
 import 'jspdf-autotable';
 export declare class PdfExportService {
     private _doc;
