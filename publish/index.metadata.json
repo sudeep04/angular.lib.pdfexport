@@ -1,1 +1,1 @@
-[{"__symbolic":"module","version":4,"metadata":{},"exports":[{"from":"./pdf-export.module","export":["PdfExportModule"]}]}]
+[{"__symbolic":"module","version":4,"metadata":{},"exports":[{"from":"./pdf-export.module","export":["PdfExportModule"]},{"from":"./services/pdf-export.service","export":["PdfExportService"]}]}]
