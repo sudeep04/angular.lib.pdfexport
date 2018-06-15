@@ -225,6 +225,9 @@ export class ProductsPainter {
                     width: pageWidth - ((3 - group.length) * tableConfig.columnWidth) - 2 * pageConfig.padding - tableConfig.lineWidth,
                     height: 0.1
                 });
+            },
+            addPageContent: (data: any) => {
+                console.log('print layout')
             }
         };
 

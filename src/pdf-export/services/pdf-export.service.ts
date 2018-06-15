@@ -108,20 +108,17 @@ export class PdfExportService {
             jsonProduct.ProductData.PropertySets.forEach((propertySet: any) => {
                 propertySet.Properties.forEach((property: any) => {
 
-                    if (product.properties.length <= 15) {
+                    const propertyValue: Property = {
+                        name: property.DisplayName,
+                        ifdguid: property.ifdguid,
+                        value: property.NominalValue
+                    };
+                    if (jsonProduct.Score.parameter_components[property.ifdguid] !== undefined) {
 
-                        const propertyValue: Property = {
-                            name: property.DisplayName,
-                            ifdguid: property.ifdguid,
-                            value: property.NominalValue
-                        };
-                        if (jsonProduct.Score.parameter_components[property.ifdguid] !== undefined) {
-
-                            propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === property.NominalValue ? true : false;
-                        }
-
-                        product.addProperty(propertyValue);
+                        propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === property.NominalValue ? true : false;
                     }
+
+                    product.addProperty(propertyValue);
                 });
             });
             data.addProduct(product);
