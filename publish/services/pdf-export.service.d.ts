@@ -1,14 +1,5 @@
-import 'jspdf-customfonts';
-import '../assets/js/default_vfs';
-import 'jspdf-autotable';
 export declare class PdfExportService {
-    private _doc;
-    private _headerPainter;
-    private _footerPainter;
-    private _productsPainter;
+    private _docRenderer;
     generatePdf(jsonData: any): void;
-    private _init();
-    private _buildProducts(products);
-    private _getProductsGoups(products);
     private _parceJsonData(jsonData);
 }

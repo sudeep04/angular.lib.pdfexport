@@ -3,8 +3,6 @@ import { Injectable } from '@angular/core';
 import { Data } from '../models/data';
 import { Product } from '../models/product';
 import { Property } from '../models/property.interface';
-import { PageConfig } from '../models/page-config';
-import { TableConfig } from '../models/table-config';
 import { DocRenderer } from '../models/doc-renderer';
 import { DocConfig } from '../models/doc-config';
 

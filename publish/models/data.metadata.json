@@ -1,1 +1,1 @@
-[{"__symbolic":"module","version":4,"metadata":{"Data":{"__symbolic":"class","members":{"__ctor__":[{"__symbolic":"constructor"}],"addProduct":[{"__symbolic":"method"}]}}}}]
+[{"__symbolic":"module","version":4,"metadata":{"Data":{"__symbolic":"class","members":{"__ctor__":[{"__symbolic":"constructor"}],"addProduct":[{"__symbolic":"method"}],"_updateGrpupTemplate":[{"__symbolic":"method"}],"_getProductsStructure":[{"__symbolic":"method"}]}}}}]
