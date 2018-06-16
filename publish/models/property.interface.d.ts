@@ -1,6 +1,6 @@
 export interface Property {
-    ifdguid: string;
+    ifdguid?: string;
     name: string;
-    value: string;
+    value?: string;
     ckeck?: boolean;
 }

@@ -14,6 +14,7 @@ import '../styles/styles.scss';
 // Routing
 import { AppRoutingModule } from './app.routing';
 import { CommonModule } from '@angular/common';
+import { PdfExportModule } from '../pdf-export';
 
 /**
  * `AppModule` is the main entry point into Angular2's bootstraping process
@@ -29,7 +30,8 @@ import { CommonModule } from '@angular/common';
   imports: [
     CommonModule,
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    PdfExportModule
   ],
   /**
    * Expose our Services and Providers into Angular's dependency injection.
