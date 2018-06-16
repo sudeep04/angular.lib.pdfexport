@@ -10,9 +10,7 @@ const TABLE_MARGIN_TOP = 7.4;
 export class PdfExportService {
     generatePdf(jsonData) {
         const data = this._parceJsonData(jsonData);
-        if (!this._docRenderer) {
-            this._docRenderer = new DocRenderer();
-        }
+        this._docRenderer = new DocRenderer();
         const docConfig = { columnWidth: COLUMN_WIDTH, lineWidth: LINE_WIDTH, marginTop: TABLE_MARGIN_TOP, padding: DOCUMENT_PADDING };
         this._docRenderer.drow(data, docConfig);
         this._docRenderer.save('Test.pdf');

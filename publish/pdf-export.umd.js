@@ -5131,9 +5131,7 @@ var PdfExportService = /** @class */ (function () {
     }
     PdfExportService.prototype.generatePdf = function (jsonData) {
         var data = this._parceJsonData(jsonData);
-        if (!this._docRenderer) {
-            this._docRenderer = new doc_renderer_1.DocRenderer();
-        }
+        this._docRenderer = new doc_renderer_1.DocRenderer();
         var docConfig = { columnWidth: COLUMN_WIDTH, lineWidth: LINE_WIDTH, marginTop: TABLE_MARGIN_TOP, padding: DOCUMENT_PADDING };
         this._docRenderer.drow(data, docConfig);
         this._docRenderer.save('Test.pdf');
