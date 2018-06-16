@@ -6,7 +6,8 @@
     "exclude": [
       "src/*.d.ts",
       "src/**/gulpfile.ts",
-      "src/**/imagesBase64/*"
+      "src/**/imagesBase64/*",
+      "src/**/app/*"
     ]
   },
   "rulesDirectory": [
