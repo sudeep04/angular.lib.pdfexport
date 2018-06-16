@@ -16,6 +16,7 @@ export class AppComponent {
     ) { }
 
     public onGeneratePdf(): void {
+        this._pdfExportService.generatePdf(SAMPLE_DATA);
         this._pdfExportService.generatePdf(SAMPLE_DATA2);
     }
 }
