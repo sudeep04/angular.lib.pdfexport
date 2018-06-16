@@ -21,10 +21,7 @@ export class PdfExportService {
 
         const data = this._parceJsonData(jsonData);
 
-        if (!this._docRenderer) {
-
-            this._docRenderer = new DocRenderer();
-        }
+        this._docRenderer = new DocRenderer();
         const docConfig: DocConfig = { columnWidth: COLUMN_WIDTH, lineWidth: LINE_WIDTH, marginTop: TABLE_MARGIN_TOP, padding: DOCUMENT_PADDING };
 
         this._docRenderer.drow(data, docConfig);
