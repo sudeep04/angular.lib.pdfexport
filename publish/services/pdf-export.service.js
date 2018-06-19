@@ -35,8 +35,8 @@ export class PdfExportService {
                         propertySet.Properties.forEach((property) => {
                             Check.notNullOrUndefined(property, 'Property');
                             Check.notNullOrUndefined(property.DisplayName, 'Property.DisplayName');
-                            Check.notNullOrUndefined(property.ifdguid, 'Property.ifdguid');
-                            Check.notNullOrUndefined(property.NominalValue, 'Property.NominalValue');
+                            //Check.notNullOrUndefined(property.ifdguid, 'Property.ifdguid');
+                            //Check.notNullOrUndefined(property.NominalValue, 'Property.NominalValue');
                             const propertyValue = {
                                 name: property.DisplayName,
                                 ifdguid: property.ifdguid,
