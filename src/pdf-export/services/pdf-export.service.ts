@@ -47,35 +47,44 @@ export class PdfExportService {
 
             const product = new Product(jsonProduct.ProductData.Name, jsonProduct.ProductData.Supplier.Name);
 
-            if(jsonProduct.ProductData.PropertySets !== undefined) {
+            if (jsonProduct.ProductData.PropertySets !== undefined) {
 
                 Check.isArray(jsonProduct.ProductData.PropertySets, 'ProductData.PropertySets');
 
                 jsonProduct.ProductData.PropertySets.forEach((propertySet: any) => {
 
-                    if(propertySet.Properties !== undefined) {
+                    if (propertySet.Properties !== undefined) {
 
                         Check.isArray(propertySet.Properties, 'Properties');
 
                         propertySet.Properties.forEach((property: any) => {
-        
+
+                            Check.notNullOrUndefined(property, 'Property');
+                            Check.notNullOrUndefined(property.DisplayName, 'Property.DisplayName');
+                            Check.notNullOrUndefined(property.ifdguid, 'Property.ifdguid');
+                            Check.notNullOrUndefined(property.NominalValue, 'Property.NominalValue');
+
                             const propertyValue: Property = {
                                 name: property.DisplayName,
                                 ifdguid: property.ifdguid,
                                 value: property.NominalValue
                             };
-                            if (jsonProduct.Score.parameter_components[property.ifdguid] !== undefined) {
-        
-                                propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === property.NominalValue ? true : false;
+
+                            if (jsonProduct.Score !== undefined && jsonProduct.Score.parameter_components !== undefined) {
+
+                                if (jsonProduct.Score.parameter_components[property.ifdguid] !== undefined) {
+
+                                    propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === property.NominalValue ? true : false;
+                                }
                             }
-        
+
                             product.addProperty(propertyValue);
                         });
                     }
-                }); 
+                });
             }
 
-            
+
             data.addProduct(product);
         });
 
