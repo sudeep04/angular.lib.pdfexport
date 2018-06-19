@@ -5,6 +5,7 @@ import { Product } from '../models/product';
 import { Property } from '../models/property.interface';
 import { DocRenderer } from '../models/doc-renderer';
 import { DocConfig } from '../models/doc-config';
+import { Check } from '../models/check';
 
 const DOCUMENT_WIDTH = 210;
 const DOCUMENT_PADDING = 8.69;
@@ -17,7 +18,9 @@ export class PdfExportService {
 
     private _docRenderer: DocRenderer;
 
-    public generatePdf(jsonData: any): void {
+    public generatePdf(jsonData: object): void {
+
+        Check.notNullOrUndefined(jsonData, 'jsonData');
 
         const data = this._parceJsonData(jsonData);
 
@@ -31,28 +34,48 @@ export class PdfExportService {
 
     private _parceJsonData(jsonData: any): Data {
 
+        Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
+
         const data = new Data();
         jsonData.Products.forEach((jsonProduct: any) => {
 
+            Check.notNullOrUndefined(jsonProduct, 'Product');
+            Check.notNullOrUndefined(jsonProduct.ProductData, 'ProductData');
+            Check.notNullOrUndefined(jsonProduct.ProductData.Name, 'ProductData.Name');
+            Check.notNullOrUndefined(jsonProduct.ProductData.Supplier, 'ProductData.Supplier');
+            Check.notNullOrUndefined(jsonProduct.ProductData.Supplier.Name, 'Supplier.Name');
+
             const product = new Product(jsonProduct.ProductData.Name, jsonProduct.ProductData.Supplier.Name);
 
-            jsonProduct.ProductData.PropertySets.forEach((propertySet: any) => {
+            if(jsonProduct.ProductData.PropertySets !== undefined) {
 
-                propertySet.Properties.forEach((property: any) => {
+                Check.isArray(jsonProduct.ProductData.PropertySets, 'ProductData.PropertySets');
 
-                    const propertyValue: Property = {
-                        name: property.DisplayName,
-                        ifdguid: property.ifdguid,
-                        value: property.NominalValue
-                    };
-                    if (jsonProduct.Score.parameter_components[property.ifdguid] !== undefined) {
+                jsonProduct.ProductData.PropertySets.forEach((propertySet: any) => {
 
-                        propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === property.NominalValue ? true : false;
+                    if(propertySet.Properties !== undefined) {
+
+                        Check.isArray(propertySet.Properties, 'Properties');
+
+                        propertySet.Properties.forEach((property: any) => {
+        
+                            const propertyValue: Property = {
+                                name: property.DisplayName,
+                                ifdguid: property.ifdguid,
+                                value: property.NominalValue
+                            };
+                            if (jsonProduct.Score.parameter_components[property.ifdguid] !== undefined) {
+        
+                                propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === property.NominalValue ? true : false;
+                            }
+        
+                            product.addProperty(propertyValue);
+                        });
                     }
+                }); 
+            }
 
-                    product.addProperty(propertyValue);
-                });
-            });
+            
             data.addProduct(product);
         });
 
