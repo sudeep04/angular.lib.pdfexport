@@ -84,7 +84,6 @@ export class PdfExportService {
                 });
             }
 
-
             data.addProduct(product);
         });
 
