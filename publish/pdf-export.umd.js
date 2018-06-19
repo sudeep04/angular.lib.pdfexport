@@ -5156,8 +5156,8 @@ var PdfExportService = /** @class */ (function () {
                         propertySet.Properties.forEach(function (property) {
                             check_1.Check.notNullOrUndefined(property, 'Property');
                             check_1.Check.notNullOrUndefined(property.DisplayName, 'Property.DisplayName');
-                            check_1.Check.notNullOrUndefined(property.ifdguid, 'Property.ifdguid');
-                            check_1.Check.notNullOrUndefined(property.NominalValue, 'Property.NominalValue');
+                            //Check.notNullOrUndefined(property.ifdguid, 'Property.ifdguid');
+                            //Check.notNullOrUndefined(property.NominalValue, 'Property.NominalValue');
                             var propertyValue = {
                                 name: property.DisplayName,
                                 ifdguid: property.ifdguid,
