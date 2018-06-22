@@ -42,7 +42,8 @@ export class PdfExportService {
             captions: {
                 architectureOffice: jsonData.Settings.Captions && jsonData.Settings.Captions.ArchitectureOffice ? jsonData.Settings.Captions.ArchitectureOffice : undefined,
                 project: jsonData.Settings.Captions && jsonData.Settings.Captions.Project ? jsonData.Settings.Captions.Project : undefined
-            }
+            },
+            showProductsImage: jsonData.Settings.ShowProductsImage
         });
         jsonData.Products.forEach((jsonProduct: any) => {
 

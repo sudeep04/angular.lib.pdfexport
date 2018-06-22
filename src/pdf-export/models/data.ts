@@ -27,7 +27,8 @@ export class Data {
             captions: {
                 architectureOffice: 'Architekturbüro',
                 project: 'Projekt'
-            }
+            },
+            showProductsImage: true
         };
 
         if (settings.sorting && (settings.sorting === 'desc' || settings.sorting === 'assc')) {
@@ -43,6 +44,11 @@ export class Data {
         if (settings.captions.project) {
 
             this._settings.captions.project = settings.captions.project;
+        }
+
+        if (settings.showProductsImage != undefined) {
+
+            this._settings.showProductsImage = settings.showProductsImage;
         }
 
         this._groups = [];

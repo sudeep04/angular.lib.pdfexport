@@ -64,9 +64,9 @@ export class DocRenderer {
 
     private _drowBody(group: Product[]) {
 
-        this._drowHeader(group, true);
+        this._drowHeader(group, this._data.settings.showProductsImage);
 
-        let isFirstWithoutImages = false;
+        let isFirstWithoutImages = !this._data.settings.showProductsImage;
 
         const pageWidth = this._doc.internal.pageSize.getWidth();
 
@@ -203,11 +203,11 @@ export class DocRenderer {
         this._doc.autoTable(columns, rows, config);
     }
 
-    private _drowHeader(group: Product[], isFirst: boolean) {
+    private _drowHeader(group: Product[], showProductsImage: boolean) {
 
         const pageWidth = this._doc.internal.pageSize.getWidth();
 
-        if (isFirst) {
+        if (showProductsImage ) {
 
             group.forEach((product: Product, index: number) => {
 
@@ -277,7 +277,7 @@ export class DocRenderer {
 
         const config: any = {
             styles,
-            margin: { top: isFirst ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP, left: this._docConfig.padding + this._docConfig.lineWidth / 2 },
+            margin: { top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP, left: this._docConfig.padding + this._docConfig.lineWidth / 2 },
             columnStyles: {
                 col1: {}
             },

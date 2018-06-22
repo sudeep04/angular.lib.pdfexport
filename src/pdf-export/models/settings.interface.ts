@@ -1,13 +1,13 @@
 export interface Settings {
-    // header: {
-        
-    // };
-    // units: [{
 
-    // }];
+    showProductsImage: boolean;
+    
     captions: {
+        
         architectureOffice: string;
+        
         project: string;
     }
+    
     sorting: 'assc' | 'desc';
 }
