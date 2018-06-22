@@ -35,11 +35,10 @@ export class PdfExportService {
     private _parceJsonData(jsonData: any): Data {
 
         Check.notNullOrUndefined(jsonData.Settings, 'jsonData.Settings');
-        Check.notNullOrUndefined(jsonData.Settings.Sorting, 'jsonData.Settings.Sorting');
         Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
 
         const data = new Data({
-            sorting: jsonData.Settings.sorting
+            sorting: jsonData.Settings.Sorting
         });
         jsonData.Products.forEach((jsonProduct: any) => {
 

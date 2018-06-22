@@ -17,7 +17,15 @@ export class Data {
 
     constructor(settings: Settings) {
 
-        this._settings = settings;
+        this._settings = {
+            sorting: 'assc'
+        };
+
+        if(settings.sorting && (settings.sorting === 'desc' || settings.sorting === 'assc')) {
+
+            this._settings.sorting = settings.sorting; 
+        }
+
         this._groups = [];
         this._groupsTemplates = [];
         this._groups.push([]);
@@ -43,6 +51,19 @@ export class Data {
                 groupTemplate.push(property.name);
             }
         });
+
+        this._sortGroupTemplate(groupTemplate);
+    }
+
+    private _sortGroupTemplate(groupTemplate: string[]) {
+
+        if( this._settings.sorting === 'assc') {
+
+            groupTemplate = groupTemplate.sort();
+        } else {
+
+            groupTemplate = groupTemplate.sort((a: string, b: string) => a < b? 1: -1);
+        }
     }
 
     private _getProductsStructure(group: Product[], groupTemplate: string[]): Product[] {

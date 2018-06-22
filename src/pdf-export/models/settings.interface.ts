@@ -5,5 +5,5 @@ export interface Settings {
     // units: [{
 
     // }];
-    sorting: 'asscending' | 'descending';
+    sorting: 'assc' | 'desc';
 }
