@@ -38,7 +38,11 @@ export class PdfExportService {
         Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
 
         const data = new Data({
-            sorting: jsonData.Settings.Sorting
+            sorting: jsonData.Settings.Sorting ? jsonData.Settings.Sorting : undefined,
+            captions: {
+                architectureOffice: jsonData.Settings.Captions && jsonData.Settings.Captions.ArchitectureOffice ? jsonData.Settings.Captions.ArchitectureOffice : undefined,
+                project: jsonData.Settings.Captions && jsonData.Settings.Captions.Project ? jsonData.Settings.Captions.Project : undefined
+            }
         });
         jsonData.Products.forEach((jsonProduct: any) => {
 

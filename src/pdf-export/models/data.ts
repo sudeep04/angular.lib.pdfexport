@@ -9,6 +9,11 @@ export class Data {
         return this._groups;
     }
 
+    public get settings(): Settings {
+
+        return this._settings;
+    }
+
     private _groups: Product[][];
 
     private _groupsTemplates: string[][];
@@ -18,12 +23,26 @@ export class Data {
     constructor(settings: Settings) {
 
         this._settings = {
-            sorting: 'assc'
+            sorting: 'assc',
+            captions: {
+                architectureOffice: 'Architekturbüro',
+                project: 'Projekt'
+            }
         };
 
-        if(settings.sorting && (settings.sorting === 'desc' || settings.sorting === 'assc')) {
+        if (settings.sorting && (settings.sorting === 'desc' || settings.sorting === 'assc')) {
 
-            this._settings.sorting = settings.sorting; 
+            this._settings.sorting = settings.sorting;
+        }
+
+        if (settings.captions.architectureOffice) {
+
+            this._settings.captions.architectureOffice = settings.captions.architectureOffice;
+        }
+
+        if (settings.captions.project) {
+
+            this._settings.captions.project = settings.captions.project;
         }
 
         this._groups = [];
@@ -57,12 +76,12 @@ export class Data {
 
     private _sortGroupTemplate(groupTemplate: string[]) {
 
-        if( this._settings.sorting === 'assc') {
+        if (this._settings.sorting === 'assc') {
 
             groupTemplate = groupTemplate.sort();
         } else {
 
-            groupTemplate = groupTemplate.sort((a: string, b: string) => a < b? 1: -1);
+            groupTemplate = groupTemplate.sort((a: string, b: string) => a < b ? 1 : -1);
         }
     }
 

@@ -5,5 +5,9 @@ export interface Settings {
     // units: [{
 
     // }];
+    captions: {
+        architectureOffice: string;
+        project: string;
+    }
     sorting: 'assc' | 'desc';
 }
