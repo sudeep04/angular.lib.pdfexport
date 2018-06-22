@@ -1,5 +1,6 @@
 import { Product } from './product';
 import { Property } from './property.interface';
+import { Settings } from './settings.interface';
 
 export class Data {
 
@@ -12,8 +13,11 @@ export class Data {
 
     private _groupsTemplates: string[][];
 
-    constructor() {
+    private _settings: Settings;
 
+    constructor(settings: Settings) {
+
+        this._settings = settings;
         this._groups = [];
         this._groupsTemplates = [];
         this._groups.push([]);
