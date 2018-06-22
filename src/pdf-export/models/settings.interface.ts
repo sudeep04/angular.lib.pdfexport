@@ -1,5 +1,11 @@
 export interface Settings {
 
+    logo: {
+        show: boolean;
+        type: 'text' | 'url';
+        data: string;
+    };
+
     showProductsImage: boolean;
     
     captions: {

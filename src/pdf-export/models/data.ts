@@ -28,7 +28,12 @@ export class Data {
                 architectureOffice: 'Architekturbüro',
                 project: 'Projekt'
             },
-            showProductsImage: true
+            showProductsImage: true,
+            logo: {
+                show: false,
+                type: 'text',
+                data: ''
+            }
         };
 
         if (settings.sorting && (settings.sorting === 'desc' || settings.sorting === 'assc')) {
@@ -46,9 +51,27 @@ export class Data {
             this._settings.captions.project = settings.captions.project;
         }
 
-        if (settings.showProductsImage != undefined) {
+        if (settings.showProductsImage !== undefined) {
 
             this._settings.showProductsImage = settings.showProductsImage;
+        }
+
+        if (settings.logo) {
+
+            if (settings.logo.type === 'text' || settings.logo.type === 'url') {
+
+                this._settings.logo.type = settings.logo.type;
+            }
+
+            if (settings.logo.show !== undefined) {
+
+                this._settings.logo.show = settings.logo.show;
+            }
+
+            if (settings.logo.data !== undefined) {
+
+                this._settings.logo.data = settings.logo.data;
+            }
         }
 
         this._groups = [];

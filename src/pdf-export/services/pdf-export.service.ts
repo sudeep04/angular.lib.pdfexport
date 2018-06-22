@@ -22,7 +22,7 @@ export class PdfExportService {
 
         Check.notNullOrUndefined(jsonData, 'jsonData');
 
-        const data = this._parceJsonData(jsonData);
+        const data = this._parseJsonData(jsonData);
 
         this._docRenderer = new DocRenderer();
         const docConfig: DocConfig = { columnWidth: COLUMN_WIDTH, lineWidth: LINE_WIDTH, marginTop: TABLE_MARGIN_TOP, padding: DOCUMENT_PADDING };
@@ -32,7 +32,7 @@ export class PdfExportService {
         this._docRenderer.save('Test.pdf');
     }
 
-    private _parceJsonData(jsonData: any): Data {
+    private _parseJsonData(jsonData: any): Data {
 
         Check.notNullOrUndefined(jsonData.Settings, 'jsonData.Settings');
         Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
@@ -43,7 +43,8 @@ export class PdfExportService {
                 architectureOffice: jsonData.Settings.Captions && jsonData.Settings.Captions.ArchitectureOffice ? jsonData.Settings.Captions.ArchitectureOffice : undefined,
                 project: jsonData.Settings.Captions && jsonData.Settings.Captions.Project ? jsonData.Settings.Captions.Project : undefined
             },
-            showProductsImage: jsonData.Settings.ShowProductsImage
+            showProductsImage: jsonData.Settings.ShowProductsImage,
+            logo: jsonData.Settings.Logo
         });
         jsonData.Products.forEach((jsonProduct: any) => {
 
