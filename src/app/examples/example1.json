@@ -1,0 +1,396 @@
+{
+    "Settings": {
+        "Logo": {
+            "Show": true,
+            "Type": "url",
+            "Data": "assets/images/logo.png"
+        },
+        "Sorting": "assc",
+        "Captions": {
+            "ArchitectureOffice": "Architekturbüro",
+            "Project": "Projekt"
+        },
+        "ShowProductsImage": true,
+        "Units": {
+            "Klasse": "beforeValue"
+        }
+    },
+    "Products": [
+        {
+            "ProductData": {
+                "Name": "AWS 90.SI+ Green",
+                "PropertySets": [
+                    {
+                        "Properties": [
+                            {
+                                "ifdguid": "9f75567ce6fc11e7bd47f48c50787210",
+                                "DisplayName": "Available in Country",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": "Alle"
+                            },
+                            {
+                                "ifdguid": "9f7713cce6fc11e7bd47f48c50787210",
+                                "DisplayName": "Corrosion protection class",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": "5",
+                                "Unit": {
+                                    "Name": "Klasse"
+                                }
+                            },
+                            {
+                                "ifdguid": "9f7198cae6fc11e7bd47f48c50787210",
+                                "DisplayName": "Depth panel frame",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": 90.0,
+                                "Unit": {
+                                    "Name": "mm"
+                                }
+                            },
+                            {
+                                "ifdguid": "9f74f420e6fc11e7bd47f48c50787210",
+                                "DisplayName": "Handicap accessible",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": true
+                            },
+                            {
+                                "ifdguid": "9f774612e6fc11e7bd47f48c50787210",
+                                "DisplayName": "Integral sunshading",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": false
+                            },
+                            {
+                                "ifdguid": "9f73ab2ee6fc11e7bd47f48c50787210",
+                                "DisplayName": "Load bearing capacity of safety equipment",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": true,
+                                "Unit": {
+                                    "Name": ""
+                                }
+                            },
+                            {
+                                "ifdguid": "9f764dfce6fc11e7bd47f48c50787210",
+                                "DisplayName": "Material",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": "Aluminium"
+                            },
+                            {
+                                "ifdguid": "9f764dfce6fc11e7bd47f48c50787210",
+                                "DisplayName": "Material",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": "Aluminium",
+                                "Unit": {
+                                    "Name": ""
+                                }
+                            },
+                            {
+                                "ifdguid": "9f72b836e6fc11e7bd47f48c50787210",
+                                "DisplayName": "Max. opening angle",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": 180.0,
+                                "Unit": {
+                                    "Name": "\u00b0"
+                                }
+                            },
+                            {
+                                "ifdguid": "9f72daf0e6fc11e7bd47f48c50787210",
+                                "DisplayName": "Max. panel weight, overlying suspension",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": 250.0,
+                                "Unit": {
+                                    "Name": "kg"
+                                }
+                            },
+                            {
+                                "ifdguid": "9f75bfd6e6fc11e7bd47f48c50787210",
+                                "DisplayName": "Opening Type",
+                                "Type": "IfcPropertyListValue",
+                                "ListValues": [
+                                    "Dreh-Links",
+                                    "Dreh-Rechts",
+                                    "Drehkipp-Links",
+                                    "Drehkipp-Rechts",
+                                    "Fix",
+                                    "Kipp"
+                                ]
+                            },
+                            {
+                                "ifdguid": "9f6f6f1ee6fc11e7bd47f48c50787210",
+                                "DisplayName": "Operating forces",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": "Gering"
+                            },
+                            {
+                                "ifdguid": "9f7577d8e6fc11e7bd47f48c50787210",
+                                "DisplayName": "Security glazing",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": "None"
+                            },
+                            {
+                                "ifdguid": "9f783b80e6fc11e7bd47f48c50787210",
+                                "DisplayName": "Suitable for passive houses",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": true
+                            },
+                            {
+                                "ifdguid": "9f75e70ee6fc11e7bd47f48c50787210",
+                                "DisplayName": "Surface finishing",
+                                "Type": "IfcPropertyListValue",
+                                "ListValues": [
+                                    "Duraflon",
+                                    "Eloxal",
+                                    "Lack",
+                                    "Pulver"
+                                ]
+                            },
+                            {
+                                "ifdguid": "9f71ddbce6fc11e7bd47f48c50787210",
+                                "DisplayName": "Total face height",
+                                "Type": "IfcPropertyBoundedValue",
+                                "UpperBoundValue": 2500.0,
+                                "LowerBoundValue": 540.0,
+                                "Unit": {
+                                    "Name": "mm"
+                                }
+                            },
+                            {
+                                "ifdguid": "9f720008e6fc11e7bd47f48c50787210",
+                                "DisplayName": "Total face width",
+                                "Type": "IfcPropertyBoundedValue",
+                                "UpperBoundValue": 2800.0,
+                                "LowerBoundValue": 470.0,
+                                "Unit": {
+                                    "Name": "mm"
+                                }
+                            },
+                            {
+                                "ifdguid": "9f71bbf2e6fc11e7bd47f48c50787210",
+                                "DisplayName": "Total panel thickness",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": 68.0,
+                                "Unit": {
+                                    "Name": "mm"
+                                }
+                            },
+                            {
+                                "ifdguid": "9f6fd580e6fc11e7bd47f48c50787210",
+                                "DisplayName": "UF -Frame",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": 0.79,
+                                "Unit": {
+                                    "Name": "W/(m\u00b2K)"
+                                }
+                            },
+                            {
+                                "ifdguid": "9f714d66e6fc11e7bd47f48c50787210",
+                                "DisplayName": "Width panel frame",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": 99.0,
+                                "Unit": {
+                                    "Name": "mm"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "Properties": [
+                            {
+                                "ifdguid": "bffe7d00d21811e1800000215ad4efdf",
+                                "DisplayName": "Fire Rating",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": "None"
+                            },
+                            {
+                                "ifdguid": "d3114d00d21811e1800000215ad4efdf",
+                                "DisplayName": "Infiltration",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": 4.0,
+                                "Unit": {
+                                    "Name": "Klasse"
+                                }
+                            },
+                            {
+                                "ifdguid": "c68cf480d21811e1800000215ad4efdf",
+                                "DisplayName": "Security Rating",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": "RC3",
+                                "Unit": {
+                                    "Name": "Klasse"
+                                }
+                            },
+                            {
+                                "ifdguid": "f9cf8380d21811e1800000215ad4efdf",
+                                "DisplayName": "Smoke Stop",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": false
+                            },
+                            {
+                                "ifdguid": "e92533f3a7e4416196ad923faee29e96",
+                                "DisplayName": "WaterTightnessRating",
+                                "Type": "IfcPropertySingleValue",
+                                "NominalValue": "9A",
+                                "Unit": {
+                                    "Name": "Klasse"
+                                }
+                            },
+                            {
+                                "ifdguid": "664882a15b8a420087f6f80670cbe20b",
+                                "DisplayName": "WindLoadRating",
+                                "Type": "IfcPropertyListValue",
+                                "ListValues": [
+                                    "B5",
+                                    "C5"
+                                ],
+                                "Unit": {
+                                    "Name": "Klasse"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "Supplier": {
+                    "Name": "Sch\u00fcco International KG"
+                }
+            }
+        },
+        {
+            "ProductData": {
+                "Name": "C50 (Cover 240)",
+                "PropertySets": [
+                    {
+                        "Properties": [
+                            {
+                                "ifdguid": "88efaeacf6ce11e78ec7f48c50787210",
+                                "NominalValue": 240.0,
+                                "Unit": {
+                                    "Name": "mm"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "Gesamtbreite"
+                            },
+                            {
+                                "ifdguid": "86ca7378f6ce11e78ec7f48c50787210",
+                                "NominalValue": 37.0,
+                                "Unit": {
+                                    "Name": "mm"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "Gesamth\u00f6he"
+                            },
+                            {
+                                "ifdguid": "8b9d53f2f6ce11e78ec7f48c50787210",
+                                "NominalValue": 528.0,
+                                "Unit": {
+                                    "Name": "mm"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "Gesamtl\u00e4nge"
+                            },
+                            {
+                                "ifdguid": "92426170f6ce11e78ec7f48c50787210",
+                                "NominalValue": 7.0,
+                                "Unit": {
+                                    "Name": "kg"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "Gewicht/St\u00fcck"
+                            },
+                            {
+                                "ifdguid": "947c0dbaf6ce11e78ec7f48c50787210",
+                                "NominalValue": "10",
+                                "Unit": {
+                                    "Name": "St\u00fcck"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "Steinbedarf/m\u00b2"
+                            }
+                        ],
+                        "Name": "Mauerwerk_Pset_P1"
+                    }
+                ],
+                "Supplier": {
+                    "Name": "Petersen Tegl A/S"
+                }
+            }
+        },
+        {
+            "ProductData": {
+                "Name": "Ergoldsbacher E58 SL",
+                "PropertySets": [
+                    {
+                        "Properties": [
+                            {
+                                "ifdguid": "d810a932ecb011e7b17cf48c50787210",
+                                "NominalValue": 243.0,
+                                "Unit": {
+                                    "Name": "mm"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "Deckbreite"
+                            },
+                            {
+                                "ifdguid": "d810cd9aecb011e7b17cf48c50787210",
+                                "Unit": {
+                                    "Name": "mm"
+                                },
+                                "UpperBoundValue": 355.0,
+                                "Type": "IfcPropertyBoundedValue",
+                                "LowerBoundValue": 325.0,
+                                "DisplayName": "Deckl\u00e4nge"
+                            },
+                            {
+                                "ifdguid": "d81185faecb011e7b17cf48c50787210",
+                                "NominalValue": 3.8,
+                                "Unit": {
+                                    "Name": "kg"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "Gewicht/St\u00fcck"
+                            },
+                            {
+                                "ifdguid": "d811599aecb011e7b17cf48c50787210",
+                                "NominalValue": 55.0,
+                                "Unit": {
+                                    "Name": "kg"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "Gewicht/m\u00b2"
+                            },
+                            {
+                                "ifdguid": "d811dfc8ecb011e7b17cf48c50787210",
+                                "NominalValue": 20.0,
+                                "Unit": {
+                                    "Name": "\u00b0"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "Regeldachneigung"
+                            },
+                            {
+                                "ifdguid": "d811a5d0ecb011e7b17cf48c50787210",
+                                "NominalValue": 5.0,
+                                "Unit": {
+                                    "Name": "St\u00fcck"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "St\u00fcck/Paket"
+                            },
+                            {
+                                "ifdguid": "d811c2f4ecb011e7b17cf48c50787210",
+                                "NominalValue": 240.0,
+                                "Unit": {
+                                    "Name": "St\u00fcck"
+                                },
+                                "Type": "IfcPropertySingleValue",
+                                "DisplayName": "St\u00fcck/Palette"
+                            }
+                        ],
+                        "Name": "Dachstein_Pset_P1"
+                    }
+                ],
+                "Supplier": {
+                    "Name": "Erlus Aktiengesellschaft"
+                }
+            }
+        }
+    ],
+    "Filters": []
+}

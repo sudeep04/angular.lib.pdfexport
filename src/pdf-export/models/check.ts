@@ -34,10 +34,6 @@ export abstract class Check {
         this.isArray(value, parameterName);
         this.notNull(value, parameterName);
         this.notUndefined(value, parameterName);
-
-        if (!(value as any[]).length) {
-            throw new Error(this.format(ERRORS.EMPTY_ARRAY_EXCEPTION, parameterName));
-        }
     }
 
     private static format(value: string, ...replacements: string[]): string {
@@ -49,8 +45,8 @@ export abstract class Check {
                 ? replacements[index]
                 : match
                 ;
-        }
-        
-        return value.replace(new RegExp('{(\\d+)}','g'), replacer);
+        };
+
+        return value.replace(new RegExp('{(\\d+)}', 'g'), replacer);
     }
 }
