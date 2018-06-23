@@ -7,8 +7,8 @@
         },
         "Sorting": "assc",
         "Captions": {
-            "ArchitectureOffice": "a",
-            "Project": "b"
+            "ArchitectureOffice": "Architekturbüro",
+            "Project": "Projekt"
         },
         "ShowProductsImage": true,
         "Units": {
