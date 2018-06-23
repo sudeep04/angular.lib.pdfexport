@@ -23,9 +23,6 @@ export class Check {
         this.isArray(value, parameterName);
         this.notNull(value, parameterName);
         this.notUndefined(value, parameterName);
-        if (!value.length) {
-            throw new Error(this.format(ERRORS.EMPTY_ARRAY_EXCEPTION, parameterName));
-        }
     }
     static format(value, ...replacements) {
         const replacer = (match, ...args) => {

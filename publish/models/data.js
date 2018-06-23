@@ -3,7 +3,11 @@ export class Data {
     get groups() {
         return this._groups;
     }
-    constructor() {
+    get settings() {
+        return this._settings;
+    }
+    constructor(settings) {
+        this._settings = settings;
         this._groups = [];
         this._groupsTemplates = [];
         this._groups.push([]);
@@ -24,6 +28,15 @@ export class Data {
                 groupTemplate.push(property.name);
             }
         });
+        this._sortGroupTemplate(groupTemplate);
+    }
+    _sortGroupTemplate(groupTemplate) {
+        if (this._settings.sorting === 'assc') {
+            groupTemplate = groupTemplate.sort();
+        }
+        else {
+            groupTemplate = groupTemplate.sort((a, b) => a < b ? 1 : -1);
+        }
     }
     _getProductsStructure(group, groupTemplate) {
         const updatedGroup = [];

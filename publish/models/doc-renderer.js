@@ -7,6 +7,7 @@ import 'jspdf-customfonts';
 import '../assets/js/default_vfs';
 import 'jspdf-autotable';
 import { logoImg } from './imagesBase64/logo-img';
+import { JsonParser } from './json-parser';
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
 export class DocRenderer {
@@ -15,30 +16,32 @@ export class DocRenderer {
         this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
         this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
     }
-    drow(data, docConfig) {
+    drow(jsonData, docConfig) {
+        this._data = JsonParser.parseData(jsonData);
+        this._docConfig = docConfig;
         let lastPage = 1;
-        data.groups.forEach((group, index) => {
-            this._drowBody(group, docConfig);
+        this._data.groups.forEach((group, index) => {
+            this._drowBody(group);
             for (let i = lastPage + 1; i < this._doc.internal.pages.length; i++) {
                 this._doc.setPage(i);
-                this._drowHeader(group, docConfig, false);
+                this._drowHeader(group, false);
             }
             lastPage = this._doc.internal.pages.length;
-            if (index < data.groups.length - 1) {
+            if (index < this._data.groups.length - 1) {
                 this._doc.addPage();
             }
         });
         for (let i = 1; i < this._doc.internal.pages.length; i++) {
             this._doc.setPage(i);
-            this._drowLayout(i, docConfig);
+            this._drowLayout(i);
         }
     }
     save(fileName) {
         this._doc.save(fileName);
     }
-    _drowBody(group, docConfig) {
-        this._drowHeader(group, docConfig, true);
-        let isFirstWithoutImages = false;
+    _drowBody(group) {
+        this._drowHeader(group, this._data.settings.showProductsImage);
+        let isFirstWithoutImages = !this._data.settings.showProductsImage;
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const columns = [{ dataKey: 'col1', title: '' }];
         const rows = [];
@@ -46,14 +49,14 @@ export class DocRenderer {
             fillColor: [255, 255, 255],
             lineWidth: 0,
             fontStyle: 'normal',
-            cellPadding: [2.8, docConfig.lineWidth + 0.5, 2.8, docConfig.lineWidth + 0.5],
+            cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
             valign: 'middle'
         };
         const columnStyles = {
-            col2: { columnWidth: docConfig.columnWidth }
+            col2: { columnWidth: this._docConfig.columnWidth }
         };
         let borders = [];
         let checkImages = [];
@@ -61,16 +64,16 @@ export class DocRenderer {
             styles,
             margin: {
                 top: this._doc.autoTable.previous.finalY,
-                right: docConfig.padding + docConfig.lineWidth / 2,
-                bottom: docConfig.padding + 3 * docConfig.lineWidth / 2 + 10,
-                left: docConfig.padding + docConfig.lineWidth / 2
+                right: this._docConfig.padding + this._docConfig.lineWidth / 2,
+                bottom: this._docConfig.padding + 3 * this._docConfig.lineWidth / 2 + 10,
+                left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
                 col1: {}
             },
             alternateRowStyles: styles,
             showHeader: 'never',
-            tableWidth: pageWidth - ((3 - group.length) * docConfig.columnWidth) - 2 * docConfig.padding - docConfig.lineWidth,
+            tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell, opts) => {
                 if (opts.column.index !== 0) {
                     if (group[opts.column.index - 1].properties[opts.row.index].ckeck !== undefined) {
@@ -95,17 +98,17 @@ export class DocRenderer {
             },
             drawHeaderRow: (row, opts) => {
                 borders.push({
-                    left: docConfig.padding + docConfig.lineWidth / 2,
+                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
                     top: row.y + row.height - 0.1,
-                    width: pageWidth - ((3 - group.length) * docConfig.columnWidth) - 2 * docConfig.padding - docConfig.lineWidth,
+                    width: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
                     height: 0.1
                 });
             },
             drawRow: (row, opts) => {
                 borders.push({
-                    left: docConfig.padding + docConfig.lineWidth / 2,
+                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
                     top: row.y + row.height - 0.1,
-                    width: pageWidth - ((3 - group.length) * docConfig.columnWidth) - 2 * docConfig.padding - docConfig.lineWidth,
+                    width: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
                     height: 0.1
                 });
             },
@@ -128,13 +131,13 @@ export class DocRenderer {
                 checkImages = [];
                 if (!isFirstWithoutImages) {
                     isFirstWithoutImages = true;
-                    data.settings.margin.top -= IMAGES_PADING_TOP + docConfig.columnWidth + docConfig.lineWidth / 2;
+                    data.settings.margin.top -= IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2;
                 }
             }
         };
         group.forEach((product) => {
             columns.push({ dataKey: product.name, title: product.name });
-            config.columnStyles[product.name] = { columnWidth: docConfig.columnWidth, cellPadding: [2.8, docConfig.lineWidth + 0.5, 2.8, docConfig.lineWidth + 4.5] };
+            config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 4.5] };
             if (rows.length === 0) {
                 product.properties.forEach((property) => {
                     const row = { col1: property.name };
@@ -149,22 +152,22 @@ export class DocRenderer {
         });
         this._doc.autoTable(columns, rows, config);
     }
-    _drowHeader(group, docConfig, isFirst) {
+    _drowHeader(group, showProductsImage) {
         const pageWidth = this._doc.internal.pageSize.getWidth();
-        if (isFirst) {
+        if (showProductsImage) {
             group.forEach((product, index) => {
                 switch (index) {
                     case 0:
-                        this._doc.addImage(boxShadowImg, pageWidth - (docConfig.columnWidth * 3 + docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, docConfig.columnWidth, docConfig.columnWidth);
-                        this._doc.addImage('assets/images/product2.png', pageWidth - (docConfig.columnWidth * 3 + docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, docConfig.columnWidth - 6.4, docConfig.columnWidth - 6.4);
+                        this._doc.addImage(boxShadowImg, pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, this._docConfig.columnWidth, this._docConfig.columnWidth);
+                        this._doc.addImage('assets/images/product2.png', pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
                         break;
                     case 1:
-                        this._doc.addImage(boxShadowImg, pageWidth - (docConfig.columnWidth * 2 + docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, docConfig.columnWidth, docConfig.columnWidth);
-                        this._doc.addImage('assets/images/product1.png', pageWidth - (docConfig.columnWidth * 2 + docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, docConfig.columnWidth - 6.4, docConfig.columnWidth - 6.4);
+                        this._doc.addImage(boxShadowImg, pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, this._docConfig.columnWidth, this._docConfig.columnWidth);
+                        this._doc.addImage('assets/images/product1.png', pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
                         break;
                     case 2:
-                        this._doc.addImage(boxShadowImg, pageWidth - (docConfig.columnWidth + docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, docConfig.columnWidth, docConfig.columnWidth);
-                        this._doc.addImage('assets/images/product3.png', pageWidth - (docConfig.columnWidth + docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, docConfig.columnWidth - 6.4, docConfig.columnWidth - 6.4);
+                        this._doc.addImage(boxShadowImg, pageWidth - (this._docConfig.columnWidth + this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, this._docConfig.columnWidth, this._docConfig.columnWidth);
+                        this._doc.addImage('assets/images/product3.png', pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
                         break;
                 }
             });
@@ -177,24 +180,27 @@ export class DocRenderer {
             fillColor: [246, 246, 246],
             lineWidth: 0,
             fontStyle: 'normal',
-            cellPadding: [2.8, docConfig.lineWidth + 0.5, 2.8, docConfig.lineWidth + 0.5],
+            cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
             valign: 'middle'
         };
         const columnStyles = {
-            col2: { columnWidth: docConfig.columnWidth }
+            col2: { columnWidth: this._docConfig.columnWidth }
         };
         const borders = [];
         const config = {
             styles,
-            margin: { top: isFirst ? IMAGES_TOP + IMAGES_PADING_TOP + docConfig.columnWidth + docConfig.lineWidth / 2 : IMAGES_TOP, left: docConfig.padding + docConfig.lineWidth / 2 },
+            margin: {
+                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP,
+                left: this._docConfig.padding + this._docConfig.lineWidth / 2
+            },
             columnStyles: {
                 col1: {}
             },
             alternateRowStyles: styles,
-            tableWidth: pageWidth - ((3 - group.length) * docConfig.columnWidth) - 2 * docConfig.padding - docConfig.lineWidth,
+            tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell, opts) => {
                 if (opts.column.dataKey === 'col1') {
                     this._doc.setFont('GothamMedium', 'normal');
@@ -208,17 +214,17 @@ export class DocRenderer {
             },
             drawHeaderRow: (row, opts) => {
                 borders.push({
-                    left: docConfig.padding + docConfig.lineWidth / 2,
+                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
                     top: row.y + row.height - 0.1,
-                    width: pageWidth - ((3 - group.length) * docConfig.columnWidth) - 2 * docConfig.padding - docConfig.lineWidth,
+                    width: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
                     height: 0.1
                 });
             },
             drawRow: (row, opts) => {
                 borders.push({
-                    left: docConfig.padding + docConfig.lineWidth / 2,
+                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
                     top: row.y + row.height - 0.1,
-                    width: pageWidth - ((3 - group.length) * docConfig.columnWidth) - 2 * docConfig.padding - docConfig.lineWidth,
+                    width: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
                     height: 0.1
                 });
             }
@@ -226,7 +232,7 @@ export class DocRenderer {
         group.forEach((product) => {
             columns.push({ dataKey: product.name, title: product.name });
             rows[0][product.name] = product.supplier;
-            config.columnStyles[product.name] = { columnWidth: docConfig.columnWidth };
+            config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth };
         });
         this._doc.autoTable(columns, rows, config);
         this._doc.setFillColor(0, 0, 0);
@@ -234,7 +240,7 @@ export class DocRenderer {
             this._doc.rect(border.left, border.top, border.width, border.height, 'F');
         });
     }
-    _drowLayout(index, docConfig) {
+    _drowLayout(index) {
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const pageHeight = this._doc.internal.pageSize.getHeight();
         const columns = [
@@ -242,37 +248,50 @@ export class DocRenderer {
             { dataKey: 'col2' }
         ];
         const rows = [
-            { col1: 'Architekturbüro', col2: 'Datum: ' + moment(Date.now()).format('DD.MM.YY') },
-            { col1: 'Projekt', col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
+            { col1: this._data.settings.captions.architectureOffice, col2: 'Datum: ' + moment(Date.now()).format('DD.MM.YY') },
+            { col1: this._data.settings.captions.project, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
         ];
         const styles = {
             fillColor: [246, 246, 246],
-            lineWidth: docConfig.lineWidth,
+            lineWidth: this._docConfig.lineWidth,
             lineColor: 255,
             cellPadding: [4.4, 4.3, 3.28, 4.3],
             fontSize: 12,
             textColor: 0
         };
         const columnStyles = {
-            col2: { columnWidth: docConfig.columnWidth }
+            col2: { columnWidth: this._docConfig.columnWidth }
         };
         const config = {
             styles,
             alternateRowStyles: styles,
             columnStyles,
-            margin: { top: docConfig.padding, left: docConfig.padding },
+            margin: { top: this._docConfig.padding, left: this._docConfig.padding },
             showHeader: 'never',
-            tableWidth: pageWidth - (2 * docConfig.padding + docConfig.columnWidth),
+            tableWidth: this._data.settings.logo.show ? pageWidth - (2 * this._docConfig.padding + this._docConfig.columnWidth) : pageWidth - (2 * this._docConfig.padding),
             drawCell: (cell, opts) => {
                 this._doc.setFont('GothamMedium', 'normal');
             }
         };
         this._doc.autoTable(columns, rows, config);
-        this._doc.addImage('assets/images/logo.png', pageWidth - docConfig.columnWidth - docConfig.padding + docConfig.lineWidth / 2, docConfig.padding + docConfig.lineWidth / 2, docConfig.columnWidth - docConfig.lineWidth, this._doc.autoTable.previous.finalY - this._doc.autoTable.previous.pageStartY - docConfig.lineWidth);
+        const tableHeight = this._doc.autoTable.previous.finalY - this._doc.autoTable.previous.pageStartY - this._docConfig.lineWidth;
+        if (this._data.settings.logo.show && this._data.settings.logo.type === 'url') {
+            this._doc.addImage(this._data.settings.logo.data, pageWidth - this._docConfig.columnWidth - this._docConfig.padding + this._docConfig.lineWidth / 2, this._docConfig.padding + this._docConfig.lineWidth / 2, this._docConfig.columnWidth - this._docConfig.lineWidth, tableHeight);
+        }
+        if (this._data.settings.logo.show && this._data.settings.logo.type === 'text') {
+            this._doc.setFont('GothamMedium', 'normal');
+            let fontSize = 14;
+            while ((this._doc.getStringUnitWidth(this._data.settings.logo.data) * fontSize) / 2.88 > this._docConfig.columnWidth - this._docConfig.lineWidth) {
+                fontSize--;
+            }
+            const logoWidth = (this._doc.getStringUnitWidth(this._data.settings.logo.data) * fontSize) / 2.88;
+            this._doc.setFontSize(fontSize);
+            this._doc.text(this._data.settings.logo.data, pageWidth - this._docConfig.columnWidth - this._docConfig.padding + this._docConfig.lineWidth / 2 + (this._docConfig.columnWidth - this._docConfig.lineWidth - logoWidth) / 2, this._docConfig.padding + this._docConfig.lineWidth + tableHeight / 2);
+        }
         this._doc.setFont('GothamMedium', 'normal');
-        this._doc.setFillColor(246, 246, 246);
-        this._doc.rect(docConfig.padding + docConfig.lineWidth / 2, pageHeight - (docConfig.padding + docConfig.lineWidth / 2 + 10), pageWidth - (2 * docConfig.padding + docConfig.lineWidth), 10, 'F');
         this._doc.setFontSize(9);
+        this._doc.setFillColor(246, 246, 246);
+        this._doc.rect(this._docConfig.padding + this._docConfig.lineWidth / 2, pageHeight - (this._docConfig.padding + this._docConfig.lineWidth / 2 + 10), pageWidth - (2 * this._docConfig.padding + this._docConfig.lineWidth), 10, 'F');
         this._doc.text('Copyright © 2018 Plan.One', 12.9, 283.2);
         this._doc.addImage(logoImg, 175.5, 280, 21.6, 4.1);
     }
