@@ -1,16 +1,19 @@
 {
     "Settings": {
         "Logo": {
-            "show": true,
-            "type": "url",
-            "data": "assets/images/logo.png"
+            "Show": true,
+            "Type": "url",
+            "Data": "assets/images/logo.png"
         },
         "Sorting": "assc",
         "Captions": {
             "ArchitectureOffice": "a",
             "Project": "b"
         },
-        "ShowProductsImage": true
+        "ShowProductsImage": true,
+        "Units": {
+            "Klasse": "beforeValue"
+        }
     },
     "Products": [
         {

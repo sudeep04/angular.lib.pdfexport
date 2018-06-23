@@ -1,3 +1,5 @@
+import { UnitSettings } from './unit-settings';
+
 export interface Settings {
 
     logo: {
@@ -13,12 +15,9 @@ export interface Settings {
         architectureOffice: string;
         
         project: string;
-    }
+    };
     
     sorting: 'assc' | 'desc';
 
-    units?: [{
-        name: string;
-        position: 'afterValue' | 'beforeValue';
-    }]
+    units: { [unit: string]: 'afterValue' | 'beforeValue' };
 }

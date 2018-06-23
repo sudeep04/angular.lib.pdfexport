@@ -11,6 +11,7 @@ import { DocConfig } from './doc-config';
 import { Product } from './product';
 import { Property } from './property.interface';
 import { logoImg } from './imagesBase64/logo-img';
+import { JsonParser } from './json-parser';
 
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
@@ -30,14 +31,14 @@ export class DocRenderer {
         this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
     }
 
-    public drow(data: Data, docConfig: DocConfig) {
+    public drow(jsonData: any, docConfig: DocConfig) {
 
-        this._data = data;
+        this._data = JsonParser.parseData(jsonData);
         this._docConfig = docConfig;
 
         let lastPage = 1;
 
-        data.groups.forEach((group: Product[], index: number) => {
+        this._data.groups.forEach((group: Product[], index: number) => {
 
             this._drowBody(group);
             for (let i = lastPage + 1; i < this._doc.internal.pages.length; i++) {
@@ -45,7 +46,7 @@ export class DocRenderer {
                 this._drowHeader(group, false);
             }
             lastPage = this._doc.internal.pages.length;
-            if (index < data.groups.length - 1) {
+            if (index < this._data.groups.length - 1) {
 
                 this._doc.addPage();
             }

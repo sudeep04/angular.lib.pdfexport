@@ -22,58 +22,7 @@ export class Data {
 
     constructor(settings: Settings) {
 
-        this._settings = {
-            sorting: 'assc',
-            captions: {
-                architectureOffice: 'Architekturbüro',
-                project: 'Projekt'
-            },
-            showProductsImage: true,
-            logo: {
-                show: false,
-                type: 'text',
-                data: ''
-            }
-        };
-
-        if (settings.sorting && (settings.sorting === 'desc' || settings.sorting === 'assc')) {
-
-            this._settings.sorting = settings.sorting;
-        }
-
-        if (settings.captions.architectureOffice) {
-
-            this._settings.captions.architectureOffice = settings.captions.architectureOffice;
-        }
-
-        if (settings.captions.project) {
-
-            this._settings.captions.project = settings.captions.project;
-        }
-
-        if (settings.showProductsImage !== undefined) {
-
-            this._settings.showProductsImage = settings.showProductsImage;
-        }
-
-        if (settings.logo) {
-
-            if (settings.logo.type === 'text' || settings.logo.type === 'url') {
-
-                this._settings.logo.type = settings.logo.type;
-            }
-
-            if (settings.logo.show !== undefined) {
-
-                this._settings.logo.show = settings.logo.show;
-            }
-
-            if (settings.logo.data !== undefined) {
-
-                this._settings.logo.data = settings.logo.data;
-            }
-        }
-
+        this._settings = settings;
         this._groups = [];
         this._groupsTemplates = [];
         this._groups.push([]);
