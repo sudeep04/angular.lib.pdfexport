@@ -16,4 +16,9 @@ export interface Settings {
     }
     
     sorting: 'assc' | 'desc';
+
+    units?: [{
+        name: string;
+        position: 'afterValue' | 'beforeValue';
+    }]
 }
