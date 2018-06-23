@@ -208,7 +208,7 @@ export class DocRenderer {
 
         const pageWidth = this._doc.internal.pageSize.getWidth();
 
-        if (showProductsImage ) {
+        if (showProductsImage) {
 
             group.forEach((product: Product, index: number) => {
 
@@ -278,7 +278,10 @@ export class DocRenderer {
 
         const config: any = {
             styles,
-            margin: { top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP, left: this._docConfig.padding + this._docConfig.lineWidth / 2 },
+            margin: {
+                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP,
+                left: this._docConfig.padding + this._docConfig.lineWidth / 2
+            },
             columnStyles: {
                 col1: {}
             },
@@ -368,7 +371,7 @@ export class DocRenderer {
             columnStyles,
             margin: { top: this._docConfig.padding, left: this._docConfig.padding },
             showHeader: 'never',
-            tableWidth: this._data.settings.logo.show? pageWidth - (2 * this._docConfig.padding + this._docConfig.columnWidth): pageWidth - (2 * this._docConfig.padding),
+            tableWidth: this._data.settings.logo.show ? pageWidth - (2 * this._docConfig.padding + this._docConfig.columnWidth) : pageWidth - (2 * this._docConfig.padding),
             drawCell: (cell: any, opts: any) => {
 
                 this._doc.setFont('GothamMedium', 'normal');
@@ -379,28 +382,28 @@ export class DocRenderer {
 
         const tableHeight = this._doc.autoTable.previous.finalY - this._doc.autoTable.previous.pageStartY - this._docConfig.lineWidth;
 
-        if (this._data.settings.logo.show && this._data.settings.logo.type === 'url' ) {
+        if (this._data.settings.logo.show && this._data.settings.logo.type === 'url') {
 
             this._doc.addImage(this._data.settings.logo.data,
-            pageWidth - this._docConfig.columnWidth - this._docConfig.padding + this._docConfig.lineWidth / 2,
-            this._docConfig.padding + this._docConfig.lineWidth / 2,
-            this._docConfig.columnWidth - this._docConfig.lineWidth,
-            tableHeight);
+                pageWidth - this._docConfig.columnWidth - this._docConfig.padding + this._docConfig.lineWidth / 2,
+                this._docConfig.padding + this._docConfig.lineWidth / 2,
+                this._docConfig.columnWidth - this._docConfig.lineWidth,
+                tableHeight);
         }
 
-        if (this._data.settings.logo.show && this._data.settings.logo.type === 'text' ) {
+        if (this._data.settings.logo.show && this._data.settings.logo.type === 'text') {
             this._doc.setFont('GothamMedium', 'normal');
 
             let fontSize = 14;
-            while((this._doc.getStringUnitWidth(this._data.settings.logo.data) * fontSize)/2.88 > this._docConfig.columnWidth - this._docConfig.lineWidth) {
+            while ((this._doc.getStringUnitWidth(this._data.settings.logo.data) * fontSize) / 2.88 > this._docConfig.columnWidth - this._docConfig.lineWidth) {
                 fontSize--;
             }
-            const logoWidth = (this._doc.getStringUnitWidth(this._data.settings.logo.data) * fontSize)/2.88;
-            
+            const logoWidth = (this._doc.getStringUnitWidth(this._data.settings.logo.data) * fontSize) / 2.88;
+
             this._doc.setFontSize(fontSize);
             this._doc.text(this._data.settings.logo.data,
-            pageWidth - this._docConfig.columnWidth - this._docConfig.padding + this._docConfig.lineWidth / 2 + (this._docConfig.columnWidth - this._docConfig.lineWidth - logoWidth) / 2,
-            this._docConfig.padding + this._docConfig.lineWidth + tableHeight /2 );
+                pageWidth - this._docConfig.columnWidth - this._docConfig.padding + this._docConfig.lineWidth / 2 + (this._docConfig.columnWidth - this._docConfig.lineWidth - logoWidth) / 2,
+                this._docConfig.padding + this._docConfig.lineWidth + tableHeight / 2);
         }
         this._doc.setFont('GothamMedium', 'normal');
         this._doc.setFontSize(9);
@@ -408,7 +411,7 @@ export class DocRenderer {
         this._doc.rect(this._docConfig.padding + this._docConfig.lineWidth / 2,
             pageHeight - (this._docConfig.padding + this._docConfig.lineWidth / 2 + 10),
             pageWidth - (2 * this._docConfig.padding + this._docConfig.lineWidth), 10, 'F');
-        
+
         this._doc.text('Copyright © 2018 Plan.One', 12.9, 283.2);
 
         this._doc.addImage(logoImg, 175.5, 280, 21.6, 4.1);

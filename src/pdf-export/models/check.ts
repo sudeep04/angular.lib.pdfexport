@@ -45,8 +45,8 @@ export abstract class Check {
                 ? replacements[index]
                 : match
                 ;
-        }
-        
-        return value.replace(new RegExp('{(\\d+)}','g'), replacer);
+        };
+
+        return value.replace(new RegExp('{(\\d+)}', 'g'), replacer);
     }
 }

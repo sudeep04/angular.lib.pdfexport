@@ -41,49 +41,51 @@ export abstract class JsonParser {
                             Check.notNullOrUndefined(property.DisplayName, 'Property.DisplayName');
 
                             let value: string = '';
+                            let val1: string = '';
+                            let val2: string = '';
 
-                            switch(property.Type){
+                            switch (property.Type) {
                                 case 'IfcPropertySingleValue':
-                                    let val = property.NominalValue;
-                                    
+                                    val1 = property.NominalValue;
+
                                     if (property.Unit) {
 
-                                        const direction: 'afterValue' | 'beforeValue' = settings.units[property.Unit.Name]? settings.units[property.Unit.Name]: 'afterValue';
+                                        const direction: 'afterValue' | 'beforeValue' = settings.units[property.Unit.Name] ? settings.units[property.Unit.Name] : 'afterValue';
                                         if (direction === 'afterValue') {
-                                            val = val + ' ' + property.Unit.Name;
+                                            val1 = val1 + ' ' + property.Unit.Name;
                                         } else {
-                                            val = property.Unit.Name + ' ' + val;
+                                            val1 = property.Unit.Name + ' ' + val1;
                                         }
                                     }
-                                    value += val;
-                                break;
+                                    value += val1;
+                                    break;
                                 case 'IfcPropertyListValue':
                                     const listValues: string[] = property.ListValues;
-                                    listValues.forEach((v: string, index: number)=>{
-                                        let val = v;
+                                    listValues.forEach((v: string, index: number) => {
+                                        val1 = v;
                                         if (property.Unit) {
 
-                                            const direction: 'afterValue' | 'beforeValue' = settings.units[property.Unit.Name]? settings.units[property.Unit.Name]: 'afterValue';
+                                            const direction: 'afterValue' | 'beforeValue' = settings.units[property.Unit.Name] ? settings.units[property.Unit.Name] : 'afterValue';
                                             if (direction === 'afterValue') {
-                                                val = val + ' ' + property.Unit.Name;
+                                                val1 = val1 + ' ' + property.Unit.Name;
                                             } else {
-                                                val = property.Unit.Name + ' ' + val;
+                                                val1 = property.Unit.Name + ' ' + val1;
                                             }
                                         }
-                                        if(index === 0) {
-                                            value += val;
+                                        if (index === 0) {
+                                            value += val1;
                                         } else {
-                                            value += ', ' + val;
+                                            value += ', ' + val1;
                                         }
                                     });
-                                break;
+                                    break;
                                 case 'IfcPropertyBoundedValue':
-                                    let val1 = property.UpperBoundValue;
-                                    let val2 = property.LowerBoundValue;
-                                    
+                                    val1 = property.UpperBoundValue;
+                                    val2 = property.LowerBoundValue;
+
                                     if (property.Unit) {
 
-                                        const direction: 'afterValue' | 'beforeValue' = settings.units[property.Unit.Name]? settings.units[property.Unit.Name]: 'afterValue';
+                                        const direction: 'afterValue' | 'beforeValue' = settings.units[property.Unit.Name] ? settings.units[property.Unit.Name] : 'afterValue';
                                         if (direction === 'afterValue') {
                                             val1 = val1 + ' ' + property.Unit.Name;
                                             val2 = val2 + ' ' + property.Unit.Name;
@@ -93,7 +95,7 @@ export abstract class JsonParser {
                                         }
                                     }
                                     value += val1 + ' - ' + val2;
-                                break;
+                                    break;
                             }
 
                             const propertyValue: Property = {
@@ -146,14 +148,13 @@ export abstract class JsonParser {
 
         if (settings.Captions) {
 
-
             if (settings.Captions.ArchitectureOffice) {
 
                 result.captions.architectureOffice = settings.Captions.ArchitectureOffice;
             }
-    
+
             if (settings.Captions.Project) {
-    
+
                 result.captions.project = settings.Captions.Project;
             }
         }

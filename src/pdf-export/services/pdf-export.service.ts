@@ -14,7 +14,7 @@ export class PdfExportService {
 
     private _docRenderer: DocRenderer;
 
-    public  generatePdf(jsonData: object): void {
+    public generatePdf(jsonData: object): void {
 
         this._docRenderer = new DocRenderer();
         const docConfig: DocConfig = { columnWidth: COLUMN_WIDTH, lineWidth: LINE_WIDTH, marginTop: TABLE_MARGIN_TOP, padding: DOCUMENT_PADDING };
@@ -23,6 +23,4 @@ export class PdfExportService {
 
         this._docRenderer.save('Test.pdf');
     }
-
-    
 }
