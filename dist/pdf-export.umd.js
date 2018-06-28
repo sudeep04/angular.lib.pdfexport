@@ -1,3 +1,10 @@
+/**
+ * pdf-export - An angular 5 component to renders pdf documents
+ * @version v1.0.0
+ * @author sveguru
+ * @link undefined
+ * @license undefined
+ */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("@angular/core"), require("@angular/common"));
