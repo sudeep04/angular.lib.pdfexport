@@ -10,7 +10,5 @@ export interface Settings {
         project: string;
     };
     sorting: 'assc' | 'desc';
-    units: {
-        [unit: string]: 'afterValue' | 'beforeValue';
-    };
+    unitsBeforeValue: string[];
 }

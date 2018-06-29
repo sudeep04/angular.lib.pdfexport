@@ -20793,11 +20793,11 @@ var JsonParser = /** @class */ (function () {
                             var value = '';
                             var val1 = '';
                             var val2 = '';
+                            var direction = property.Unit !== undefined && settings.unitsBeforeValue.find(function (unit) { return unit === property.Unit.Name; }) ? 'beforeValue' : 'afterValue';
                             switch (property.Type) {
                                 case 'IfcPropertySingleValue':
                                     val1 = property.NominalValue;
                                     if (property.Unit) {
-                                        var direction = settings.units[property.Unit.Name] ? settings.units[property.Unit.Name] : 'afterValue';
                                         if (direction === 'afterValue') {
                                             val1 = val1 + ' ' + property.Unit.Name;
                                         }
@@ -20812,7 +20812,6 @@ var JsonParser = /** @class */ (function () {
                                     listValues.forEach(function (v, index) {
                                         val1 = v;
                                         if (property.Unit) {
-                                            var direction = settings.units[property.Unit.Name] ? settings.units[property.Unit.Name] : 'afterValue';
                                             if (direction === 'afterValue') {
                                                 val1 = val1 + ' ' + property.Unit.Name;
                                             }
@@ -20832,7 +20831,6 @@ var JsonParser = /** @class */ (function () {
                                     val1 = property.UpperBoundValue;
                                     val2 = property.LowerBoundValue;
                                     if (property.Unit) {
-                                        var direction = settings.units[property.Unit.Name] ? settings.units[property.Unit.Name] : 'afterValue';
                                         if (direction === 'afterValue') {
                                             val1 = val1 + ' ' + property.Unit.Name;
                                             val2 = val2 + ' ' + property.Unit.Name;
@@ -20877,7 +20875,7 @@ var JsonParser = /** @class */ (function () {
                 type: 'text',
                 data: ''
             },
-            units: {}
+            unitsBeforeValue: []
         };
         if (settings.Sorting && (settings.Sorting === 'desc' || settings.Sorting === 'assc')) {
             result.sorting = settings.Sorting;
@@ -20904,8 +20902,8 @@ var JsonParser = /** @class */ (function () {
                 result.logo.data = settings.Logo.Data;
             }
         }
-        if (settings.Units) {
-            result.units = settings.Units;
+        if (settings.UnitsBeforeValue) {
+            result.unitsBeforeValue = settings.UnitsBeforeValue;
         }
         return result;
     };
