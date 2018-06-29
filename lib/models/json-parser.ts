@@ -42,6 +42,7 @@ export abstract class JsonParser {
                             let value: string = '';
                             let val1: string = '';
                             let val2: string = '';
+                            const direction: 'afterValue' | 'beforeValue' = property.Unit !== undefined && settings.unitsBeforeValue.find((unit: string) => unit === property.Unit.Name) ? 'beforeValue' : 'afterValue';
 
                             switch (property.Type) {
                                 case 'IfcPropertySingleValue':
@@ -49,7 +50,6 @@ export abstract class JsonParser {
 
                                     if (property.Unit) {
 
-                                        const direction: 'afterValue' | 'beforeValue' = settings.units[property.Unit.Name] ? settings.units[property.Unit.Name] : 'afterValue';
                                         if (direction === 'afterValue') {
                                             val1 = val1 + ' ' + property.Unit.Name;
                                         } else {
@@ -64,7 +64,6 @@ export abstract class JsonParser {
                                         val1 = v;
                                         if (property.Unit) {
 
-                                            const direction: 'afterValue' | 'beforeValue' = settings.units[property.Unit.Name] ? settings.units[property.Unit.Name] : 'afterValue';
                                             if (direction === 'afterValue') {
                                                 val1 = val1 + ' ' + property.Unit.Name;
                                             } else {
@@ -84,7 +83,6 @@ export abstract class JsonParser {
 
                                     if (property.Unit) {
 
-                                        const direction: 'afterValue' | 'beforeValue' = settings.units[property.Unit.Name] ? settings.units[property.Unit.Name] : 'afterValue';
                                         if (direction === 'afterValue') {
                                             val1 = val1 + ' ' + property.Unit.Name;
                                             val2 = val2 + ' ' + property.Unit.Name;
@@ -137,7 +135,7 @@ export abstract class JsonParser {
                 type: 'text',
                 data: ''
             },
-            units: {}
+            unitsBeforeValue: []
         };
 
         if (settings.Sorting && (settings.Sorting === 'desc' || settings.Sorting === 'assc')) {
@@ -181,9 +179,9 @@ export abstract class JsonParser {
             }
         }
 
-        if (settings.Units) {
+        if (settings.UnitsBeforeValue) {
 
-            result.units = settings.Units;
+            result.unitsBeforeValue = settings.UnitsBeforeValue;
         }
 
         return result;
