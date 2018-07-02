@@ -137,7 +137,7 @@ export abstract class JsonParser {
                 data: ''
             },
             unitsBeforeValue: [],
-            applyFilters: true
+            applyFilters: false
         };
 
         if (settings.Sorting && (settings.Sorting === 'desc' || settings.Sorting === 'assc')) {
