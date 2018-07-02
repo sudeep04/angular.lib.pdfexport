@@ -18,4 +18,6 @@ export interface Settings {
     sorting: 'assc' | 'desc';
 
     unitsBeforeValue: string[];
+
+    applyFilters: boolean;
 }
