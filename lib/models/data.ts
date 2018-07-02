@@ -48,8 +48,10 @@ export class Data {
             if (!this._properties.find((propertyName: string) => propertyName === property.name)) {
                 if (this._settings.applyFilters) {
 
-                    if (this._filters && this._filters.find((filter: string)=> filter === property.name))
+                    if (this._filters && this._filters.find((filter: string) => filter === property.name)) {
+
                         this._properties.push(property.name);
+                    }
                 }
             }
         });

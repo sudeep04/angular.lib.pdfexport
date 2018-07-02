@@ -42,7 +42,10 @@ export abstract class JsonParser {
                             let value: string = '';
                             let val1: string = '';
                             let val2: string = '';
-                            const direction: 'afterValue' | 'beforeValue' = property.Unit !== undefined && settings.unitsBeforeValue.find((unit: string) => unit === property.Unit.Name) ? 'beforeValue' : 'afterValue';
+                            const direction: 'afterValue' | 'beforeValue'
+                                = property.Unit !== undefined && settings.unitsBeforeValue.find((unit: string) => unit === property.Unit.Name) ?
+                                    'beforeValue'
+                                    : 'afterValue';
 
                             switch (property.Type) {
                                 case 'IfcPropertySingleValue':
@@ -62,7 +65,7 @@ export abstract class JsonParser {
                                     const listValues: string[] = property.ListValues;
                                     listValues.forEach((v: string, index: number) => {
                                         val1 = v;
-                                        
+
                                         if (index === 0) {
                                             value += val1;
                                         } else {
@@ -75,7 +78,7 @@ export abstract class JsonParser {
                                             value = value + ' ' + property.Unit.Name;
                                         } else {
                                             value = property.Unit.Name + ' ' + value;
-                                        }   
+                                        }
                                     }
                                     break;
                                 case 'IfcPropertyBoundedValue':
@@ -87,7 +90,7 @@ export abstract class JsonParser {
                                         if (direction === 'afterValue') {
                                             value = val1 + ' - ' + val2 + ' ' + property.Unit.Name;
                                         } else {
-                                            value = property.Unit.Name + ' ' +  val1 + ' - ' + val2;
+                                            value = property.Unit.Name + ' ' + val1 + ' - ' + val2;
                                         }
                                     }
                                     break;
@@ -115,7 +118,7 @@ export abstract class JsonParser {
 
             data.addProduct(product);
         });
-        
+
         return data;
     }
 
