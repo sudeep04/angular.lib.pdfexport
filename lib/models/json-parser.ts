@@ -102,11 +102,10 @@ export abstract class JsonParser {
                                 value
                             };
 
-                            if (jsonProduct.Score !== undefined && jsonProduct.Score.parameter_components !== undefined) {
-
-                                if (jsonProduct.Score.parameter_components[property.ifdguid] !== undefined) {
-
-                                    propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === 1 ? true : false;
+                            if (jsonProduct.Score !== undefined && jsonProduct.Score.parameters_components !== undefined) {
+                                
+                                if (jsonProduct.Score.parameters_components[property.ifdguid] !== undefined) {
+                                    propertyValue.ckeck = jsonProduct.Score.parameters_components[property.ifdguid] === 1 ? true : false;
                                 }
                             }
 
@@ -118,7 +117,7 @@ export abstract class JsonParser {
 
             data.addProduct(product);
         });
-
+        
         return data;
     }
 
