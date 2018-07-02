@@ -6,31 +6,34 @@ export class Data {
     get settings() {
         return this._settings;
     }
-    constructor(settings) {
+    constructor(settings, filters) {
         this._settings = settings;
         this._groups = [];
-        this._groupsTemplates = [];
+        this._properties = [];
         this._groups.push([]);
-        this._groupsTemplates.push([]);
+        this._filters = filters;
     }
     addProduct(product) {
         if (this._groups[this._groups.length - 1].length > 2) {
             this._groups.push([]);
-            this._groupsTemplates.push([]);
         }
         this._groups[this._groups.length - 1].push(product);
-        this._updateGrpupTemplate(this._groupsTemplates[this._groupsTemplates.length - 1], product);
-        this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._groupsTemplates[this._groupsTemplates.length - 1]);
+        this._updateProperties(product);
+        this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._properties);
     }
-    _updateGrpupTemplate(groupTemplate, product) {
+    _updateProperties(product) {
         product.properties.forEach((property) => {
-            if (!groupTemplate.find((propertyName) => propertyName === property.name)) {
-                groupTemplate.push(property.name);
+            if (!this._properties.find((propertyName) => propertyName === property.name)) {
+                if (this._settings.applyFilters) {
+                    if (this._filters && this._filters.find((filter) => filter === property.name)) {
+                        this._properties.push(property.name);
+                    }
+                }
             }
         });
-        this._sortGroupTemplate(groupTemplate);
+        this._sortProperties(this._properties);
     }
-    _sortGroupTemplate(groupTemplate) {
+    _sortProperties(groupTemplate) {
         if (this._settings.sorting === 'assc') {
             groupTemplate = groupTemplate.sort();
         }
@@ -38,11 +41,11 @@ export class Data {
             groupTemplate = groupTemplate.sort((a, b) => a < b ? 1 : -1);
         }
     }
-    _getProductsStructure(group, groupTemplate) {
+    _getProductsStructure(group, properties) {
         const updatedGroup = [];
         group.forEach((product) => {
             const updatedProduct = new Product(product.name, product.supplier);
-            groupTemplate.forEach((propertyName, index) => {
+            properties.forEach((propertyName, index) => {
                 const prop = product.properties.find((property) => property.name === propertyName);
                 if (prop) {
                     updatedProduct.properties.push(prop);
