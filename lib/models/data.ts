@@ -16,17 +16,19 @@ export class Data {
 
     private _groups: Product[][];
 
-    private _groupsTemplates: string[][];
+    private _properties: string[];
 
     private _settings: Settings;
 
-    constructor(settings: Settings) {
+    private _filters: string[];
+
+    constructor(settings: Settings, filters: string[]) {
 
         this._settings = settings;
         this._groups = [];
-        this._groupsTemplates = [];
+        this._properties = [];
         this._groups.push([]);
-        this._groupsTemplates.push([]);
+        this._filters = filters;
     }
 
     public addProduct(product: Product): void {
@@ -34,25 +36,28 @@ export class Data {
         if (this._groups[this._groups.length - 1].length > 2) {
 
             this._groups.push([]);
-            this._groupsTemplates.push([]);
         }
         this._groups[this._groups.length - 1].push(product);
-        this._updateGrpupTemplate(this._groupsTemplates[this._groupsTemplates.length - 1], product);
-        this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._groupsTemplates[this._groupsTemplates.length - 1]);
+        this._updateProperties(product);
+        this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._properties);
     }
 
-    private _updateGrpupTemplate(groupTemplate: string[], product: Product): void {
+    private _updateProperties(product: Product): void {
 
         product.properties.forEach((property: Property) => {
-            if (!groupTemplate.find((propertyName: string) => propertyName === property.name)) {
-                groupTemplate.push(property.name);
+            if (!this._properties.find((propertyName: string) => propertyName === property.name)) {
+                if (this._settings.applyFilters) {
+
+                    if (this._filters && this._filters.find((filter: string)=> filter === property.name))
+                        this._properties.push(property.name);
+                }
             }
         });
 
-        this._sortGroupTemplate(groupTemplate);
+        this._sortProperties(this._properties);
     }
 
-    private _sortGroupTemplate(groupTemplate: string[]) {
+    private _sortProperties(groupTemplate: string[]) {
 
         if (this._settings.sorting === 'assc') {
 
@@ -63,7 +68,7 @@ export class Data {
         }
     }
 
-    private _getProductsStructure(group: Product[], groupTemplate: string[]): Product[] {
+    private _getProductsStructure(group: Product[], properties: string[]): Product[] {
 
         const updatedGroup: Product[] = [];
 
@@ -71,7 +76,7 @@ export class Data {
 
             const updatedProduct = new Product(product.name, product.supplier);
 
-            groupTemplate.forEach((propertyName: string, index: number) => {
+            properties.forEach((propertyName: string, index: number) => {
 
                 const prop = product.properties.find((property: Property) => property.name === propertyName);
                 if (prop) {

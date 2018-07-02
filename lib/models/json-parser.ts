@@ -12,7 +12,7 @@ export abstract class JsonParser {
         Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
 
         const settings: Settings = JsonParser.parseSettings(jsonData.Settings);
-        const data = new Data(settings);
+        const data = new Data(settings, jsonData.Filters);
 
         jsonData.Products.forEach((jsonProduct: any) => {
 
@@ -62,36 +62,34 @@ export abstract class JsonParser {
                                     const listValues: string[] = property.ListValues;
                                     listValues.forEach((v: string, index: number) => {
                                         val1 = v;
-                                        if (property.Unit) {
-
-                                            if (direction === 'afterValue') {
-                                                val1 = val1 + ' ' + property.Unit.Name;
-                                            } else {
-                                                val1 = property.Unit.Name + ' ' + val1;
-                                            }
-                                        }
+                                        
                                         if (index === 0) {
                                             value += val1;
                                         } else {
                                             value += ', ' + val1;
                                         }
                                     });
+                                    if (property.Unit) {
+
+                                        if (direction === 'afterValue') {
+                                            value = value + ' ' + property.Unit.Name;
+                                        } else {
+                                            value = property.Unit.Name + ' ' + value;
+                                        }   
+                                    }
                                     break;
                                 case 'IfcPropertyBoundedValue':
-                                    val1 = property.UpperBoundValue;
-                                    val2 = property.LowerBoundValue;
+                                    val1 = property.LowerBoundValue;
+                                    val2 = property.UpperBoundValue;
 
                                     if (property.Unit) {
 
                                         if (direction === 'afterValue') {
-                                            val1 = val1 + ' ' + property.Unit.Name;
-                                            val2 = val2 + ' ' + property.Unit.Name;
+                                            value = val1 + ' - ' + val2 + ' ' + property.Unit.Name;
                                         } else {
-                                            val1 = property.Unit.Name + ' ' + val1;
-                                            val2 = property.Unit.Name + ' ' + val2;
+                                            value = property.Unit.Name + ' ' +  val1 + ' - ' + val2;
                                         }
                                     }
-                                    value += val1 + ' - ' + val2;
                                     break;
                             }
 
@@ -117,7 +115,7 @@ export abstract class JsonParser {
 
             data.addProduct(product);
         });
-
+        
         return data;
     }
 
@@ -135,7 +133,8 @@ export abstract class JsonParser {
                 type: 'text',
                 data: ''
             },
-            unitsBeforeValue: []
+            unitsBeforeValue: [],
+            applyFilters: true
         };
 
         if (settings.Sorting && (settings.Sorting === 'desc' || settings.Sorting === 'assc')) {
@@ -182,6 +181,11 @@ export abstract class JsonParser {
         if (settings.UnitsBeforeValue) {
 
             result.unitsBeforeValue = settings.UnitsBeforeValue;
+        }
+
+        if (settings.ApplyFilters) {
+
+            result.applyFilters = settings.ApplyFilters;
         }
 
         return result;
