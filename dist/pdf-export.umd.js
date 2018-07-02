@@ -20774,7 +20774,7 @@ var JsonParser = /** @class */ (function () {
         check_1.Check.notNullOrUndefined(jsonData, 'jsonData');
         check_1.Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
         var settings = JsonParser.parseSettings(jsonData.Settings);
-        var data = new data_1.Data(settings);
+        var data = new data_1.Data(settings, jsonData.Filters);
         jsonData.Products.forEach(function (jsonProduct) {
             check_1.Check.notNullOrUndefined(jsonProduct, 'Product');
             check_1.Check.notNullOrUndefined(jsonProduct.ProductData, 'ProductData');
@@ -20793,7 +20793,9 @@ var JsonParser = /** @class */ (function () {
                             var value = '';
                             var val1 = '';
                             var val2 = '';
-                            var direction = property.Unit !== undefined && settings.unitsBeforeValue.find(function (unit) { return unit === property.Unit.Name; }) ? 'beforeValue' : 'afterValue';
+                            var direction = property.Unit !== undefined && settings.unitsBeforeValue.find(function (unit) { return unit === property.Unit.Name; }) ?
+                                'beforeValue'
+                                : 'afterValue';
                             switch (property.Type) {
                                 case 'IfcPropertySingleValue':
                                     val1 = property.NominalValue;
@@ -20811,14 +20813,6 @@ var JsonParser = /** @class */ (function () {
                                     var listValues = property.ListValues;
                                     listValues.forEach(function (v, index) {
                                         val1 = v;
-                                        if (property.Unit) {
-                                            if (direction === 'afterValue') {
-                                                val1 = val1 + ' ' + property.Unit.Name;
-                                            }
-                                            else {
-                                                val1 = property.Unit.Name + ' ' + val1;
-                                            }
-                                        }
                                         if (index === 0) {
                                             value += val1;
                                         }
@@ -20826,21 +20820,26 @@ var JsonParser = /** @class */ (function () {
                                             value += ', ' + val1;
                                         }
                                     });
-                                    break;
-                                case 'IfcPropertyBoundedValue':
-                                    val1 = property.UpperBoundValue;
-                                    val2 = property.LowerBoundValue;
                                     if (property.Unit) {
                                         if (direction === 'afterValue') {
-                                            val1 = val1 + ' ' + property.Unit.Name;
-                                            val2 = val2 + ' ' + property.Unit.Name;
+                                            value = value + ' ' + property.Unit.Name;
                                         }
                                         else {
-                                            val1 = property.Unit.Name + ' ' + val1;
-                                            val2 = property.Unit.Name + ' ' + val2;
+                                            value = property.Unit.Name + ' ' + value;
                                         }
                                     }
-                                    value += val1 + ' - ' + val2;
+                                    break;
+                                case 'IfcPropertyBoundedValue':
+                                    val1 = property.LowerBoundValue;
+                                    val2 = property.UpperBoundValue;
+                                    if (property.Unit) {
+                                        if (direction === 'afterValue') {
+                                            value = val1 + ' - ' + val2 + ' ' + property.Unit.Name;
+                                        }
+                                        else {
+                                            value = property.Unit.Name + ' ' + val1 + ' - ' + val2;
+                                        }
+                                    }
                                     break;
                             }
                             var propertyValue = {
@@ -20875,7 +20874,8 @@ var JsonParser = /** @class */ (function () {
                 type: 'text',
                 data: ''
             },
-            unitsBeforeValue: []
+            unitsBeforeValue: [],
+            applyFilters: true
         };
         if (settings.Sorting && (settings.Sorting === 'desc' || settings.Sorting === 'assc')) {
             result.sorting = settings.Sorting;
@@ -20905,6 +20905,9 @@ var JsonParser = /** @class */ (function () {
         if (settings.UnitsBeforeValue) {
             result.unitsBeforeValue = settings.UnitsBeforeValue;
         }
+        if (settings.ApplyFilters) {
+            result.applyFilters = settings.ApplyFilters;
+        }
         return result;
     };
     return JsonParser;
@@ -20921,12 +20924,12 @@ exports.JsonParser = JsonParser;
 Object.defineProperty(exports, "__esModule", { value: true });
 var product_1 = __webpack_require__(128);
 var Data = /** @class */ (function () {
-    function Data(settings) {
+    function Data(settings, filters) {
         this._settings = settings;
         this._groups = [];
-        this._groupsTemplates = [];
+        this._properties = [];
         this._groups.push([]);
-        this._groupsTemplates.push([]);
+        this._filters = filters;
     }
     Object.defineProperty(Data.prototype, "groups", {
         get: function () {
@@ -20945,21 +20948,25 @@ var Data = /** @class */ (function () {
     Data.prototype.addProduct = function (product) {
         if (this._groups[this._groups.length - 1].length > 2) {
             this._groups.push([]);
-            this._groupsTemplates.push([]);
         }
         this._groups[this._groups.length - 1].push(product);
-        this._updateGrpupTemplate(this._groupsTemplates[this._groupsTemplates.length - 1], product);
-        this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._groupsTemplates[this._groupsTemplates.length - 1]);
+        this._updateProperties(product);
+        this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._properties);
     };
-    Data.prototype._updateGrpupTemplate = function (groupTemplate, product) {
+    Data.prototype._updateProperties = function (product) {
+        var _this = this;
         product.properties.forEach(function (property) {
-            if (!groupTemplate.find(function (propertyName) { return propertyName === property.name; })) {
-                groupTemplate.push(property.name);
+            if (!_this._properties.find(function (propertyName) { return propertyName === property.name; })) {
+                if (_this._settings.applyFilters) {
+                    if (_this._filters && _this._filters.find(function (filter) { return filter === property.name; })) {
+                        _this._properties.push(property.name);
+                    }
+                }
             }
         });
-        this._sortGroupTemplate(groupTemplate);
+        this._sortProperties(this._properties);
     };
-    Data.prototype._sortGroupTemplate = function (groupTemplate) {
+    Data.prototype._sortProperties = function (groupTemplate) {
         if (this._settings.sorting === 'assc') {
             groupTemplate = groupTemplate.sort();
         }
@@ -20967,11 +20974,11 @@ var Data = /** @class */ (function () {
             groupTemplate = groupTemplate.sort(function (a, b) { return a < b ? 1 : -1; });
         }
     };
-    Data.prototype._getProductsStructure = function (group, groupTemplate) {
+    Data.prototype._getProductsStructure = function (group, properties) {
         var updatedGroup = [];
         group.forEach(function (product) {
             var updatedProduct = new product_1.Product(product.name, product.supplier);
-            groupTemplate.forEach(function (propertyName, index) {
+            properties.forEach(function (propertyName, index) {
                 var prop = product.properties.find(function (property) { return property.name === propertyName; });
                 if (prop) {
                     updatedProduct.properties.push(prop);

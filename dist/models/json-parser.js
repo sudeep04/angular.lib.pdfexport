@@ -6,7 +6,7 @@ export class JsonParser {
         Check.notNullOrUndefined(jsonData, 'jsonData');
         Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
         const settings = JsonParser.parseSettings(jsonData.Settings);
-        const data = new Data(settings);
+        const data = new Data(settings, jsonData.Filters);
         jsonData.Products.forEach((jsonProduct) => {
             Check.notNullOrUndefined(jsonProduct, 'Product');
             Check.notNullOrUndefined(jsonProduct.ProductData, 'ProductData');
@@ -25,7 +25,9 @@ export class JsonParser {
                             let value = '';
                             let val1 = '';
                             let val2 = '';
-                            const direction = property.Unit !== undefined && settings.unitsBeforeValue.find((unit) => unit === property.Unit.Name) ? 'beforeValue' : 'afterValue';
+                            const direction = property.Unit !== undefined && settings.unitsBeforeValue.find((unit) => unit === property.Unit.Name) ?
+                                'beforeValue'
+                                : 'afterValue';
                             switch (property.Type) {
                                 case 'IfcPropertySingleValue':
                                     val1 = property.NominalValue;
@@ -43,14 +45,6 @@ export class JsonParser {
                                     const listValues = property.ListValues;
                                     listValues.forEach((v, index) => {
                                         val1 = v;
-                                        if (property.Unit) {
-                                            if (direction === 'afterValue') {
-                                                val1 = val1 + ' ' + property.Unit.Name;
-                                            }
-                                            else {
-                                                val1 = property.Unit.Name + ' ' + val1;
-                                            }
-                                        }
                                         if (index === 0) {
                                             value += val1;
                                         }
@@ -58,21 +52,26 @@ export class JsonParser {
                                             value += ', ' + val1;
                                         }
                                     });
-                                    break;
-                                case 'IfcPropertyBoundedValue':
-                                    val1 = property.UpperBoundValue;
-                                    val2 = property.LowerBoundValue;
                                     if (property.Unit) {
                                         if (direction === 'afterValue') {
-                                            val1 = val1 + ' ' + property.Unit.Name;
-                                            val2 = val2 + ' ' + property.Unit.Name;
+                                            value = value + ' ' + property.Unit.Name;
                                         }
                                         else {
-                                            val1 = property.Unit.Name + ' ' + val1;
-                                            val2 = property.Unit.Name + ' ' + val2;
+                                            value = property.Unit.Name + ' ' + value;
                                         }
                                     }
-                                    value += val1 + ' - ' + val2;
+                                    break;
+                                case 'IfcPropertyBoundedValue':
+                                    val1 = property.LowerBoundValue;
+                                    val2 = property.UpperBoundValue;
+                                    if (property.Unit) {
+                                        if (direction === 'afterValue') {
+                                            value = val1 + ' - ' + val2 + ' ' + property.Unit.Name;
+                                        }
+                                        else {
+                                            value = property.Unit.Name + ' ' + val1 + ' - ' + val2;
+                                        }
+                                    }
                                     break;
                             }
                             const propertyValue = {
@@ -107,7 +106,8 @@ export class JsonParser {
                 type: 'text',
                 data: ''
             },
-            unitsBeforeValue: []
+            unitsBeforeValue: [],
+            applyFilters: true
         };
         if (settings.Sorting && (settings.Sorting === 'desc' || settings.Sorting === 'assc')) {
             result.sorting = settings.Sorting;
@@ -136,6 +136,9 @@ export class JsonParser {
         }
         if (settings.UnitsBeforeValue) {
             result.unitsBeforeValue = settings.UnitsBeforeValue;
+        }
+        if (settings.ApplyFilters) {
+            result.applyFilters = settings.ApplyFilters;
         }
         return result;
     }

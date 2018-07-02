@@ -4,11 +4,12 @@ export declare class Data {
     readonly groups: Product[][];
     readonly settings: Settings;
     private _groups;
-    private _groupsTemplates;
+    private _properties;
     private _settings;
-    constructor(settings: Settings);
+    private _filters;
+    constructor(settings: Settings, filters: string[]);
     addProduct(product: Product): void;
-    private _updateGrpupTemplate(groupTemplate, product);
-    private _sortGroupTemplate(groupTemplate);
-    private _getProductsStructure(group, groupTemplate);
+    private _updateProperties(product);
+    private _sortProperties(groupTemplate);
+    private _getProductsStructure(group, properties);
 }
