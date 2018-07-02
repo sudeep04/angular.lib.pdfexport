@@ -20875,7 +20875,7 @@ var JsonParser = /** @class */ (function () {
                 data: ''
             },
             unitsBeforeValue: [],
-            applyFilters: true
+            applyFilters: false
         };
         if (settings.Sorting && (settings.Sorting === 'desc' || settings.Sorting === 'assc')) {
             result.sorting = settings.Sorting;
@@ -20957,10 +20957,8 @@ var Data = /** @class */ (function () {
         var _this = this;
         product.properties.forEach(function (property) {
             if (!_this._properties.find(function (propertyName) { return propertyName === property.name; })) {
-                if (_this._settings.applyFilters) {
-                    if (_this._filters && _this._filters.find(function (filter) { return filter === property.name; })) {
-                        _this._properties.push(property.name);
-                    }
+                if (!_this._settings.applyFilters || (_this._filters && _this._filters.find(function (filter) { return filter === property.name; }))) {
+                    _this._properties.push(property.name);
                 }
             }
         });
