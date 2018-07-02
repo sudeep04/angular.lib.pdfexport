@@ -24,10 +24,8 @@ export class Data {
     _updateProperties(product) {
         product.properties.forEach((property) => {
             if (!this._properties.find((propertyName) => propertyName === property.name)) {
-                if (this._settings.applyFilters) {
-                    if (this._filters && this._filters.find((filter) => filter === property.name)) {
-                        this._properties.push(property.name);
-                    }
+                if (!this._settings.applyFilters || (this._filters && this._filters.find((filter) => filter === property.name))) {
+                    this._properties.push(property.name);
                 }
             }
         });
