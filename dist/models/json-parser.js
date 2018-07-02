@@ -81,7 +81,7 @@ export class JsonParser {
                             };
                             if (jsonProduct.Score !== undefined && jsonProduct.Score.parameter_components !== undefined) {
                                 if (jsonProduct.Score.parameter_components[property.ifdguid] !== undefined) {
-                                    propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === property.NominalValue ? true : false;
+                                    propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === 1 ? true : false;
                                 }
                             }
                             product.addProperty(propertyValue);
