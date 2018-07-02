@@ -106,7 +106,7 @@ export abstract class JsonParser {
 
                                 if (jsonProduct.Score.parameter_components[property.ifdguid] !== undefined) {
 
-                                    propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === property.NominalValue ? true : false;
+                                    propertyValue.ckeck = jsonProduct.Score.parameter_components[property.ifdguid] === 1 ? true : false;
                                 }
                             }
 
