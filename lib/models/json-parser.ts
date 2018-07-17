@@ -12,7 +12,7 @@ export abstract class JsonParser {
         Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
 
         const settings: Settings = JsonParser.parseSettings(jsonData.Settings);
-        const data = new Data(settings, jsonData.Filters);
+        const data = new Data(settings, jsonData.property_filters);
 
         jsonData.Products.forEach((jsonProduct: any) => {
 
@@ -39,6 +39,7 @@ export abstract class JsonParser {
                             Check.notNullOrUndefined(property, 'Property');
                             Check.notNullOrUndefined(property.DisplayName, 'Property.DisplayName');
 
+                            let originalValue: any;
                             let value: string = '';
                             let val1: string = '';
                             let val2: string = '';
@@ -60,6 +61,7 @@ export abstract class JsonParser {
                                         }
                                     }
                                     value += val1;
+                                    originalValue = property.NominalValue;
                                     break;
                                 case 'IfcPropertyListValue':
                                     const listValues: string[] = property.ListValues;
@@ -80,6 +82,7 @@ export abstract class JsonParser {
                                             value = property.Unit.Name + ' ' + value;
                                         }
                                     }
+                                    originalValue = property.ListValues;
                                     break;
                                 case 'IfcPropertyBoundedValue':
                                     val1 = property.LowerBoundValue;
@@ -93,13 +96,18 @@ export abstract class JsonParser {
                                             value = property.Unit.Name + ' ' + val1 + ' - ' + val2;
                                         }
                                     }
+                                    originalValue = {
+                                        upper: property.UpperBoundValue,
+                                        lower: property.LowerBoundValue
+                                    }
                                     break;
                             }
 
                             const propertyValue: Property = {
                                 name: property.DisplayName,
                                 ifdguid: property.ifdguid,
-                                value
+                                value,
+                                originalValue
                             };
 
                             if (jsonProduct.Score !== undefined && jsonProduct.Score.parameters_components !== undefined) {
@@ -184,7 +192,6 @@ export abstract class JsonParser {
 
             result.unitsBeforeValue = settings.UnitsBeforeValue;
         }
-
         if (settings.ApplyFilters) {
 
             result.applyFilters = settings.ApplyFilters;
