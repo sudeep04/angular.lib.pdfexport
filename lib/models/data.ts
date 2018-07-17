@@ -20,9 +20,9 @@ export class Data {
 
     private _settings: Settings;
 
-    private _filters: string[];
+    private _filters: any[];
 
-    constructor(settings: Settings, filters: string[]) {
+    constructor(settings: Settings, filters: any[]) {
 
         this._settings = settings;
         this._groups = [];
@@ -46,7 +46,7 @@ export class Data {
 
         product.properties.forEach((property: Property) => {
             if (!this._properties.find((propertyName: string) => propertyName === property.name)) {
-                if (!this._settings.applyFilters || (this._filters && this._filters.find((filter: string) => filter === property.name))) {
+                if (!this._settings.applyFilters || (this._filters && this._filters.find((filter: any) => filter.id === property.ifdguid && JSON.stringify({value:filter.value}) === JSON.stringify({value:property.originalValue}) ))) {
 
                     this._properties.push(property.name);
                 }
