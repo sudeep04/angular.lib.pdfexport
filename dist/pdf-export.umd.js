@@ -20774,7 +20774,7 @@ var JsonParser = /** @class */ (function () {
         check_1.Check.notNullOrUndefined(jsonData, 'jsonData');
         check_1.Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
         var settings = JsonParser.parseSettings(jsonData.Settings);
-        var data = new data_1.Data(settings, jsonData.Filters);
+        var data = new data_1.Data(settings, jsonData.property_filters);
         jsonData.Products.forEach(function (jsonProduct) {
             check_1.Check.notNullOrUndefined(jsonProduct, 'Product');
             check_1.Check.notNullOrUndefined(jsonProduct.ProductData, 'ProductData');
@@ -20790,6 +20790,7 @@ var JsonParser = /** @class */ (function () {
                         propertySet.Properties.forEach(function (property) {
                             check_1.Check.notNullOrUndefined(property, 'Property');
                             check_1.Check.notNullOrUndefined(property.DisplayName, 'Property.DisplayName');
+                            var originalValue;
                             var value = '';
                             var val1 = '';
                             var val2 = '';
@@ -20808,6 +20809,7 @@ var JsonParser = /** @class */ (function () {
                                         }
                                     }
                                     value += val1;
+                                    originalValue = property.NominalValue;
                                     break;
                                 case 'IfcPropertyListValue':
                                     var listValues = property.ListValues;
@@ -20828,6 +20830,7 @@ var JsonParser = /** @class */ (function () {
                                             value = property.Unit.Name + ' ' + value;
                                         }
                                     }
+                                    originalValue = property.ListValues;
                                     break;
                                 case 'IfcPropertyBoundedValue':
                                     val1 = property.LowerBoundValue;
@@ -20840,12 +20843,17 @@ var JsonParser = /** @class */ (function () {
                                             value = property.Unit.Name + ' ' + val1 + ' - ' + val2;
                                         }
                                     }
+                                    originalValue = {
+                                        upper: property.UpperBoundValue,
+                                        lower: property.LowerBoundValue
+                                    };
                                     break;
                             }
                             var propertyValue = {
                                 name: property.DisplayName,
                                 ifdguid: property.ifdguid,
-                                value: value
+                                value: value,
+                                originalValue: originalValue
                             };
                             if (jsonProduct.Score !== undefined && jsonProduct.Score.parameters_components !== undefined) {
                                 if (jsonProduct.Score.parameters_components[property.ifdguid] !== undefined) {
@@ -20957,7 +20965,7 @@ var Data = /** @class */ (function () {
         var _this = this;
         product.properties.forEach(function (property) {
             if (!_this._properties.find(function (propertyName) { return propertyName === property.name; })) {
-                if (!_this._settings.applyFilters || (_this._filters && _this._filters.find(function (filter) { return filter === property.name; }))) {
+                if (!_this._settings.applyFilters || (_this._filters && _this._filters.find(function (filter) { return filter.id === property.ifdguid && JSON.stringify({ value: filter.value }) === JSON.stringify({ value: property.originalValue }); }))) {
                     _this._properties.push(property.name);
                 }
             }
