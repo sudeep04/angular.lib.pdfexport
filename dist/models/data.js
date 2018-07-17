@@ -24,7 +24,7 @@ export class Data {
     _updateProperties(product) {
         product.properties.forEach((property) => {
             if (!this._properties.find((propertyName) => propertyName === property.name)) {
-                if (!this._settings.applyFilters || (this._filters && this._filters.find((filter) => filter === property.name))) {
+                if (!this._settings.applyFilters || (this._filters && this._filters.find((filter) => filter.id === property.ifdguid && JSON.stringify({ value: filter.value }) === JSON.stringify({ value: property.originalValue })))) {
                     this._properties.push(property.name);
                 }
             }
