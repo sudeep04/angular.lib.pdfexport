@@ -6,7 +6,7 @@ export class JsonParser {
         Check.notNullOrUndefined(jsonData, 'jsonData');
         Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
         const settings = JsonParser.parseSettings(jsonData.Settings);
-        const data = new Data(settings, jsonData.Filters);
+        const data = new Data(settings, jsonData.property_filters);
         jsonData.Products.forEach((jsonProduct) => {
             Check.notNullOrUndefined(jsonProduct, 'Product');
             Check.notNullOrUndefined(jsonProduct.ProductData, 'ProductData');
@@ -22,6 +22,7 @@ export class JsonParser {
                         propertySet.Properties.forEach((property) => {
                             Check.notNullOrUndefined(property, 'Property');
                             Check.notNullOrUndefined(property.DisplayName, 'Property.DisplayName');
+                            let originalValue;
                             let value = '';
                             let val1 = '';
                             let val2 = '';
@@ -40,6 +41,7 @@ export class JsonParser {
                                         }
                                     }
                                     value += val1;
+                                    originalValue = property.NominalValue;
                                     break;
                                 case 'IfcPropertyListValue':
                                     const listValues = property.ListValues;
@@ -60,6 +62,7 @@ export class JsonParser {
                                             value = property.Unit.Name + ' ' + value;
                                         }
                                     }
+                                    originalValue = property.ListValues;
                                     break;
                                 case 'IfcPropertyBoundedValue':
                                     val1 = property.LowerBoundValue;
@@ -72,12 +75,17 @@ export class JsonParser {
                                             value = property.Unit.Name + ' ' + val1 + ' - ' + val2;
                                         }
                                     }
+                                    originalValue = {
+                                        upper: property.UpperBoundValue,
+                                        lower: property.LowerBoundValue
+                                    };
                                     break;
                             }
                             const propertyValue = {
                                 name: property.DisplayName,
                                 ifdguid: property.ifdguid,
-                                value
+                                value,
+                                originalValue
                             };
                             if (jsonProduct.Score !== undefined && jsonProduct.Score.parameters_components !== undefined) {
                                 if (jsonProduct.Score.parameters_components[property.ifdguid] !== undefined) {

@@ -7,7 +7,7 @@ export declare class Data {
     private _properties;
     private _settings;
     private _filters;
-    constructor(settings: Settings, filters: string[]);
+    constructor(settings: Settings, filters: any[]);
     addProduct(product: Product): void;
     private _updateProperties(product);
     private _sortProperties(groupTemplate);
