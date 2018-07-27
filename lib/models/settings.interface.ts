@@ -8,6 +8,8 @@ export interface Settings {
 
     showProductsImage: boolean;
 
+    productsImageApiPath: string;
+
     captions: {
 
         architectureOffice: string;
@@ -15,9 +17,11 @@ export interface Settings {
         project: string;
     };
 
-    sorting: 'assc' | 'desc';
+    sorting: 'asc' | 'dsc';
 
     unitsBeforeValue: string[];
 
     applyFilters: boolean;
+
+    showHighlights: boolean;
 }
