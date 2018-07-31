@@ -9,6 +9,8 @@ export interface Settings {
     captions: {
         architectureOffice: string;
         project: string;
+        bearbeiter: string;
+        id: string;
     };
     sorting: 'asc' | 'dsc';
     unitsBeforeValue: string[];

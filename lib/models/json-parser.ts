@@ -147,7 +147,9 @@ export abstract class JsonParser {
             sorting: 'asc',
             captions: {
                 architectureOffice: 'Architekturbüro',
-                project: 'Projekt'
+                project: 'Projekt',
+                bearbeiter: 'Bearbeiter',
+                id: 'Version'
             },
             showProductsImage: true,
             logo: {
@@ -177,6 +179,16 @@ export abstract class JsonParser {
             if (settings.captions.project) {
 
                 result.captions.project = settings.captions.project;
+            }
+
+            if (settings.captions.bearbeiter) {
+
+                result.captions.bearbeiter = settings.captions.bearbeiter;
+            }
+
+            if (settings.captions.id) {
+
+                result.captions.id = settings.captions.id;
             }
         }
 

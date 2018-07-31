@@ -15,6 +15,7 @@ import { JsonParser } from './json-parser';
 
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
+const HEADER_TOP = 48;
 
 export class DocRenderer {
 
@@ -279,7 +280,7 @@ export class DocRenderer {
         const config: any = {
             styles,
             margin: {
-                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP,
+                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : HEADER_TOP,
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
@@ -349,7 +350,8 @@ export class DocRenderer {
 
         const rows = [
             { col1: this._data.settings.captions.architectureOffice, col2: 'Datum: ' + moment(Date.now()).format('DD.MM.YY') },
-            { col1: this._data.settings.captions.project, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
+            { col1: this._data.settings.captions.project, col2: 'ID: ' + this._data.settings.captions.id },
+            { col1: this._data.settings.captions.bearbeiter, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
         ];
 
         const styles = {

@@ -4944,9 +4944,12 @@ and limitations under the License.
 ***************************************************************************** */
 /* global Reflect, Promise */
 
-var extendStatics = Object.setPrototypeOf ||
-    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
 
 function __extends(d, b) {
     extendStatics(d, b);
@@ -4954,12 +4957,15 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-var __assign = Object.assign || function __assign(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
     }
-    return t;
+    return __assign.apply(this, arguments);
 }
 
 function __rest(s, e) {
@@ -5003,8 +5009,8 @@ function __generator(thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -17116,6 +17122,7 @@ var logo_img_1 = __webpack_require__(143);
 var json_parser_1 = __webpack_require__(144);
 var IMAGES_TOP = 35;
 var IMAGES_PADING_TOP = 6.2;
+var HEADER_TOP = 48;
 var DocRenderer = /** @class */ (function () {
     function DocRenderer() {
         this._doc = new jsPDF();
@@ -17302,7 +17309,7 @@ var DocRenderer = /** @class */ (function () {
         var config = {
             styles: styles,
             margin: {
-                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP,
+                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : HEADER_TOP,
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
@@ -17359,7 +17366,8 @@ var DocRenderer = /** @class */ (function () {
         ];
         var rows = [
             { col1: this._data.settings.captions.architectureOffice, col2: 'Datum: ' + moment(Date.now()).format('DD.MM.YY') },
-            { col1: this._data.settings.captions.project, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
+            { col1: this._data.settings.captions.project, col2: 'ID: ' + this._data.settings.captions.id },
+            { col1: this._data.settings.captions.bearbeiter, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
         ];
         var styles = {
             fillColor: [246, 246, 246],
@@ -20895,7 +20903,9 @@ var JsonParser = /** @class */ (function () {
             sorting: 'asc',
             captions: {
                 architectureOffice: 'Architekturbüro',
-                project: 'Projekt'
+                project: 'Projekt',
+                bearbeiter: 'Bearbeiter',
+                id: 'Version'
             },
             showProductsImage: true,
             logo: {
@@ -20918,6 +20928,12 @@ var JsonParser = /** @class */ (function () {
             }
             if (settings.captions.project) {
                 result.captions.project = settings.captions.project;
+            }
+            if (settings.captions.bearbeiter) {
+                result.captions.bearbeiter = settings.captions.bearbeiter;
+            }
+            if (settings.captions.id) {
+                result.captions.id = settings.captions.id;
             }
         }
         if (settings.showProductsImage !== undefined) {
