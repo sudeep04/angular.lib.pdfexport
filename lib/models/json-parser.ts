@@ -159,6 +159,7 @@ export abstract class JsonParser {
             unitsBeforeValue: [],
             applyFilters: false,
             showHighlights: false,
+            fileName: 'product-comparison.pdf'
         };
 
         if (settings.sorting && (settings.sorting === 'dsc' || settings.sorting === 'asc')) {
@@ -223,6 +224,11 @@ export abstract class JsonParser {
         if (settings.placeholderUrl) {
 
             result.placeholderUrl = settings.placeholderUrl;
+        }
+
+        if (settings.fileName) {
+
+            result.fileName = settings.fileName;
         }
 
         return result;
