@@ -61,7 +61,7 @@ export abstract class JsonParser {
                                     : 'afterValue';
 
                             switch (property.type) {
-                                case '0':
+                                case 0:
                                     val1 = property.nominalValue;
 
                                     if (property.unit) {
@@ -75,7 +75,7 @@ export abstract class JsonParser {
                                     value += val1;
                                     originalValue = property.nominalValue;
                                     break;
-                                case '1':
+                                case 1:
                                     const listValues: string[] = property.listValues;
                                     listValues.forEach((v: string, index: number) => {
                                         val1 = v;
@@ -96,7 +96,7 @@ export abstract class JsonParser {
                                     }
                                     originalValue = property.listValues;
                                     break;
-                                case '2':
+                                case 2:
                                     val1 = property.lowerBoundValue;
                                     val2 = property.upperBoundValue;
 
@@ -159,6 +159,7 @@ export abstract class JsonParser {
             unitsBeforeValue: [],
             applyFilters: false,
             showHighlights: false,
+            fileName: 'product-comparison.pdf'
         };
 
         if (settings.sorting && (settings.sorting === 'dsc' || settings.sorting === 'asc')) {
@@ -223,6 +224,11 @@ export abstract class JsonParser {
         if (settings.placeholderUrl) {
 
             result.placeholderUrl = settings.placeholderUrl;
+        }
+
+        if (settings.fileName) {
+
+            result.fileName = settings.fileName;
         }
 
         return result;

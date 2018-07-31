@@ -4944,12 +4944,9 @@ and limitations under the License.
 ***************************************************************************** */
 /* global Reflect, Promise */
 
-var extendStatics = function(d, b) {
-    extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return extendStatics(d, b);
-};
+var extendStatics = Object.setPrototypeOf ||
+    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
 
 function __extends(d, b) {
     extendStatics(d, b);
@@ -4957,15 +4954,12 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-var __assign = function() {
-    __assign = Object.assign || function __assign(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-        }
-        return t;
+var __assign = Object.assign || function __assign(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
     }
-    return __assign.apply(this, arguments);
+    return t;
 }
 
 function __rest(s, e) {
@@ -5009,8 +5003,8 @@ function __generator(thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -5144,7 +5138,7 @@ var PdfExportService = /** @class */ (function () {
         this._docRenderer = new doc_renderer_1.DocRenderer();
         var docConfig = { columnWidth: COLUMN_WIDTH, lineWidth: LINE_WIDTH, marginTop: TABLE_MARGIN_TOP, padding: DOCUMENT_PADDING };
         this._docRenderer.drow(jsonData, docConfig);
-        this._docRenderer.save('Test.pdf');
+        this._docRenderer.save();
     };
     PdfExportService = tslib_1.__decorate([
         core_1.Injectable()
@@ -17149,8 +17143,8 @@ var DocRenderer = /** @class */ (function () {
             this._drowLayout(i);
         }
     };
-    DocRenderer.prototype.save = function (fileName) {
-        this._doc.save(fileName);
+    DocRenderer.prototype.save = function () {
+        this._doc.save(this._data.settings.fileName);
     };
     DocRenderer.prototype._drowBody = function (group) {
         var _this = this;
@@ -20800,9 +20794,14 @@ var JsonParser = /** @class */ (function () {
             check_1.Check.notNullOrUndefined(jsonproduct.productData.supplier.name, 'supplier.name');
             var product = new product_1.Product(jsonproduct.productData.name, jsonproduct.productData.supplier.name);
             if (data.settings.showProductsImage) {
-                check_1.Check.notNullOrUndefined(jsonproduct.productData.primaryImage, 'productData.primaryImage');
-                var imgUrl = data.settings.productsImageApiPath + jsonproduct.productData.primaryImage.uuid + "/content/" + jsonproduct.productData.primaryImage.content + "?quality=80&background=white&mode=pad&width=160&height=160";
-                product.addImageUrl(imgUrl);
+                if (jsonproduct.productData.primaryImage) {
+                    var imgUrl = data.settings.productsImageApiPath + jsonproduct.productData.primaryImage.uuid + "/content/" + jsonproduct.productData.primaryImage.content + "?quality=80&background=white&mode=pad&width=160&height=160";
+                    product.addImageUrl(imgUrl);
+                }
+                else {
+                    check_1.Check.notNullOrUndefined(settings.placeholderUrl, 'settings.placeholderUrl');
+                    product.addImageUrl(settings.placeholderUrl);
+                }
             }
             if (jsonproduct.productData.propertySets !== undefined) {
                 check_1.Check.isArray(jsonproduct.productData.propertySets, 'productData.propertySets');
@@ -20820,7 +20819,7 @@ var JsonParser = /** @class */ (function () {
                                 'beforeValue'
                                 : 'afterValue';
                             switch (property.type) {
-                                case '0':
+                                case 0:
                                     val1 = property.nominalValue;
                                     if (property.unit) {
                                         if (direction === 'afterValue') {
@@ -20833,7 +20832,7 @@ var JsonParser = /** @class */ (function () {
                                     value += val1;
                                     originalValue = property.nominalValue;
                                     break;
-                                case '1':
+                                case 1:
                                     var listValues = property.listValues;
                                     listValues.forEach(function (v, index) {
                                         val1 = v;
@@ -20854,7 +20853,7 @@ var JsonParser = /** @class */ (function () {
                                     }
                                     originalValue = property.listValues;
                                     break;
-                                case '2':
+                                case 2:
                                     val1 = property.lowerBoundValue;
                                     val2 = property.upperBoundValue;
                                     if (property.unit) {
@@ -20908,6 +20907,7 @@ var JsonParser = /** @class */ (function () {
             unitsBeforeValue: [],
             applyFilters: false,
             showHighlights: false,
+            fileName: 'product-comparison.pdf'
         };
         if (settings.sorting && (settings.sorting === 'dsc' || settings.sorting === 'asc')) {
             result.sorting = settings.sorting;
@@ -20945,6 +20945,12 @@ var JsonParser = /** @class */ (function () {
         }
         if (settings.showHighlights) {
             result.showHighlights = settings.showHighlights;
+        }
+        if (settings.placeholderUrl) {
+            result.placeholderUrl = settings.placeholderUrl;
+        }
+        if (settings.fileName) {
+            result.fileName = settings.fileName;
         }
         return result;
     };
