@@ -36,8 +36,8 @@ export class DocRenderer {
             this._drowLayout(i);
         }
     }
-    save(fileName) {
-        this._doc.save(fileName);
+    save() {
+        this._doc.save(this._data.settings.fileName);
     }
     _drowBody(group) {
         this._drowHeader(group, this._data.settings.showProductsImage);

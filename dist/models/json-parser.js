@@ -15,9 +15,14 @@ export class JsonParser {
             Check.notNullOrUndefined(jsonproduct.productData.supplier.name, 'supplier.name');
             const product = new Product(jsonproduct.productData.name, jsonproduct.productData.supplier.name);
             if (data.settings.showProductsImage) {
-                Check.notNullOrUndefined(jsonproduct.productData.primaryImage, 'productData.primaryImage');
-                var imgUrl = data.settings.productsImageApiPath + jsonproduct.productData.primaryImage.uuid + "/content/" + jsonproduct.productData.primaryImage.content + "?quality=80&background=white&mode=pad&width=160&height=160";
-                product.addImageUrl(imgUrl);
+                if (jsonproduct.productData.primaryImage) {
+                    var imgUrl = data.settings.productsImageApiPath + jsonproduct.productData.primaryImage.uuid + "/content/" + jsonproduct.productData.primaryImage.content + "?quality=80&background=white&mode=pad&width=160&height=160";
+                    product.addImageUrl(imgUrl);
+                }
+                else {
+                    Check.notNullOrUndefined(settings.placeholderUrl, 'settings.placeholderUrl');
+                    product.addImageUrl(settings.placeholderUrl);
+                }
             }
             if (jsonproduct.productData.propertySets !== undefined) {
                 Check.isArray(jsonproduct.productData.propertySets, 'productData.propertySets');
@@ -35,7 +40,7 @@ export class JsonParser {
                                 'beforeValue'
                                 : 'afterValue';
                             switch (property.type) {
-                                case '0':
+                                case 0:
                                     val1 = property.nominalValue;
                                     if (property.unit) {
                                         if (direction === 'afterValue') {
@@ -48,7 +53,7 @@ export class JsonParser {
                                     value += val1;
                                     originalValue = property.nominalValue;
                                     break;
-                                case '1':
+                                case 1:
                                     const listValues = property.listValues;
                                     listValues.forEach((v, index) => {
                                         val1 = v;
@@ -69,7 +74,7 @@ export class JsonParser {
                                     }
                                     originalValue = property.listValues;
                                     break;
-                                case '2':
+                                case 2:
                                     val1 = property.lowerBoundValue;
                                     val2 = property.upperBoundValue;
                                     if (property.unit) {
@@ -123,6 +128,7 @@ export class JsonParser {
             unitsBeforeValue: [],
             applyFilters: false,
             showHighlights: false,
+            fileName: 'product-comparison.pdf'
         };
         if (settings.sorting && (settings.sorting === 'dsc' || settings.sorting === 'asc')) {
             result.sorting = settings.sorting;
@@ -160,6 +166,12 @@ export class JsonParser {
         }
         if (settings.showHighlights) {
             result.showHighlights = settings.showHighlights;
+        }
+        if (settings.placeholderUrl) {
+            result.placeholderUrl = settings.placeholderUrl;
+        }
+        if (settings.fileName) {
+            result.fileName = settings.fileName;
         }
         return result;
     }
