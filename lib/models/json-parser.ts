@@ -61,7 +61,7 @@ export abstract class JsonParser {
                                     : 'afterValue';
 
                             switch (property.type) {
-                                case '0':
+                                case 0:
                                     val1 = property.nominalValue;
 
                                     if (property.unit) {
@@ -75,7 +75,7 @@ export abstract class JsonParser {
                                     value += val1;
                                     originalValue = property.nominalValue;
                                     break;
-                                case '1':
+                                case 1:
                                     const listValues: string[] = property.listValues;
                                     listValues.forEach((v: string, index: number) => {
                                         val1 = v;
@@ -96,7 +96,7 @@ export abstract class JsonParser {
                                     }
                                     originalValue = property.listValues;
                                     break;
-                                case '2':
+                                case 2:
                                     val1 = property.lowerBoundValue;
                                     val2 = property.upperBoundValue;
 
