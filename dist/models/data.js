@@ -32,7 +32,7 @@ export class Data {
         this._sortProperties(this._properties);
     }
     _sortProperties(groupTemplate) {
-        if (this._settings.sorting === 'assc') {
+        if (this._settings.sorting === 'asc') {
             groupTemplate = groupTemplate.sort();
         }
         else {
@@ -43,6 +43,7 @@ export class Data {
         const updatedGroup = [];
         group.forEach((product) => {
             const updatedProduct = new Product(product.name, product.supplier);
+            updatedProduct.addImageUrl(product.imageUrl);
             properties.forEach((propertyName, index) => {
                 const prop = product.properties.find((property) => property.name === propertyName);
                 if (prop) {

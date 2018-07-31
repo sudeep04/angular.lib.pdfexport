@@ -219,7 +219,7 @@ export class DocRenderer {
                             IMAGES_TOP + IMAGES_PADING_TOP,
                             this._docConfig.columnWidth,
                             this._docConfig.columnWidth);
-                        this._doc.addImage('assets/images/product2.png',
+                        this._doc.addImage(product.imageUrl,
                             pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2,
                             IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
                             this._docConfig.columnWidth - 6.4,
@@ -231,7 +231,7 @@ export class DocRenderer {
                             IMAGES_TOP + IMAGES_PADING_TOP,
                             this._docConfig.columnWidth,
                             this._docConfig.columnWidth);
-                        this._doc.addImage('assets/images/product1.png',
+                        this._doc.addImage(product.imageUrl,
                             pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2,
                             IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
                             this._docConfig.columnWidth - 6.4,
@@ -243,7 +243,7 @@ export class DocRenderer {
                             IMAGES_TOP + IMAGES_PADING_TOP,
                             this._docConfig.columnWidth,
                             this._docConfig.columnWidth);
-                        this._doc.addImage('assets/images/product3.png',
+                        this._doc.addImage(product.imageUrl,
                             pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2,
                             IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
                             this._docConfig.columnWidth - 6.4,

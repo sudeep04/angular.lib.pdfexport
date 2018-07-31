@@ -12,6 +12,11 @@ export class Product {
         return this._supplier;
     }
 
+    public get imageUrl(): string {
+
+        return this._imageUrl;
+    }
+
     public get properties(): Property[] {
 
         return this._properties;
@@ -21,6 +26,8 @@ export class Product {
 
     private _supplier: string;
 
+    private _imageUrl: string;
+
     private _properties: Property[];
 
     constructor(name: string, supplier: string) {
@@ -28,10 +35,16 @@ export class Product {
         this._name = name;
         this._supplier = supplier;
         this._properties = [];
+        this._imageUrl = "";
     }
 
     public addProperty(property: Property): void {
 
         this._properties.push(property);
+    }
+
+    public addImageUrl(imageUrl: string): void {
+
+        this._imageUrl = imageUrl;
     }
 }

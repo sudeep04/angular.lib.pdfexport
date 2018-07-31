@@ -58,7 +58,7 @@ export class Data {
 
     private _sortProperties(groupTemplate: string[]) {
 
-        if (this._settings.sorting === 'assc') {
+        if (this._settings.sorting === 'asc') {
 
             groupTemplate = groupTemplate.sort();
         } else {
@@ -74,6 +74,9 @@ export class Data {
         group.forEach((product: Product) => {
 
             const updatedProduct = new Product(product.name, product.supplier);
+
+            updatedProduct.addImageUrl(product.imageUrl);
+            
 
             properties.forEach((propertyName: string, index: number) => {
 

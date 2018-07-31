@@ -9,62 +9,74 @@ export abstract class JsonParser {
     public static parseData(jsonData: any): Data {
 
         Check.notNullOrUndefined(jsonData, 'jsonData');
-        Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
+        Check.notEmptyArray(jsonData.products, 'jsonData.products');
 
-        const settings: Settings = JsonParser.parseSettings(jsonData.Settings);
+        const settings: Settings = JsonParser.parseSettings(jsonData.settings);
         const data = new Data(settings, jsonData.property_filters);
 
-        jsonData.Products.forEach((jsonProduct: any) => {
+        jsonData.products.forEach((jsonproduct: any) => {
 
-            Check.notNullOrUndefined(jsonProduct, 'Product');
-            Check.notNullOrUndefined(jsonProduct.ProductData, 'ProductData');
-            Check.notNullOrUndefined(jsonProduct.ProductData.Name, 'ProductData.Name');
-            Check.notNullOrUndefined(jsonProduct.ProductData.Supplier, 'ProductData.Supplier');
-            Check.notNullOrUndefined(jsonProduct.ProductData.Supplier.Name, 'Supplier.Name');
+            Check.notNullOrUndefined(jsonproduct, 'product');
+            Check.notNullOrUndefined(jsonproduct.productData, 'productData');
+            Check.notNullOrUndefined(jsonproduct.productData.name, 'productData.name');
+            Check.notNullOrUndefined(jsonproduct.productData.supplier, 'productData.supplier');
+            Check.notNullOrUndefined(jsonproduct.productData.supplier.name, 'supplier.name');
 
-            const product = new Product(jsonProduct.ProductData.Name, jsonProduct.ProductData.Supplier.Name);
+            const product = new Product(jsonproduct.productData.name, jsonproduct.productData.supplier.name);
 
-            if (jsonProduct.ProductData.PropertySets !== undefined) {
+            if(data.settings.showProductsImage)
+            {
+                if(jsonproduct.productData.primaryImage) {
+                    var imgUrl = data.settings.productsImageApiPath + jsonproduct.productData.primaryImage.uuid + "/content/" + jsonproduct.productData.primaryImage.content  +"?quality=80&background=white&mode=pad&width=160&height=160";
+                    product.addImageUrl(imgUrl);
+                }else{
 
-                Check.isArray(jsonProduct.ProductData.PropertySets, 'ProductData.PropertySets');
+                    Check.notNullOrUndefined(settings.placeholderUrl, 'settings.placeholderUrl');
+                    product.addImageUrl(settings.placeholderUrl);
+                }
+            }
 
-                jsonProduct.ProductData.PropertySets.forEach((propertySet: any) => {
+            if (jsonproduct.productData.propertySets !== undefined) {
 
-                    if (propertySet.Properties !== undefined) {
+                Check.isArray(jsonproduct.productData.propertySets, 'productData.propertySets');
 
-                        Check.isArray(propertySet.Properties, 'Properties');
+                jsonproduct.productData.propertySets.forEach((propertySet: any) => {
 
-                        propertySet.Properties.forEach((property: any) => {
+                    if (propertySet.properties !== undefined) {
 
-                            Check.notNullOrUndefined(property, 'Property');
-                            Check.notNullOrUndefined(property.DisplayName, 'Property.DisplayName');
+                        Check.isArray(propertySet.properties, 'properties');
+
+                        propertySet.properties.forEach((property: any) => {
+
+                            Check.notNullOrUndefined(property, 'property');
+                            Check.notNullOrUndefined(property.displayName, 'property.displayName');
 
                             let originalValue: any;
                             let value: string = '';
                             let val1: string = '';
                             let val2: string = '';
                             const direction: 'afterValue' | 'beforeValue'
-                                = property.Unit !== undefined && settings.unitsBeforeValue.find((unit: string) => unit === property.Unit.Name) ?
+                                = property.unit !== undefined && settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
                                     'beforeValue'
                                     : 'afterValue';
 
-                            switch (property.Type) {
-                                case 'IfcPropertySingleValue':
-                                    val1 = property.NominalValue;
+                            switch (property.type) {
+                                case '0':
+                                    val1 = property.nominalValue;
 
-                                    if (property.Unit) {
+                                    if (property.unit) {
 
                                         if (direction === 'afterValue') {
-                                            val1 = val1 + ' ' + property.Unit.Name;
+                                            val1 = val1 + ' ' + property.unit;
                                         } else {
-                                            val1 = property.Unit.Name + ' ' + val1;
+                                            val1 = property.unit + ' ' + val1;
                                         }
                                     }
                                     value += val1;
-                                    originalValue = property.NominalValue;
+                                    originalValue = property.nominalValue;
                                     break;
-                                case 'IfcPropertyListValue':
-                                    const listValues: string[] = property.ListValues;
+                                case '1':
+                                    const listValues: string[] = property.listValues;
                                     listValues.forEach((v: string, index: number) => {
                                         val1 = v;
 
@@ -74,46 +86,46 @@ export abstract class JsonParser {
                                             value += ', ' + val1;
                                         }
                                     });
-                                    if (property.Unit) {
+                                    if (property.unit) {
 
                                         if (direction === 'afterValue') {
-                                            value = value + ' ' + property.Unit.Name;
+                                            value = value + ' ' + property.unit;
                                         } else {
-                                            value = property.Unit.Name + ' ' + value;
+                                            value = property.unit + ' ' + value;
                                         }
                                     }
-                                    originalValue = property.ListValues;
+                                    originalValue = property.listValues;
                                     break;
-                                case 'IfcPropertyBoundedValue':
-                                    val1 = property.LowerBoundValue;
-                                    val2 = property.UpperBoundValue;
+                                case '2':
+                                    val1 = property.lowerBoundValue;
+                                    val2 = property.upperBoundValue;
 
-                                    if (property.Unit) {
+                                    if (property.unit) {
 
                                         if (direction === 'afterValue') {
-                                            value = val1 + ' - ' + val2 + ' ' + property.Unit.Name;
+                                            value = val1 + ' - ' + val2 + ' ' + property.unit;
                                         } else {
-                                            value = property.Unit.Name + ' ' + val1 + ' - ' + val2;
+                                            value = property.unit + ' ' + val1 + ' - ' + val2;
                                         }
                                     }
                                     originalValue = {
-                                        upper: property.UpperBoundValue,
-                                        lower: property.LowerBoundValue
+                                        upper: property.upperBoundValue,
+                                        lower: property.lowerBoundValue
                                     }
                                     break;
                             }
 
                             const propertyValue: Property = {
-                                name: property.DisplayName,
+                                name: property.displayName,
                                 ifdguid: property.ifdguid,
                                 value,
                                 originalValue
                             };
 
-                            if (jsonProduct.Score !== undefined && jsonProduct.Score.parameters_components !== undefined) {
+                            if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
                                 
-                                if (jsonProduct.Score.parameters_components[property.ifdguid] !== undefined) {
-                                    propertyValue.ckeck = jsonProduct.Score.parameters_components[property.ifdguid] === 1 ? true : false;
+                                if (jsonproduct.productScore.filterScores[property.ifdguid] !== undefined && jsonproduct.productScore.filterScores[property.ifdguid]!== -1) {
+                                    propertyValue.ckeck = jsonproduct.productScore.filterScores[property.ifdguid] === 1 ? true : false;
                                 }
                             }
 
@@ -132,7 +144,7 @@ export abstract class JsonParser {
     public static parseSettings(settings: any): Settings {
 
         const result: Settings = {
-            sorting: 'assc',
+            sorting: 'asc',
             captions: {
                 architectureOffice: 'Architekturbüro',
                 project: 'Projekt'
@@ -143,58 +155,74 @@ export abstract class JsonParser {
                 type: 'text',
                 data: ''
             },
+            productsImageApiPath: 'https://plan.one/api/v1/files/',
             unitsBeforeValue: [],
-            applyFilters: false
+            applyFilters: false,
+            showHighlights: false,
         };
 
-        if (settings.Sorting && (settings.Sorting === 'desc' || settings.Sorting === 'assc')) {
+        if (settings.sorting && (settings.sorting === 'dsc' || settings.sorting === 'asc')) {
 
-            result.sorting = settings.Sorting;
+            result.sorting = settings.sorting;
         }
 
-        if (settings.Captions) {
+        if (settings.captions) {
 
-            if (settings.Captions.ArchitectureOffice) {
+            if (settings.captions.architectureOffice) {
 
-                result.captions.architectureOffice = settings.Captions.ArchitectureOffice;
+                result.captions.architectureOffice = settings.captions.architectureOffice;
             }
 
-            if (settings.Captions.Project) {
+            if (settings.captions.project) {
 
-                result.captions.project = settings.Captions.Project;
-            }
-        }
-
-        if (settings.ShowProductsImage !== undefined) {
-
-            result.showProductsImage = settings.ShowProductsImage;
-        }
-
-        if (settings.Logo) {
-
-            if (settings.Logo.Type === 'text' || settings.Logo.Type === 'url') {
-
-                result.logo.type = settings.Logo.Type;
-            }
-
-            if (settings.Logo.Show !== undefined) {
-
-                result.logo.show = settings.Logo.Show;
-            }
-
-            if (settings.Logo.Data !== undefined) {
-
-                result.logo.data = settings.Logo.Data;
+                result.captions.project = settings.captions.project;
             }
         }
 
-        if (settings.UnitsBeforeValue) {
+        if (settings.showProductsImage !== undefined) {
 
-            result.unitsBeforeValue = settings.UnitsBeforeValue;
+            result.showProductsImage = settings.showProductsImage;
         }
-        if (settings.ApplyFilters) {
 
-            result.applyFilters = settings.ApplyFilters;
+        if (settings.productsImageApiPath !== undefined) {
+            result.productsImageApiPath = settings.productsImageApiPath;
+        }
+
+        if (settings.logo) {
+
+            if (settings.logo.type === 'text' || settings.logo.type === 'url') {
+
+                result.logo.type = settings.logo.type;
+            }
+
+            if (settings.logo.show !== undefined) {
+
+                result.logo.show = settings.logo.show;
+            }
+
+            if (settings.logo.data !== undefined) {
+
+                result.logo.data = settings.logo.data;
+            }
+        }
+
+        if (settings.unitsBeforeValue) {
+
+            result.unitsBeforeValue = settings.unitsBeforeValue;
+        }
+        if (settings.applyFilters) {
+
+            result.applyFilters = settings.applyFilters;
+        }
+
+        if (settings.showHighlights) {
+
+            result.showHighlights = settings.showHighlights;
+        }
+
+        if (settings.placeholderUrl) {
+
+            result.placeholderUrl = settings.placeholderUrl;
         }
 
         return result;

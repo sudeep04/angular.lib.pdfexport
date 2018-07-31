@@ -56,44 +56,44 @@ export class AppComponent implements OnInit {
 
 ```typescript
 {
-    Settings: {
-        Logo: {
-            Show: boolean;
-            Type: 'text' | 'url';
-            Data: string;  /* text or url data */
+    settings: {
+        logo: {
+            show: boolean;
+            type: 'text' | 'url';
+            data: string;  /* text or url data */
         };
-        ApplyFilters: boolean;
-        Sorting: 'assc' | 'desc';
-        Captions: {
-            ArchitectureOffice: string;
-            Project: string;
+        applyFilters: boolean;
+        sorting: 'asc' | 'dsc';
+        captions: {
+            architectureOffice: string;
+            project: string;
         };
-        ShowProductsImage: boolean;
-        UnitsBeforeValue: string [];
+        showProductsImage: boolean;
+	productsImageApiPath: string;
+	showHighlights: boolean;
+        unitsBeforeValue: string [];
     },
-    Products: [{
-        ProductData: {
-            Name: string;
-            PropertySets: [{
-                Properties: [{
+    products: [{
+        productData: {
+            name: string;
+            propertySets: [{
+                properties: [{
                     ifdguid: string;
-                    DisplayName: string;
-                    Type: 'IfcPropertySingleValue' | 'IfcPropertyListValue' | 'IfcPropertyBoundedValue';
-                    NominalValue: any; /* only for IfcPropertySingleValue type */
-                    ListValues: string []; /* only for IfcPropertyListValue type */
-                    UpperBoundValue: number; /* only for IfcPropertyBoundedValue type */
-                    LowerBoundValue: number; /* only for IfcPropertyBoundedValue type */
-                    Unit: {
-                        Name: string;
-                    }
+                    displayName: string;
+                    type: '0' | '1' | '2';
+                    nominalValue: any; /* only for IfcPropertySingleValue (Type 0) type */
+                    listValues: string []; /* only for IfcPropertyListValue type (Type 1) */
+                    upperBoundValue: number; /* only for IfcPropertyBoundedValue type (Type 2) */
+                    lowerBoundValue: number; /* only for IfcPropertyBoundedValue type (Type 2) */
+                    unit: string;
                 }]
             }];
-            Supplier: {
-                Name: string;
+            supplier: {
+                name: string;
             };
         };
-        Score: {
-            parameters_components: { [id: string] : number; };
+        productScore: {
+            filterScores: { [id: string] : number; };
         };   
     }];
     property_filters: [{

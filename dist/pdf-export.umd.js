@@ -4944,9 +4944,12 @@ and limitations under the License.
 ***************************************************************************** */
 /* global Reflect, Promise */
 
-var extendStatics = Object.setPrototypeOf ||
-    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
 
 function __extends(d, b) {
     extendStatics(d, b);
@@ -4954,12 +4957,15 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-var __assign = Object.assign || function __assign(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
     }
-    return t;
+    return __assign.apply(this, arguments);
 }
 
 function __rest(s, e) {
@@ -5003,8 +5009,8 @@ function __generator(thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -17005,6 +17011,7 @@ var Product = /** @class */ (function () {
         this._name = name;
         this._supplier = supplier;
         this._properties = [];
+        this._imageUrl = "";
     }
     Object.defineProperty(Product.prototype, "name", {
         get: function () {
@@ -17020,6 +17027,13 @@ var Product = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Product.prototype, "imageUrl", {
+        get: function () {
+            return this._imageUrl;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(Product.prototype, "properties", {
         get: function () {
             return this._properties;
@@ -17029,6 +17043,9 @@ var Product = /** @class */ (function () {
     });
     Product.prototype.addProperty = function (property) {
         this._properties.push(property);
+    };
+    Product.prototype.addImageUrl = function (imageUrl) {
+        this._imageUrl = imageUrl;
     };
     return Product;
 }());
@@ -17257,15 +17274,15 @@ var DocRenderer = /** @class */ (function () {
                 switch (index) {
                     case 0:
                         _this._doc.addImage(box_shadow_img_1.boxShadowImg, pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
-                        _this._doc.addImage('assets/images/product2.png', pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
                         break;
                     case 1:
                         _this._doc.addImage(box_shadow_img_1.boxShadowImg, pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
-                        _this._doc.addImage('assets/images/product1.png', pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
                         break;
                     case 2:
                         _this._doc.addImage(box_shadow_img_1.boxShadowImg, pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
-                        _this._doc.addImage('assets/images/product3.png', pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
                         break;
                 }
             });
@@ -17712,7 +17729,7 @@ exports.boxShadowImg = ' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABM0AAATNC
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkImg = ' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAABGCAYAAABxLuKEAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NTc3MiwgMjAxNC8wMS8xMy0xOTo0NDowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkI1QkNEODJCNkUyMjExRThCNkFBRERBQzg1NjQ5OTE1IiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkI1QkNEODJDNkUyMjExRThCNkFBRERBQzg1NjQ5OTE1Ij4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6QjVCQ0Q4Mjk2RTIyMTFFOEI2QUFEREFDODU2NDk5MTUiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6QjVCQ0Q4MkE2RTIyMTFFOEI2QUFEREFDODU2NDk5MTUiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz62YKfUAAAEbUlEQVR42uzbfUgTYRwH8LvzLVPU+qMQKsPE5t7VNCoSiogQLayIw17AyqLSMt9yafZOf/RHf/aCCEGEFEEgWISvCalYBlEa00wzX+ZbNl9mqbO7sy2Xm3u559ndbc937Ngru3327J77/XbDZ2dnMZSFIRABgkEwCAbBIBgEg2AEGk8Xf38kvfg+Pra2cah/swdO6ONWBr8K8vYZpm4ucVcYcnJm2vd845vip51fMP3fPXwfwmNPmkjadVEWReA4/tjSk3EXLQlI3fS0X3JteVGNpsfsA46GiXS3ozcdt4RDuCMKneK2z7457+qKqIGR7A4wNqHYgkO4K4o1HMKdUebjqJoa7hpmMVeBYYViyIPW5oDXmp6dBhzCFVAOskQx5FG7OsUVRowRpRoACp3+SZ3gtzHAUeisXLJU0DBQUOgcWRf+QKgw0FDSRVLNlhXBVYYaSkglAVP7JL8uLwaNcipcMnwzauOZ+YUl4e4op9cvRBEKDFSUG5ELUYQAAw3lzHrpoCUUe/ox5H/XS4SMkiaSDl5TxqYv9j6swZDNI8OK++rmrPfDg15eBIElrAppSQkTLbelCyZUFGuzElna1XHgeF110pReb3JHqH8A9nzbLtUqP/8OCDgMCjUlF1f1gZ+SrypjM2xZZ0swDMrRN1VJMxbg1vj5Y6Xb41WrweLwAsXSxtcqCp1v42NYQmXZrW9jo6FmtkG8QjkrktmFYg7GJhRDuuZwbnayx4GKckUZk2HvqCYcRTHk+8Q4g/N1VBvmIA40lHMRsl5HUObDkA0Dmq3H7EQxpJvCSawsu94+qg23EwcaSkaEvPeyIibT0e2fccTcaflweppF3dSjm6BxrrZpf0bYiMOgHKqtgIJSqNjgMIoJTHVfN+sV6qVwdleWFbZaxzGiVAJ4XdAoJjCgauy+SR09cgrV2hGJBRzeo5jAxK0IBraCdIswsaKs4PPPH7L/cKChnBfLu0GhmMBkihX3PHAc2IoO/JqkvlYvLrb8w4GKckm+IRvkXvj8PV/yWWf74ZP1NfF6gM2rQC9vLEMs/+Tn6Tn+pONL7NuhAaAo1AfaXSCPBopiriSAggMrsFDMVdcl+0JCmQt8x8kSK7ry5dG5sCp8c20H3uNkS5T08S3QUBbrx/AWxxko1hpVvMPJkSg7VLIoFeaEDqK1Dh6DQ0/iJzjGcSaKLTAMzt6/I4crnFwKJc+JKLbCcIrDBYo9MJzgcIViL4wRh6ocZlLrahJh4lyQRrZT53wuUByBYXCS1syNHFg4XKM4CgMVJ49CyeUYhQ0MFBy+oLCFMcE5QeHMsMBRSSPbcqSRl/iAAgIGCA7fUEDBsMKh6p42qv7hFQpIGIdw+IoCGsYunHxZlDpLorzMRxQYMEYcnDql1lWbxSmQRaszJQreotCBeXAiWavp3XHrY9Ox+gENc4M4cBn9E8fL/WvXPeQzCmwYBodeaKd+B1GvQwTOHWyE8R3FGTCCDfoXLYJBMAgGwSAYBINghJo/AgwAkdIZBg8ffqIAAAAASUVORK5CYII=';
+exports.checkImg = ' data:image/png;base64,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';
 
 
 /***/ }),
@@ -17722,7 +17739,7 @@ exports.checkImg = ' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAABGCAYAA
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unckeckImg = ' data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAABGCAYAAABxLuKEAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NTc3MiwgMjAxNC8wMS8xMy0xOTo0NDowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOkJGNTYxNEE0NkUyMjExRThCMkNGQ0E1Mjg3N0U0QUYxIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOkJGNTYxNEE1NkUyMjExRThCMkNGQ0E1Mjg3N0U0QUYxIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6QkY1NjE0QTI2RTIyMTFFOEIyQ0ZDQTUyODc3RTRBRjEiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6QkY1NjE0QTM2RTIyMTFFOEIyQ0ZDQTUyODc3RTRBRjEiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz79X8qnAAAFJ0lEQVR42uzba2wURRwA8NnZe3dbqBA+YBExaqW81CqUJqZNUBMjtKAuLSUaShDsM6U0fVo+CaWa1MQcWC0WaCnWrhIgqRqiRRMVgqIBRZ4aoEJM06aWXu+857rba69eatu73f/co87/w324u8xOfjM7O/OfWUYURURjfGBKQGEoDIWhMBSGwlAYCkNhKMz/OTSAZfHuq7cXO46fzhX/dpi0qx79RJua9IX0vQBcZ97TOzDHIXzzmqen/17Nsge+0z6//Aij1Tghr8UALSJ5+4dfFVjLmtKQZ6w8/aZn7Mbdm15mGAaqwrzrp+uplpz6EvGvobHWXZ6IuLbyVxnOOACFAwHD29u6iqxl+5/6rx91r6xymvZs3giA40XJqisRB23jfmSTH0Kx7ZVgOJgkihyOli+11srmNqkBeFIocrjPXUOD2XuaRItthvz/cMLw9iOnCiZD8cOpUIwzJYofzgYYHKwKZYc0pgQYjlZFOBLKbwGh+HB+gMHBilDkgTYIFIU4Iyi7A0bxw8mpV4UTLAzvOPptrrX0/TSlLTGMU/5B+xQ4ilF8ON9fRZaNbzaJdqeeOIzocOmtO1ueUzuwOQ534UlwvCjZdYpRRsN19gqSGnKLkl4TFIz7+p0ksW8QZEIyAc4Yyl0ryHVcZy4p6t1BzXzxzJheyCmsjINEsd301hYkzXMQNMrwRC0+tp88zNxZ3dpnH0fOkz/C4bSdwu7Lf3TghNnecm12OHkti/Qb0vcqmfAF/VQyvZO3jV22AHTxI88/nMdPw6KwGMW8W3SMTUy4EIqnkoBnxPRzH1VvY5fC4oCGjPJe8TGdtLhUujxQMo8ZwamKTBwZpbFIFYqama+AZ3JenCX3Rx7K6hWqUNSulbw4HdWRgeMdU05AoECsrkd6TnUeu3h+mFEKT+jWrDgMlY+BSG0KOJ7r4zpqwoPjQ0kBQ4GCCR+OjLIPHgUSJvQ4oygZ8CjQMP44j8wj6hJjzu8khUICxodjqFwvkELRrFyIdGtTD5FCIQXjTVEMDMUTK1taZJI+IkcChned/z3FtrP1aVKVdl+8iWw1hw4igKR3qGCGUSxZdaVSjyHaovYDJ03WmoPEcHA0ovhwmsnh4GhFIY2DoxmFJA6OdhRSOHg6oJDAwdMFBRoHTycUSJygdyJdv9xIjmQUP5zalmYUoi1aNJRvrgBFwQwybF/XbXp7axf0wtO+/3PO2XU+gziMfJTMc+0OKEqMueAzYzm/Q5+d3sgdrQVPWTg+PZtDvsdgxg2NoluXemBklRzeTKAaGPbBuZdwYgIMyt6Czn+hjM/nLILB0a1JaQ3JGMM1Fr3BxHPqUSbOp4zgVOexSfepQtHnr+7Tpi3pDAWMIA2QFzihpl4Rjoyyr7AzgCSTgO+J7ZOuk8cunKcYxVSbk4dCuROpWTT/XNA4oyiZKwPNvI3iFAaLYyjM6FGDIoea46y86+LNZAu/q0Lst0yNIm+GKcvR8p6+u3MsL+0yuy93T41SnPmnsSqrGIVzJzKgnjO6Q6g8cS3gWXE9cs+ZauA3lKy9DYECsbqeHAdui0PAs+N6Yj9+fUIcQ+kL3caK9dtRBJ0M995Wv956bCi3ocpzq8dbcJwJmRq2qj51MO626pVuq80NZvnwofd5rEHGshevGIoya1EEvkswXGnR48FShdPlQ4yaJx7+mjHqrIjASxbyh+vnG0+K0tjDLl1wRh6koa/D0Df1yYwxFIbC0KAwFIbCUBgKQ2EoDIWJ6vhHgAEAKPPkdkpUXEIAAAAASUVORK5CYII=';
+exports.unckeckImg = ' data:image/png;base64,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';
 
 
 /***/ }),
@@ -20772,47 +20789,52 @@ var JsonParser = /** @class */ (function () {
     }
     JsonParser.parseData = function (jsonData) {
         check_1.Check.notNullOrUndefined(jsonData, 'jsonData');
-        check_1.Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
-        var settings = JsonParser.parseSettings(jsonData.Settings);
+        check_1.Check.notEmptyArray(jsonData.products, 'jsonData.products');
+        var settings = JsonParser.parseSettings(jsonData.settings);
         var data = new data_1.Data(settings, jsonData.property_filters);
-        jsonData.Products.forEach(function (jsonProduct) {
-            check_1.Check.notNullOrUndefined(jsonProduct, 'Product');
-            check_1.Check.notNullOrUndefined(jsonProduct.ProductData, 'ProductData');
-            check_1.Check.notNullOrUndefined(jsonProduct.ProductData.Name, 'ProductData.Name');
-            check_1.Check.notNullOrUndefined(jsonProduct.ProductData.Supplier, 'ProductData.Supplier');
-            check_1.Check.notNullOrUndefined(jsonProduct.ProductData.Supplier.Name, 'Supplier.Name');
-            var product = new product_1.Product(jsonProduct.ProductData.Name, jsonProduct.ProductData.Supplier.Name);
-            if (jsonProduct.ProductData.PropertySets !== undefined) {
-                check_1.Check.isArray(jsonProduct.ProductData.PropertySets, 'ProductData.PropertySets');
-                jsonProduct.ProductData.PropertySets.forEach(function (propertySet) {
-                    if (propertySet.Properties !== undefined) {
-                        check_1.Check.isArray(propertySet.Properties, 'Properties');
-                        propertySet.Properties.forEach(function (property) {
-                            check_1.Check.notNullOrUndefined(property, 'Property');
-                            check_1.Check.notNullOrUndefined(property.DisplayName, 'Property.DisplayName');
+        jsonData.products.forEach(function (jsonproduct) {
+            check_1.Check.notNullOrUndefined(jsonproduct, 'product');
+            check_1.Check.notNullOrUndefined(jsonproduct.productData, 'productData');
+            check_1.Check.notNullOrUndefined(jsonproduct.productData.name, 'productData.name');
+            check_1.Check.notNullOrUndefined(jsonproduct.productData.supplier, 'productData.supplier');
+            check_1.Check.notNullOrUndefined(jsonproduct.productData.supplier.name, 'supplier.name');
+            var product = new product_1.Product(jsonproduct.productData.name, jsonproduct.productData.supplier.name);
+            if (data.settings.showProductsImage) {
+                check_1.Check.notNullOrUndefined(jsonproduct.productData.primaryImage, 'productData.primaryImage');
+                var imgUrl = data.settings.productsImageApiPath + jsonproduct.productData.primaryImage.uuid + "/content/" + jsonproduct.productData.primaryImage.content + "?quality=80&background=white&mode=pad&width=160&height=160";
+                product.addImageUrl(imgUrl);
+            }
+            if (jsonproduct.productData.propertySets !== undefined) {
+                check_1.Check.isArray(jsonproduct.productData.propertySets, 'productData.propertySets');
+                jsonproduct.productData.propertySets.forEach(function (propertySet) {
+                    if (propertySet.properties !== undefined) {
+                        check_1.Check.isArray(propertySet.properties, 'properties');
+                        propertySet.properties.forEach(function (property) {
+                            check_1.Check.notNullOrUndefined(property, 'property');
+                            check_1.Check.notNullOrUndefined(property.displayName, 'property.displayName');
                             var originalValue;
                             var value = '';
                             var val1 = '';
                             var val2 = '';
-                            var direction = property.Unit !== undefined && settings.unitsBeforeValue.find(function (unit) { return unit === property.Unit.Name; }) ?
+                            var direction = property.unit !== undefined && settings.unitsBeforeValue.find(function (unit) { return unit === property.unit; }) ?
                                 'beforeValue'
                                 : 'afterValue';
-                            switch (property.Type) {
-                                case 'IfcPropertySingleValue':
-                                    val1 = property.NominalValue;
-                                    if (property.Unit) {
+                            switch (property.type) {
+                                case '0':
+                                    val1 = property.nominalValue;
+                                    if (property.unit) {
                                         if (direction === 'afterValue') {
-                                            val1 = val1 + ' ' + property.Unit.Name;
+                                            val1 = val1 + ' ' + property.unit;
                                         }
                                         else {
-                                            val1 = property.Unit.Name + ' ' + val1;
+                                            val1 = property.unit + ' ' + val1;
                                         }
                                     }
                                     value += val1;
-                                    originalValue = property.NominalValue;
+                                    originalValue = property.nominalValue;
                                     break;
-                                case 'IfcPropertyListValue':
-                                    var listValues = property.ListValues;
+                                case '1':
+                                    var listValues = property.listValues;
                                     listValues.forEach(function (v, index) {
                                         val1 = v;
                                         if (index === 0) {
@@ -20822,42 +20844,42 @@ var JsonParser = /** @class */ (function () {
                                             value += ', ' + val1;
                                         }
                                     });
-                                    if (property.Unit) {
+                                    if (property.unit) {
                                         if (direction === 'afterValue') {
-                                            value = value + ' ' + property.Unit.Name;
+                                            value = value + ' ' + property.unit;
                                         }
                                         else {
-                                            value = property.Unit.Name + ' ' + value;
+                                            value = property.unit + ' ' + value;
                                         }
                                     }
-                                    originalValue = property.ListValues;
+                                    originalValue = property.listValues;
                                     break;
-                                case 'IfcPropertyBoundedValue':
-                                    val1 = property.LowerBoundValue;
-                                    val2 = property.UpperBoundValue;
-                                    if (property.Unit) {
+                                case '2':
+                                    val1 = property.lowerBoundValue;
+                                    val2 = property.upperBoundValue;
+                                    if (property.unit) {
                                         if (direction === 'afterValue') {
-                                            value = val1 + ' - ' + val2 + ' ' + property.Unit.Name;
+                                            value = val1 + ' - ' + val2 + ' ' + property.unit;
                                         }
                                         else {
-                                            value = property.Unit.Name + ' ' + val1 + ' - ' + val2;
+                                            value = property.unit + ' ' + val1 + ' - ' + val2;
                                         }
                                     }
                                     originalValue = {
-                                        upper: property.UpperBoundValue,
-                                        lower: property.LowerBoundValue
+                                        upper: property.upperBoundValue,
+                                        lower: property.lowerBoundValue
                                     };
                                     break;
                             }
                             var propertyValue = {
-                                name: property.DisplayName,
+                                name: property.displayName,
                                 ifdguid: property.ifdguid,
                                 value: value,
                                 originalValue: originalValue
                             };
-                            if (jsonProduct.Score !== undefined && jsonProduct.Score.parameters_components !== undefined) {
-                                if (jsonProduct.Score.parameters_components[property.ifdguid] !== undefined) {
-                                    propertyValue.ckeck = jsonProduct.Score.parameters_components[property.ifdguid] === 1 ? true : false;
+                            if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
+                                if (jsonproduct.productScore.filterScores[property.ifdguid] !== undefined && jsonproduct.productScore.filterScores[property.ifdguid] !== -1) {
+                                    propertyValue.ckeck = jsonproduct.productScore.filterScores[property.ifdguid] === 1 ? true : false;
                                 }
                             }
                             product.addProperty(propertyValue);
@@ -20871,7 +20893,7 @@ var JsonParser = /** @class */ (function () {
     };
     JsonParser.parseSettings = function (settings) {
         var result = {
-            sorting: 'assc',
+            sorting: 'asc',
             captions: {
                 architectureOffice: 'Architekturbüro',
                 project: 'Projekt'
@@ -20882,39 +20904,47 @@ var JsonParser = /** @class */ (function () {
                 type: 'text',
                 data: ''
             },
+            productsImageApiPath: 'https://plan.one/api/v1/files/',
             unitsBeforeValue: [],
-            applyFilters: false
+            applyFilters: false,
+            showHighlights: false,
         };
-        if (settings.Sorting && (settings.Sorting === 'desc' || settings.Sorting === 'assc')) {
-            result.sorting = settings.Sorting;
+        if (settings.sorting && (settings.sorting === 'dsc' || settings.sorting === 'asc')) {
+            result.sorting = settings.sorting;
         }
-        if (settings.Captions) {
-            if (settings.Captions.ArchitectureOffice) {
-                result.captions.architectureOffice = settings.Captions.ArchitectureOffice;
+        if (settings.captions) {
+            if (settings.captions.architectureOffice) {
+                result.captions.architectureOffice = settings.captions.architectureOffice;
             }
-            if (settings.Captions.Project) {
-                result.captions.project = settings.Captions.Project;
-            }
-        }
-        if (settings.ShowProductsImage !== undefined) {
-            result.showProductsImage = settings.ShowProductsImage;
-        }
-        if (settings.Logo) {
-            if (settings.Logo.Type === 'text' || settings.Logo.Type === 'url') {
-                result.logo.type = settings.Logo.Type;
-            }
-            if (settings.Logo.Show !== undefined) {
-                result.logo.show = settings.Logo.Show;
-            }
-            if (settings.Logo.Data !== undefined) {
-                result.logo.data = settings.Logo.Data;
+            if (settings.captions.project) {
+                result.captions.project = settings.captions.project;
             }
         }
-        if (settings.UnitsBeforeValue) {
-            result.unitsBeforeValue = settings.UnitsBeforeValue;
+        if (settings.showProductsImage !== undefined) {
+            result.showProductsImage = settings.showProductsImage;
         }
-        if (settings.ApplyFilters) {
-            result.applyFilters = settings.ApplyFilters;
+        if (settings.productsImageApiPath !== undefined) {
+            result.productsImageApiPath = settings.productsImageApiPath;
+        }
+        if (settings.logo) {
+            if (settings.logo.type === 'text' || settings.logo.type === 'url') {
+                result.logo.type = settings.logo.type;
+            }
+            if (settings.logo.show !== undefined) {
+                result.logo.show = settings.logo.show;
+            }
+            if (settings.logo.data !== undefined) {
+                result.logo.data = settings.logo.data;
+            }
+        }
+        if (settings.unitsBeforeValue) {
+            result.unitsBeforeValue = settings.unitsBeforeValue;
+        }
+        if (settings.applyFilters) {
+            result.applyFilters = settings.applyFilters;
+        }
+        if (settings.showHighlights) {
+            result.showHighlights = settings.showHighlights;
         }
         return result;
     };
@@ -20973,7 +21003,7 @@ var Data = /** @class */ (function () {
         this._sortProperties(this._properties);
     };
     Data.prototype._sortProperties = function (groupTemplate) {
-        if (this._settings.sorting === 'assc') {
+        if (this._settings.sorting === 'asc') {
             groupTemplate = groupTemplate.sort();
         }
         else {
@@ -20984,6 +21014,7 @@ var Data = /** @class */ (function () {
         var updatedGroup = [];
         group.forEach(function (product) {
             var updatedProduct = new product_1.Product(product.name, product.supplier);
+            updatedProduct.addImageUrl(product.imageUrl);
             properties.forEach(function (propertyName, index) {
                 var prop = product.properties.find(function (property) { return property.name === propertyName; });
                 if (prop) {
