@@ -159,15 +159,15 @@ export class DocRenderer {
                 switch (index) {
                     case 0:
                         this._doc.addImage(boxShadowImg, pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, this._docConfig.columnWidth, this._docConfig.columnWidth);
-                        this._doc.addImage('assets/images/product2.png', pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        this._doc.addImage(product.imageUrl, pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
                         break;
                     case 1:
                         this._doc.addImage(boxShadowImg, pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, this._docConfig.columnWidth, this._docConfig.columnWidth);
-                        this._doc.addImage('assets/images/product1.png', pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        this._doc.addImage(product.imageUrl, pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
                         break;
                     case 2:
                         this._doc.addImage(boxShadowImg, pageWidth - (this._docConfig.columnWidth + this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, this._docConfig.columnWidth, this._docConfig.columnWidth);
-                        this._doc.addImage('assets/images/product3.png', pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        this._doc.addImage(product.imageUrl, pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
                         break;
                 }
             });

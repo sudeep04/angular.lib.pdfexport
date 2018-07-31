@@ -4,47 +4,52 @@ import { Product } from './product';
 export class JsonParser {
     static parseData(jsonData) {
         Check.notNullOrUndefined(jsonData, 'jsonData');
-        Check.notEmptyArray(jsonData.Products, 'jsonData.Products');
-        const settings = JsonParser.parseSettings(jsonData.Settings);
+        Check.notEmptyArray(jsonData.products, 'jsonData.products');
+        const settings = JsonParser.parseSettings(jsonData.settings);
         const data = new Data(settings, jsonData.property_filters);
-        jsonData.Products.forEach((jsonProduct) => {
-            Check.notNullOrUndefined(jsonProduct, 'Product');
-            Check.notNullOrUndefined(jsonProduct.ProductData, 'ProductData');
-            Check.notNullOrUndefined(jsonProduct.ProductData.Name, 'ProductData.Name');
-            Check.notNullOrUndefined(jsonProduct.ProductData.Supplier, 'ProductData.Supplier');
-            Check.notNullOrUndefined(jsonProduct.ProductData.Supplier.Name, 'Supplier.Name');
-            const product = new Product(jsonProduct.ProductData.Name, jsonProduct.ProductData.Supplier.Name);
-            if (jsonProduct.ProductData.PropertySets !== undefined) {
-                Check.isArray(jsonProduct.ProductData.PropertySets, 'ProductData.PropertySets');
-                jsonProduct.ProductData.PropertySets.forEach((propertySet) => {
-                    if (propertySet.Properties !== undefined) {
-                        Check.isArray(propertySet.Properties, 'Properties');
-                        propertySet.Properties.forEach((property) => {
-                            Check.notNullOrUndefined(property, 'Property');
-                            Check.notNullOrUndefined(property.DisplayName, 'Property.DisplayName');
+        jsonData.products.forEach((jsonproduct) => {
+            Check.notNullOrUndefined(jsonproduct, 'product');
+            Check.notNullOrUndefined(jsonproduct.productData, 'productData');
+            Check.notNullOrUndefined(jsonproduct.productData.name, 'productData.name');
+            Check.notNullOrUndefined(jsonproduct.productData.supplier, 'productData.supplier');
+            Check.notNullOrUndefined(jsonproduct.productData.supplier.name, 'supplier.name');
+            const product = new Product(jsonproduct.productData.name, jsonproduct.productData.supplier.name);
+            if (data.settings.showProductsImage) {
+                Check.notNullOrUndefined(jsonproduct.productData.primaryImage, 'productData.primaryImage');
+                var imgUrl = data.settings.productsImageApiPath + jsonproduct.productData.primaryImage.uuid + "/content/" + jsonproduct.productData.primaryImage.content + "?quality=80&background=white&mode=pad&width=160&height=160";
+                product.addImageUrl(imgUrl);
+            }
+            if (jsonproduct.productData.propertySets !== undefined) {
+                Check.isArray(jsonproduct.productData.propertySets, 'productData.propertySets');
+                jsonproduct.productData.propertySets.forEach((propertySet) => {
+                    if (propertySet.properties !== undefined) {
+                        Check.isArray(propertySet.properties, 'properties');
+                        propertySet.properties.forEach((property) => {
+                            Check.notNullOrUndefined(property, 'property');
+                            Check.notNullOrUndefined(property.displayName, 'property.displayName');
                             let originalValue;
                             let value = '';
                             let val1 = '';
                             let val2 = '';
-                            const direction = property.Unit !== undefined && settings.unitsBeforeValue.find((unit) => unit === property.Unit.Name) ?
+                            const direction = property.unit !== undefined && settings.unitsBeforeValue.find((unit) => unit === property.unit) ?
                                 'beforeValue'
                                 : 'afterValue';
-                            switch (property.Type) {
-                                case 'IfcPropertySingleValue':
-                                    val1 = property.NominalValue;
-                                    if (property.Unit) {
+                            switch (property.type) {
+                                case '0':
+                                    val1 = property.nominalValue;
+                                    if (property.unit) {
                                         if (direction === 'afterValue') {
-                                            val1 = val1 + ' ' + property.Unit.Name;
+                                            val1 = val1 + ' ' + property.unit;
                                         }
                                         else {
-                                            val1 = property.Unit.Name + ' ' + val1;
+                                            val1 = property.unit + ' ' + val1;
                                         }
                                     }
                                     value += val1;
-                                    originalValue = property.NominalValue;
+                                    originalValue = property.nominalValue;
                                     break;
-                                case 'IfcPropertyListValue':
-                                    const listValues = property.ListValues;
+                                case '1':
+                                    const listValues = property.listValues;
                                     listValues.forEach((v, index) => {
                                         val1 = v;
                                         if (index === 0) {
@@ -54,42 +59,42 @@ export class JsonParser {
                                             value += ', ' + val1;
                                         }
                                     });
-                                    if (property.Unit) {
+                                    if (property.unit) {
                                         if (direction === 'afterValue') {
-                                            value = value + ' ' + property.Unit.Name;
+                                            value = value + ' ' + property.unit;
                                         }
                                         else {
-                                            value = property.Unit.Name + ' ' + value;
+                                            value = property.unit + ' ' + value;
                                         }
                                     }
-                                    originalValue = property.ListValues;
+                                    originalValue = property.listValues;
                                     break;
-                                case 'IfcPropertyBoundedValue':
-                                    val1 = property.LowerBoundValue;
-                                    val2 = property.UpperBoundValue;
-                                    if (property.Unit) {
+                                case '2':
+                                    val1 = property.lowerBoundValue;
+                                    val2 = property.upperBoundValue;
+                                    if (property.unit) {
                                         if (direction === 'afterValue') {
-                                            value = val1 + ' - ' + val2 + ' ' + property.Unit.Name;
+                                            value = val1 + ' - ' + val2 + ' ' + property.unit;
                                         }
                                         else {
-                                            value = property.Unit.Name + ' ' + val1 + ' - ' + val2;
+                                            value = property.unit + ' ' + val1 + ' - ' + val2;
                                         }
                                     }
                                     originalValue = {
-                                        upper: property.UpperBoundValue,
-                                        lower: property.LowerBoundValue
+                                        upper: property.upperBoundValue,
+                                        lower: property.lowerBoundValue
                                     };
                                     break;
                             }
                             const propertyValue = {
-                                name: property.DisplayName,
+                                name: property.displayName,
                                 ifdguid: property.ifdguid,
                                 value,
                                 originalValue
                             };
-                            if (jsonProduct.Score !== undefined && jsonProduct.Score.parameters_components !== undefined) {
-                                if (jsonProduct.Score.parameters_components[property.ifdguid] !== undefined) {
-                                    propertyValue.ckeck = jsonProduct.Score.parameters_components[property.ifdguid] === 1 ? true : false;
+                            if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
+                                if (jsonproduct.productScore.filterScores[property.ifdguid] !== undefined && jsonproduct.productScore.filterScores[property.ifdguid] !== -1) {
+                                    propertyValue.ckeck = jsonproduct.productScore.filterScores[property.ifdguid] === 1 ? true : false;
                                 }
                             }
                             product.addProperty(propertyValue);
@@ -103,7 +108,7 @@ export class JsonParser {
     }
     static parseSettings(settings) {
         const result = {
-            sorting: 'assc',
+            sorting: 'asc',
             captions: {
                 architectureOffice: 'Architekturbüro',
                 project: 'Projekt'
@@ -114,39 +119,47 @@ export class JsonParser {
                 type: 'text',
                 data: ''
             },
+            productsImageApiPath: 'https://plan.one/api/v1/files/',
             unitsBeforeValue: [],
-            applyFilters: false
+            applyFilters: false,
+            showHighlights: false,
         };
-        if (settings.Sorting && (settings.Sorting === 'desc' || settings.Sorting === 'assc')) {
-            result.sorting = settings.Sorting;
+        if (settings.sorting && (settings.sorting === 'dsc' || settings.sorting === 'asc')) {
+            result.sorting = settings.sorting;
         }
-        if (settings.Captions) {
-            if (settings.Captions.ArchitectureOffice) {
-                result.captions.architectureOffice = settings.Captions.ArchitectureOffice;
+        if (settings.captions) {
+            if (settings.captions.architectureOffice) {
+                result.captions.architectureOffice = settings.captions.architectureOffice;
             }
-            if (settings.Captions.Project) {
-                result.captions.project = settings.Captions.Project;
-            }
-        }
-        if (settings.ShowProductsImage !== undefined) {
-            result.showProductsImage = settings.ShowProductsImage;
-        }
-        if (settings.Logo) {
-            if (settings.Logo.Type === 'text' || settings.Logo.Type === 'url') {
-                result.logo.type = settings.Logo.Type;
-            }
-            if (settings.Logo.Show !== undefined) {
-                result.logo.show = settings.Logo.Show;
-            }
-            if (settings.Logo.Data !== undefined) {
-                result.logo.data = settings.Logo.Data;
+            if (settings.captions.project) {
+                result.captions.project = settings.captions.project;
             }
         }
-        if (settings.UnitsBeforeValue) {
-            result.unitsBeforeValue = settings.UnitsBeforeValue;
+        if (settings.showProductsImage !== undefined) {
+            result.showProductsImage = settings.showProductsImage;
         }
-        if (settings.ApplyFilters) {
-            result.applyFilters = settings.ApplyFilters;
+        if (settings.productsImageApiPath !== undefined) {
+            result.productsImageApiPath = settings.productsImageApiPath;
+        }
+        if (settings.logo) {
+            if (settings.logo.type === 'text' || settings.logo.type === 'url') {
+                result.logo.type = settings.logo.type;
+            }
+            if (settings.logo.show !== undefined) {
+                result.logo.show = settings.logo.show;
+            }
+            if (settings.logo.data !== undefined) {
+                result.logo.data = settings.logo.data;
+            }
+        }
+        if (settings.unitsBeforeValue) {
+            result.unitsBeforeValue = settings.unitsBeforeValue;
+        }
+        if (settings.applyFilters) {
+            result.applyFilters = settings.applyFilters;
+        }
+        if (settings.showHighlights) {
+            result.showHighlights = settings.showHighlights;
         }
         return result;
     }
