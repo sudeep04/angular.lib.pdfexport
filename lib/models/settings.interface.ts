@@ -26,4 +26,6 @@ export interface Settings {
     showHighlights: boolean;
 
     placeholderUrl?: string;
+
+    fileName: string;
 }

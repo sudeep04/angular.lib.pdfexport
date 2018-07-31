@@ -8,7 +8,7 @@ export declare class DocRenderer {
     private _docConfig;
     constructor();
     drow(jsonData: any, docConfig: DocConfig): void;
-    save(fileName: string): void;
+    save(): void;
     private _drowBody(group);
     private _drowHeader(group, showProductsImage);
     private _drowLayout(index);
