@@ -24,4 +24,6 @@ export interface Settings {
     applyFilters: boolean;
 
     showHighlights: boolean;
+
+    placeholderUrl?: string;
 }
