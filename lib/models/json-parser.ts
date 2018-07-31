@@ -26,9 +26,14 @@ export abstract class JsonParser {
 
             if(data.settings.showProductsImage)
             {
-                Check.notNullOrUndefined(jsonproduct.productData.primaryImage, 'productData.primaryImage');
-                var imgUrl = data.settings.productsImageApiPath + jsonproduct.productData.primaryImage.uuid + "/content/" + jsonproduct.productData.primaryImage.content  +"?quality=80&background=white&mode=pad&width=160&height=160";
-                product.addImageUrl(imgUrl);
+                if(jsonproduct.productData.primaryImage) {
+                    var imgUrl = data.settings.productsImageApiPath + jsonproduct.productData.primaryImage.uuid + "/content/" + jsonproduct.productData.primaryImage.content  +"?quality=80&background=white&mode=pad&width=160&height=160";
+                    product.addImageUrl(imgUrl);
+                }else{
+
+                    Check.notNullOrUndefined(settings.placeholderUrl, 'settings.placeholderUrl');
+                    product.addImageUrl(settings.placeholderUrl);
+                }
             }
 
             if (jsonproduct.productData.propertySets !== undefined) {
@@ -213,6 +218,11 @@ export abstract class JsonParser {
         if (settings.showHighlights) {
 
             result.showHighlights = settings.showHighlights;
+        }
+
+        if (settings.placeholderUrl) {
+
+            result.placeholderUrl = settings.placeholderUrl;
         }
 
         return result;
