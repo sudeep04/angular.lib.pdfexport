@@ -10,7 +10,7 @@ export class PdfExportService {
         this._docRenderer = new DocRenderer();
         const docConfig = { columnWidth: COLUMN_WIDTH, lineWidth: LINE_WIDTH, marginTop: TABLE_MARGIN_TOP, padding: DOCUMENT_PADDING };
         this._docRenderer.drow(jsonData, docConfig);
-        this._docRenderer.save('Test.pdf');
+        this._docRenderer.save();
     }
 }
 PdfExportService.decorators = [

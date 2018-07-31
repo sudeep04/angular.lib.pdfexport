@@ -58,9 +58,9 @@ export class DocRenderer {
         }
     }
 
-    public save(fileName: string) {
+    public save() {
 
-        this._doc.save(fileName);
+        this._doc.save(this._data.settings.fileName);
     }
 
     private _drowBody(group: Product[]) {

@@ -14,4 +14,6 @@ export interface Settings {
     unitsBeforeValue: string[];
     applyFilters: boolean;
     showHighlights: boolean;
+    placeholderUrl?: string;
+    fileName: string;
 }

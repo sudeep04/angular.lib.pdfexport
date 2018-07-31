@@ -21,6 +21,6 @@ export class PdfExportService {
 
         this._docRenderer.drow(jsonData, docConfig);
 
-        this._docRenderer.save('Test.pdf');
+        this._docRenderer.save();
     }
 }
