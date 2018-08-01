@@ -97,7 +97,10 @@ export class AppComponent implements OnInit {
             };
         };
         productScore: {
-            filterScores: { [id: string] : number; };
+            filterScores: [
+          [ [id: string], number ]
+        ],
+	    
         };   
     }];
     property_filters: [{

@@ -20885,8 +20885,8 @@ var JsonParser = /** @class */ (function () {
                                 originalValue: originalValue
                             };
                             if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
-                                if (jsonproduct.productScore.filterScores[property.ifdguid] !== undefined && jsonproduct.productScore.filterScores[property.ifdguid] !== -1) {
-                                    propertyValue.ckeck = jsonproduct.productScore.filterScores[property.ifdguid] === 1 ? true : false;
+                                if (jsonproduct.productScore.filterScores.has(property.ifdguid) && jsonproduct.productScore.filterScores.get(property.ifdguid) !== -1) {
+                                    propertyValue.ckeck = jsonproduct.productScore.filterScores.get(property.ifdguid) === 1 ? true : false;
                                 }
                             }
                             product.addProperty(propertyValue);
