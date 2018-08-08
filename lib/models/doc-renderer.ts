@@ -189,8 +189,42 @@ export class DocRenderer {
             config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 4.5] };
             if (rows.length === 0) {
                 product.properties.forEach((property: Property) => {
-                    const row = { col1: property.name };
+                    let row = {};
+                    if(this._data.settings.applyFilters){
+                        const direction: 'afterValue' | 'beforeValue'
+                                = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
+                                    'beforeValue'
+                                    : 'afterValue';
+                        const filter = this._data.filters.find((filter: any) => filter.id === property.ifdguid);
+                        let filterText = ''
 
+                        if(filter.value && filter.value.length!=undefined){
+                            const listValues: string[] = filter.value;
+                            listValues.forEach((v: string, index: number) => {
+                                const val1 = v;
+
+                                if (index === 0) {
+                                    filterText += val1;
+                                } else {
+                                    filterText += ', ' + val1;
+                                }
+                            });
+                        }else if
+                        (filter.value && filter.value.upper!=undefined&& filter.value.lower!=undefined){
+                            filterText = filter.value.lower + ' - ' + filter.value.upper;
+                        } else {
+                            filterText = filter.value;
+                        }
+
+                        if (direction === 'afterValue') {
+                            filterText = filterText + ' ' + property.unit;
+                        } else {
+                            filterText = property.unit + ' ' + filterText;
+                        }
+                        row = { col1: property.name + ` (${filterText})` };
+                    }else{
+                        row = { col1: property.name };
+                    }
                     rows.push(row);
                 });
             }

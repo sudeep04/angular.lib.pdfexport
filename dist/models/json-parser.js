@@ -77,6 +77,7 @@ export class JsonParser {
                                 case 2:
                                     val1 = property.lowerBoundValue;
                                     val2 = property.upperBoundValue;
+                                    value = val1 + ' - ' + val2;
                                     if (property.unit) {
                                         if (direction === 'afterValue') {
                                             value = val1 + ' - ' + val2 + ' ' + property.unit;
@@ -95,7 +96,9 @@ export class JsonParser {
                                 name: property.displayName,
                                 ifdguid: property.ifdguid,
                                 value,
-                                originalValue
+                                originalValue,
+                                unit: property.unit,
+                                type: property.type
                             };
                             if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
                                 if (jsonproduct.productScore.filterScores.has(property.ifdguid) && jsonproduct.productScore.filterScores.get(property.ifdguid) !== -1) {
