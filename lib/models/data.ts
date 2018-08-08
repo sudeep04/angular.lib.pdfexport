@@ -46,7 +46,7 @@ export class Data {
 
         product.properties.forEach((property: Property) => {
             if (!this._properties.find((propertyName: string) => propertyName === property.name)) {
-                if (!this._settings.applyFilters || (this._filters && this._filters.find((filter: any) => filter.id === property.ifdguid && JSON.stringify({value:filter.value}) === JSON.stringify({value:property.originalValue}) ))) {
+                if (!this._settings.applyFilters || (this._filters && this._filters.find((filter: any) => filter.id === property.ifdguid && this._match(filter.value, property.originalValue)))) {
 
                     this._properties.push(property.name);
                 }
@@ -54,6 +54,19 @@ export class Data {
         });
 
         this._sortProperties(this._properties);
+    }
+
+    private _match(filter:any, value: any): boolean {
+
+        if(filter.lower && filter.upper){
+            if(value.lower && value.upper){
+                return value.lower>=filter.lower && value.lower<=filter.upper && value.upper>=filter.lower && value.upper<=filter.upper;
+            }else{
+                return value>=filter.lower && value<=filter.upper;
+            }
+        }else{
+            return JSON.stringify({value}) === JSON.stringify({value:filter});
+        }
     }
 
     private _sortProperties(groupTemplate: string[]) {

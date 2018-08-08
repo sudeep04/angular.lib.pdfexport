@@ -99,6 +99,7 @@ export abstract class JsonParser {
                                 case 2:
                                     val1 = property.lowerBoundValue;
                                     val2 = property.upperBoundValue;
+                                    value = val1 + ' - ' + val2;
 
                                     if (property.unit) {
 
