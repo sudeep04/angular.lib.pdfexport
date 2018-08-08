@@ -15,6 +15,10 @@ export interface Settings {
         architectureOffice: string;
 
         project: string;
+        
+        bearbeiter: string;
+
+        id: string;
     };
 
     sorting: 'asc' | 'dsc';
