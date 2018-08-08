@@ -67,10 +67,14 @@ export class AppComponent implements OnInit {
         captions: {
             architectureOffice: string;
             project: string;
+            bearbeiter : string;
+            id: string;
         };
         showProductsImage: boolean;
 	productsImageApiPath: string;
 	showHighlights: boolean;
+	placeholderUrl: string;
+	fileName: string;
         unitsBeforeValue: string [];
     },
     products: [{
@@ -93,7 +97,10 @@ export class AppComponent implements OnInit {
             };
         };
         productScore: {
-            filterScores: { [id: string] : number; };
+            filterScores: [
+          [ [id: string], number ]
+        ],
+	    
         };   
     }];
     property_filters: [{

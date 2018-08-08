@@ -10,6 +10,7 @@ import { logoImg } from './imagesBase64/logo-img';
 import { JsonParser } from './json-parser';
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
+const HEADER_TOP = 48;
 export class DocRenderer {
     constructor() {
         this._doc = new jsPDF();
@@ -140,7 +141,42 @@ export class DocRenderer {
             config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 4.5] };
             if (rows.length === 0) {
                 product.properties.forEach((property) => {
-                    const row = { col1: property.name };
+                    let row = {};
+                    if (this._data.settings.applyFilters) {
+                        const direction = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit) => unit === property.unit) ?
+                            'beforeValue'
+                            : 'afterValue';
+                        const filter = this._data.filters.find((filter) => filter.id === property.ifdguid);
+                        let filterText = '';
+                        if (filter.value && filter.value.length != undefined) {
+                            const listValues = filter.value;
+                            listValues.forEach((v, index) => {
+                                const val1 = v;
+                                if (index === 0) {
+                                    filterText += val1;
+                                }
+                                else {
+                                    filterText += ', ' + val1;
+                                }
+                            });
+                        }
+                        else if (filter.value && filter.value.upper != undefined && filter.value.lower != undefined) {
+                            filterText = filter.value.lower + ' - ' + filter.value.upper;
+                        }
+                        else {
+                            filterText = filter.value;
+                        }
+                        if (direction === 'afterValue') {
+                            filterText = filterText + ' ' + property.unit;
+                        }
+                        else {
+                            filterText = property.unit + ' ' + filterText;
+                        }
+                        row = { col1: property.name + ` (${filterText})` };
+                    }
+                    else {
+                        row = { col1: property.name };
+                    }
                     rows.push(row);
                 });
             }
@@ -193,7 +229,7 @@ export class DocRenderer {
         const config = {
             styles,
             margin: {
-                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP,
+                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : HEADER_TOP,
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
@@ -249,7 +285,8 @@ export class DocRenderer {
         ];
         const rows = [
             { col1: this._data.settings.captions.architectureOffice, col2: 'Datum: ' + moment(Date.now()).format('DD.MM.YY') },
-            { col1: this._data.settings.captions.project, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
+            { col1: this._data.settings.captions.project, col2: 'ID: ' + this._data.settings.captions.id },
+            { col1: this._data.settings.captions.bearbeiter, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
         ];
         const styles = {
             fillColor: [246, 246, 246],

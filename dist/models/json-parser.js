@@ -77,6 +77,7 @@ export class JsonParser {
                                 case 2:
                                     val1 = property.lowerBoundValue;
                                     val2 = property.upperBoundValue;
+                                    value = val1 + ' - ' + val2;
                                     if (property.unit) {
                                         if (direction === 'afterValue') {
                                             value = val1 + ' - ' + val2 + ' ' + property.unit;
@@ -95,11 +96,13 @@ export class JsonParser {
                                 name: property.displayName,
                                 ifdguid: property.ifdguid,
                                 value,
-                                originalValue
+                                originalValue,
+                                unit: property.unit,
+                                type: property.type
                             };
                             if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
-                                if (jsonproduct.productScore.filterScores[property.ifdguid] !== undefined && jsonproduct.productScore.filterScores[property.ifdguid] !== -1) {
-                                    propertyValue.ckeck = jsonproduct.productScore.filterScores[property.ifdguid] === 1 ? true : false;
+                                if (jsonproduct.productScore.filterScores.has(property.ifdguid) && jsonproduct.productScore.filterScores.get(property.ifdguid) !== -1) {
+                                    propertyValue.ckeck = jsonproduct.productScore.filterScores.get(property.ifdguid) === 1 ? true : false;
                                 }
                             }
                             product.addProperty(propertyValue);
@@ -116,7 +119,9 @@ export class JsonParser {
             sorting: 'asc',
             captions: {
                 architectureOffice: 'Architekturbüro',
-                project: 'Projekt'
+                project: 'Projekt',
+                bearbeiter: 'Bearbeiter',
+                id: 'Version'
             },
             showProductsImage: true,
             logo: {
@@ -139,6 +144,12 @@ export class JsonParser {
             }
             if (settings.captions.project) {
                 result.captions.project = settings.captions.project;
+            }
+            if (settings.captions.bearbeiter) {
+                result.captions.bearbeiter = settings.captions.bearbeiter;
+            }
+            if (settings.captions.id) {
+                result.captions.id = settings.captions.id;
             }
         }
         if (settings.showProductsImage !== undefined) {

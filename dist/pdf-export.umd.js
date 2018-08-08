@@ -17116,6 +17116,7 @@ var logo_img_1 = __webpack_require__(143);
 var json_parser_1 = __webpack_require__(144);
 var IMAGES_TOP = 35;
 var IMAGES_PADING_TOP = 6.2;
+var HEADER_TOP = 48;
 var DocRenderer = /** @class */ (function () {
     function DocRenderer() {
         this._doc = new jsPDF();
@@ -17248,7 +17249,42 @@ var DocRenderer = /** @class */ (function () {
             config.columnStyles[product.name] = { columnWidth: _this._docConfig.columnWidth, cellPadding: [2.8, _this._docConfig.lineWidth + 0.5, 2.8, _this._docConfig.lineWidth + 4.5] };
             if (rows.length === 0) {
                 product.properties.forEach(function (property) {
-                    var row = { col1: property.name };
+                    var row = {};
+                    if (_this._data.settings.applyFilters) {
+                        var direction = property.unit !== undefined && _this._data.settings.unitsBeforeValue.find(function (unit) { return unit === property.unit; }) ?
+                            'beforeValue'
+                            : 'afterValue';
+                        var filter = _this._data.filters.find(function (filter) { return filter.id === property.ifdguid; });
+                        var filterText_1 = '';
+                        if (filter.value && filter.value.length != undefined) {
+                            var listValues = filter.value;
+                            listValues.forEach(function (v, index) {
+                                var val1 = v;
+                                if (index === 0) {
+                                    filterText_1 += val1;
+                                }
+                                else {
+                                    filterText_1 += ', ' + val1;
+                                }
+                            });
+                        }
+                        else if (filter.value && filter.value.upper != undefined && filter.value.lower != undefined) {
+                            filterText_1 = filter.value.lower + ' - ' + filter.value.upper;
+                        }
+                        else {
+                            filterText_1 = filter.value;
+                        }
+                        if (direction === 'afterValue') {
+                            filterText_1 = filterText_1 + ' ' + property.unit;
+                        }
+                        else {
+                            filterText_1 = property.unit + ' ' + filterText_1;
+                        }
+                        row = { col1: property.name + (" (" + filterText_1 + ")") };
+                    }
+                    else {
+                        row = { col1: property.name };
+                    }
                     rows.push(row);
                 });
             }
@@ -17302,7 +17338,7 @@ var DocRenderer = /** @class */ (function () {
         var config = {
             styles: styles,
             margin: {
-                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP,
+                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : HEADER_TOP,
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
@@ -17359,7 +17395,8 @@ var DocRenderer = /** @class */ (function () {
         ];
         var rows = [
             { col1: this._data.settings.captions.architectureOffice, col2: 'Datum: ' + moment(Date.now()).format('DD.MM.YY') },
-            { col1: this._data.settings.captions.project, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
+            { col1: this._data.settings.captions.project, col2: 'ID: ' + this._data.settings.captions.id },
+            { col1: this._data.settings.captions.bearbeiter, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
         ];
         var styles = {
             fillColor: [246, 246, 246],
@@ -20856,6 +20893,7 @@ var JsonParser = /** @class */ (function () {
                                 case 2:
                                     val1 = property.lowerBoundValue;
                                     val2 = property.upperBoundValue;
+                                    value = val1 + ' - ' + val2;
                                     if (property.unit) {
                                         if (direction === 'afterValue') {
                                             value = val1 + ' - ' + val2 + ' ' + property.unit;
@@ -20874,11 +20912,13 @@ var JsonParser = /** @class */ (function () {
                                 name: property.displayName,
                                 ifdguid: property.ifdguid,
                                 value: value,
-                                originalValue: originalValue
+                                originalValue: originalValue,
+                                unit: property.unit,
+                                type: property.type
                             };
                             if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
-                                if (jsonproduct.productScore.filterScores[property.ifdguid] !== undefined && jsonproduct.productScore.filterScores[property.ifdguid] !== -1) {
-                                    propertyValue.ckeck = jsonproduct.productScore.filterScores[property.ifdguid] === 1 ? true : false;
+                                if (jsonproduct.productScore.filterScores.has(property.ifdguid) && jsonproduct.productScore.filterScores.get(property.ifdguid) !== -1) {
+                                    propertyValue.ckeck = jsonproduct.productScore.filterScores.get(property.ifdguid) === 1 ? true : false;
                                 }
                             }
                             product.addProperty(propertyValue);
@@ -20895,7 +20935,9 @@ var JsonParser = /** @class */ (function () {
             sorting: 'asc',
             captions: {
                 architectureOffice: 'Architekturbüro',
-                project: 'Projekt'
+                project: 'Projekt',
+                bearbeiter: 'Bearbeiter',
+                id: 'Version'
             },
             showProductsImage: true,
             logo: {
@@ -20918,6 +20960,12 @@ var JsonParser = /** @class */ (function () {
             }
             if (settings.captions.project) {
                 result.captions.project = settings.captions.project;
+            }
+            if (settings.captions.bearbeiter) {
+                result.captions.bearbeiter = settings.captions.bearbeiter;
+            }
+            if (settings.captions.id) {
+                result.captions.id = settings.captions.id;
             }
         }
         if (settings.showProductsImage !== undefined) {
@@ -20989,6 +21037,13 @@ var Data = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Data.prototype, "filters", {
+        get: function () {
+            return this._filters;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Data.prototype.addProduct = function (product) {
         if (this._groups[this._groups.length - 1].length > 2) {
             this._groups.push([]);
@@ -21000,20 +21055,33 @@ var Data = /** @class */ (function () {
     Data.prototype._updateProperties = function (product) {
         var _this = this;
         product.properties.forEach(function (property) {
-            if (!_this._properties.find(function (propertyName) { return propertyName === property.name; })) {
-                if (!_this._settings.applyFilters || (_this._filters && _this._filters.find(function (filter) { return filter.id === property.ifdguid && JSON.stringify({ value: filter.value }) === JSON.stringify({ value: property.originalValue }); }))) {
-                    _this._properties.push(property.name);
+            if (!_this._properties.find(function (prop) { return prop.name === property.name; })) {
+                if (!_this._settings.applyFilters || (_this._filters && _this._filters.find(function (filter) { return filter.id === property.ifdguid && _this._match(filter.value, property.originalValue); }))) {
+                    _this._properties.push(property);
                 }
             }
         });
         this._sortProperties(this._properties);
+    };
+    Data.prototype._match = function (filter, value) {
+        if (filter.lower != undefined && filter.upper != undefined) {
+            if (value.lower != undefined && value.upper != undefined) {
+                return value.lower >= filter.lower && value.lower <= filter.upper && value.upper >= filter.lower && value.upper <= filter.upper;
+            }
+            else {
+                return value >= filter.lower && value <= filter.upper;
+            }
+        }
+        else {
+            return JSON.stringify({ value: value }) === JSON.stringify({ value: filter });
+        }
     };
     Data.prototype._sortProperties = function (groupTemplate) {
         if (this._settings.sorting === 'asc') {
             groupTemplate = groupTemplate.sort();
         }
         else {
-            groupTemplate = groupTemplate.sort(function (a, b) { return a < b ? 1 : -1; });
+            groupTemplate = groupTemplate.sort(function (a, b) { return a.name < b.name ? 1 : -1; });
         }
     };
     Data.prototype._getProductsStructure = function (group, properties) {
@@ -21021,13 +21089,13 @@ var Data = /** @class */ (function () {
         group.forEach(function (product) {
             var updatedProduct = new product_1.Product(product.name, product.supplier);
             updatedProduct.addImageUrl(product.imageUrl);
-            properties.forEach(function (propertyName, index) {
-                var prop = product.properties.find(function (property) { return property.name === propertyName; });
+            properties.forEach(function (p, index) {
+                var prop = product.properties.find(function (property) { return property.name === p.name; });
                 if (prop) {
                     updatedProduct.properties.push(prop);
                 }
                 else {
-                    updatedProduct.properties.push({ name: propertyName });
+                    updatedProduct.properties.push({ name: p.name, ckeck: p.ckeck, ifdguid: p.ifdguid, originalValue: p.originalValue, unit: p.unit, value: p.value, type: p.type });
                 }
             });
             updatedGroup.push(updatedProduct);
