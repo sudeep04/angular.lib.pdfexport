@@ -120,7 +120,9 @@ export abstract class JsonParser {
                                 name: property.displayName,
                                 ifdguid: property.ifdguid,
                                 value,
-                                originalValue
+                                originalValue,
+                                unit: property.unit,
+                                type: property.type
                             };
 
                             if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
