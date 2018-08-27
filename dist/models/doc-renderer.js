@@ -8,7 +8,7 @@ import '../assets/js/default_vfs';
 import 'jspdf-autotable';
 import { logoImg } from './imagesBase64/logo-img';
 import { JsonParser } from './json-parser';
-const IMAGES_TOP = 35;
+const IMAGES_TOP = 48;
 const IMAGES_PADING_TOP = 6.2;
 const HEADER_TOP = 48;
 export class DocRenderer {
@@ -195,15 +195,30 @@ export class DocRenderer {
                 switch (index) {
                     case 0:
                         this._doc.addImage(boxShadowImg, pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, this._docConfig.columnWidth, this._docConfig.columnWidth);
-                        this._doc.addImage(product.imageUrl, pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        try {
+                            this._doc.addImage(product.imageUrl, pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        }
+                        catch (e) {
+                            this._doc.addImage(this._data.settings.placeholderUrl, pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        }
                         break;
                     case 1:
                         this._doc.addImage(boxShadowImg, pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, this._docConfig.columnWidth, this._docConfig.columnWidth);
-                        this._doc.addImage(product.imageUrl, pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        try {
+                            this._doc.addImage(product.imageUrl, pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        }
+                        catch (e) {
+                            this._doc.addImage(this._data.settings.placeholderUrl, pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        }
                         break;
                     case 2:
                         this._doc.addImage(boxShadowImg, pageWidth - (this._docConfig.columnWidth + this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, this._docConfig.columnWidth, this._docConfig.columnWidth);
-                        this._doc.addImage(product.imageUrl, pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        try {
+                            this._doc.addImage(product.imageUrl, pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        }
+                        catch (e) {
+                            this._doc.addImage(this._data.settings.placeholderUrl, pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, this._docConfig.columnWidth - 6.4, this._docConfig.columnWidth - 6.4);
+                        }
                         break;
                 }
             });
