@@ -126,9 +126,10 @@ export abstract class JsonParser {
                             };
 
                             if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
+                                var filterMap = new Map(jsonproduct.productScore.filterScores);
 
-                                if (jsonproduct.productScore.filterScores.has(property.ifdguid) && jsonproduct.productScore.filterScores.get(property.ifdguid) !== -1) {
-                                      propertyValue.ckeck = jsonproduct.productScore.filterScores.get(property.ifdguid) === 1 ? true : false;
+                                if (filterMap.has(property.ifdguid) && filterMap.get(property.ifdguid) !== -1) {
+                                      propertyValue.ckeck = filterMap.get(property.ifdguid) === 1 ? true : false;
                                 }
                             }                             
 
