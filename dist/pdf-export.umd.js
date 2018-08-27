@@ -17114,7 +17114,7 @@ __webpack_require__(141);
 __webpack_require__(142);
 var logo_img_1 = __webpack_require__(143);
 var json_parser_1 = __webpack_require__(144);
-var IMAGES_TOP = 35;
+var IMAGES_TOP = 48;
 var IMAGES_PADING_TOP = 6.2;
 var HEADER_TOP = 48;
 var DocRenderer = /** @class */ (function () {
@@ -17304,15 +17304,30 @@ var DocRenderer = /** @class */ (function () {
                 switch (index) {
                     case 0:
                         _this._doc.addImage(box_shadow_img_1.boxShadowImg, pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
-                        _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        try {
+                            _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        }
+                        catch (e) {
+                            _this._doc.addImage(_this._data.settings.placeholderUrl, pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        }
                         break;
                     case 1:
                         _this._doc.addImage(box_shadow_img_1.boxShadowImg, pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
-                        _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        try {
+                            _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        }
+                        catch (e) {
+                            _this._doc.addImage(_this._data.settings.placeholderUrl, pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        }
                         break;
                     case 2:
                         _this._doc.addImage(box_shadow_img_1.boxShadowImg, pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
-                        _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        try {
+                            _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        }
+                        catch (e) {
+                            _this._doc.addImage(_this._data.settings.placeholderUrl, pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                        }
                         break;
                 }
             });
