@@ -12,13 +12,18 @@ export interface Settings {
 
     captions: {
 
-        architectureOffice: string;
-
         project: string;
         
         bearbeiter: string;
 
-        id: string;
+    };
+
+    translations: {
+        layout: {
+            page: string;
+
+            date: string;
+        }
     };
 
     sorting: 'asc' | 'dsc';

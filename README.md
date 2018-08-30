@@ -65,10 +65,14 @@ export class AppComponent implements OnInit {
         applyFilters: boolean;
         sorting: 'asc' | 'dsc';
         captions: {
-            architectureOffice: string;
             project: string;
             bearbeiter : string;
-            id: string;
+        };
+        translations: {
+            layout:{
+                page: string;
+                date: string;
+            }
         };
         showProductsImage: boolean;
 	productsImageApiPath: string;

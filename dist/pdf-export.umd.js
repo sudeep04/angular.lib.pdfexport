@@ -4944,9 +4944,12 @@ and limitations under the License.
 ***************************************************************************** */
 /* global Reflect, Promise */
 
-var extendStatics = Object.setPrototypeOf ||
-    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
 
 function __extends(d, b) {
     extendStatics(d, b);
@@ -4954,12 +4957,15 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-var __assign = Object.assign || function __assign(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
     }
-    return t;
+    return __assign.apply(this, arguments);
 }
 
 function __rest(s, e) {
@@ -5003,8 +5009,8 @@ function __generator(thisArg, body) {
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
         while (_) try {
-            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [0, t.value];
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
                 case 0: case 1: t = op; break;
                 case 4: _.label++; return { value: op[1], done: false };
@@ -17114,9 +17120,10 @@ __webpack_require__(141);
 __webpack_require__(142);
 var logo_img_1 = __webpack_require__(143);
 var json_parser_1 = __webpack_require__(144);
-var IMAGES_TOP = 48;
+var util_1 = __webpack_require__(148);
+var IMAGES_TOP = 35;
 var IMAGES_PADING_TOP = 6.2;
-var HEADER_TOP = 48;
+//const HEADER_TOP = 48;
 var DocRenderer = /** @class */ (function () {
     function DocRenderer() {
         this._doc = new jsPDF();
@@ -17246,7 +17253,11 @@ var DocRenderer = /** @class */ (function () {
         };
         group.forEach(function (product) {
             columns.push({ dataKey: product.name, title: product.name });
-            config.columnStyles[product.name] = { columnWidth: _this._docConfig.columnWidth, cellPadding: [2.8, _this._docConfig.lineWidth + 0.5, 2.8, _this._docConfig.lineWidth + 4.5] };
+            var lineW = _this._docConfig.lineWidth + 0.5;
+            if (_this._data.settings.showHighlights) {
+                lineW = lineW + 4;
+            }
+            config.columnStyles[product.name] = { columnWidth: _this._docConfig.columnWidth, cellPadding: [2.8, _this._docConfig.lineWidth + 0.5, 2.8, lineW] };
             if (rows.length === 0) {
                 product.properties.forEach(function (property) {
                     var row = {};
@@ -17254,25 +17265,29 @@ var DocRenderer = /** @class */ (function () {
                         var direction = property.unit !== undefined && _this._data.settings.unitsBeforeValue.find(function (unit) { return unit === property.unit; }) ?
                             'beforeValue'
                             : 'afterValue';
-                        var filter = _this._data.filters.find(function (filter) { return filter.id === property.ifdguid; });
+                        var filterMap = new Map(_this._data.filters);
+                        var filterValue = filterMap.get(property.ifdguid);
                         var filterText_1 = '';
-                        if (filter.value && filter.value.length != undefined) {
-                            var listValues = filter.value;
-                            listValues.forEach(function (v, index) {
-                                var val1 = v;
-                                if (index === 0) {
-                                    filterText_1 += val1;
-                                }
-                                else {
-                                    filterText_1 += ', ' + val1;
-                                }
-                            });
-                        }
-                        else if (filter.value && filter.value.upper != undefined && filter.value.lower != undefined) {
-                            filterText_1 = filter.value.lower + ' - ' + filter.value.upper;
-                        }
-                        else {
-                            filterText_1 = filter.value;
+                        if (filterValue) {
+                            if (util_1.isArray(filterValue)) {
+                                //List Values
+                                var listValues = filterValue;
+                                listValues.forEach(function (v, index) {
+                                    var val1 = v;
+                                    if (index === 0) {
+                                        filterText_1 += val1;
+                                    }
+                                    else {
+                                        filterText_1 += ', ' + val1;
+                                    }
+                                });
+                            }
+                            else if (filterValue.upper != undefined && filterValue.lower != undefined) {
+                                filterText_1 = filterValue.lower + ' - ' + filterValue.upper;
+                            }
+                            else {
+                                filterText_1 = filterValue.toString();
+                            }
                         }
                         if (direction === 'afterValue') {
                             filterText_1 = filterText_1 + ' ' + property.unit;
@@ -17353,7 +17368,7 @@ var DocRenderer = /** @class */ (function () {
         var config = {
             styles: styles,
             margin: {
-                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : HEADER_TOP,
+                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP,
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
@@ -17409,9 +17424,8 @@ var DocRenderer = /** @class */ (function () {
             { dataKey: 'col2' }
         ];
         var rows = [
-            { col1: this._data.settings.captions.architectureOffice, col2: 'Datum: ' + moment(Date.now()).format('DD.MM.YY') },
-            { col1: this._data.settings.captions.project, col2: 'ID: ' + this._data.settings.captions.id },
-            { col1: this._data.settings.captions.bearbeiter, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
+            { col1: this._data.settings.captions.project, col2: this._data.settings.translations.layout.date + ": " + moment(Date.now()).format('DD.MM.YY') },
+            { col1: this._data.settings.captions.bearbeiter, col2: this._data.settings.translations.layout.page + ": " + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
         ];
         var styles = {
             fillColor: [246, 246, 246],
@@ -20932,8 +20946,9 @@ var JsonParser = /** @class */ (function () {
                                 type: property.type
                             };
                             if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
-                                if (jsonproduct.productScore.filterScores.has(property.ifdguid) && jsonproduct.productScore.filterScores.get(property.ifdguid) !== -1) {
-                                    propertyValue.ckeck = jsonproduct.productScore.filterScores.get(property.ifdguid) === 1 ? true : false;
+                                var filterMap = new Map(jsonproduct.productScore.filterScores);
+                                if (filterMap.has(property.ifdguid) && filterMap.get(property.ifdguid) !== -1) {
+                                    propertyValue.ckeck = filterMap.get(property.ifdguid) === 1 ? true : false;
                                 }
                             }
                             product.addProperty(propertyValue);
@@ -20949,10 +20964,14 @@ var JsonParser = /** @class */ (function () {
         var result = {
             sorting: 'asc',
             captions: {
-                architectureOffice: 'Architekturbüro',
                 project: 'Projekt',
-                bearbeiter: 'Bearbeiter',
-                id: 'Version'
+                bearbeiter: 'Bearbeiter'
+            },
+            translations: {
+                layout: {
+                    page: "Seite",
+                    date: "Datum"
+                }
             },
             showProductsImage: true,
             logo: {
@@ -20970,17 +20989,19 @@ var JsonParser = /** @class */ (function () {
             result.sorting = settings.sorting;
         }
         if (settings.captions) {
-            if (settings.captions.architectureOffice) {
-                result.captions.architectureOffice = settings.captions.architectureOffice;
-            }
             if (settings.captions.project) {
                 result.captions.project = settings.captions.project;
             }
             if (settings.captions.bearbeiter) {
                 result.captions.bearbeiter = settings.captions.bearbeiter;
             }
-            if (settings.captions.id) {
-                result.captions.id = settings.captions.id;
+        }
+        if (settings.translations.layout) {
+            if (settings.translations.layout.page) {
+                result.translations.layout.page = settings.translations.layout.page;
+            }
+            if (settings.translations.layout.date) {
+                result.translations.layout.date = settings.translations.layout.date;
             }
         }
         if (settings.showProductsImage !== undefined) {
@@ -21069,9 +21090,10 @@ var Data = /** @class */ (function () {
     };
     Data.prototype._updateProperties = function (product) {
         var _this = this;
+        var filtersMap = new Map(this._filters);
         product.properties.forEach(function (property) {
             if (!_this._properties.find(function (prop) { return prop.name === property.name; })) {
-                if (!_this._settings.applyFilters || (_this._filters && _this._filters.find(function (filter) { return filter.id === property.ifdguid && _this._match(filter.value, property.originalValue); }))) {
+                if (!_this._settings.applyFilters || (filtersMap && filtersMap.has(property.ifdguid) && _this._match(filtersMap.get(property.ifdguid), property.originalValue))) {
                     _this._properties.push(property);
                 }
             }
@@ -21087,13 +21109,20 @@ var Data = /** @class */ (function () {
                 return value >= filter.lower && value <= filter.upper;
             }
         }
+        else if (Array.isArray(filter) || Array.isArray(value)) {
+            for (var i = 0; i < filter.length; i++) {
+                if (value.indexOf(filter[i]) === -1)
+                    return false;
+            }
+            return true;
+        }
         else {
             return JSON.stringify({ value: value }) === JSON.stringify({ value: filter });
         }
     };
     Data.prototype._sortProperties = function (groupTemplate) {
         if (this._settings.sorting === 'asc') {
-            groupTemplate = groupTemplate.sort();
+            groupTemplate = groupTemplate.sort(function (a, b) { return a.name > b.name ? 1 : -1; });
         }
         else {
             groupTemplate = groupTemplate.sort(function (a, b) { return a.name < b.name ? 1 : -1; });
@@ -21110,7 +21139,7 @@ var Data = /** @class */ (function () {
                     updatedProduct.properties.push(prop);
                 }
                 else {
-                    updatedProduct.properties.push({ name: p.name, ckeck: p.ckeck, ifdguid: p.ifdguid, originalValue: p.originalValue, unit: p.unit, value: p.value, type: p.type });
+                    updatedProduct.properties.push({ name: p.name, ifdguid: p.ifdguid, originalValue: ' ', unit: p.unit, value: ' ', type: p.type });
                 }
             });
             updatedGroup.push(updatedProduct);
@@ -21193,6 +21222,12 @@ exports.ERRORS = {
     EMPTY_ARRAY_EXCEPTION: 'Property {0} can not be an empty array.'
 };
 
+
+/***/ }),
+/* 148 */
+/***/ (function(module, exports) {
+
+module.exports = require("util");
 
 /***/ })
 /******/ ]);

@@ -25,9 +25,10 @@ export class Data {
         this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._properties);
     }
     _updateProperties(product) {
+        var filtersMap = new Map(this._filters);
         product.properties.forEach((property) => {
             if (!this._properties.find((prop) => prop.name === property.name)) {
-                if (!this._settings.applyFilters || (this._filters && this._filters.find((filter) => filter.id === property.ifdguid && this._match(filter.value, property.originalValue)))) {
+                if (!this._settings.applyFilters || (filtersMap && filtersMap.has(property.ifdguid) && this._match(filtersMap.get(property.ifdguid), property.originalValue))) {
                     this._properties.push(property);
                 }
             }
@@ -43,13 +44,20 @@ export class Data {
                 return value >= filter.lower && value <= filter.upper;
             }
         }
+        else if (Array.isArray(filter) || Array.isArray(value)) {
+            for (var i = 0; i < filter.length; i++) {
+                if (value.indexOf(filter[i]) === -1)
+                    return false;
+            }
+            return true;
+        }
         else {
             return JSON.stringify({ value }) === JSON.stringify({ value: filter });
         }
     }
     _sortProperties(groupTemplate) {
         if (this._settings.sorting === 'asc') {
-            groupTemplate = groupTemplate.sort();
+            groupTemplate = groupTemplate.sort((a, b) => a.name > b.name ? 1 : -1);
         }
         else {
             groupTemplate = groupTemplate.sort((a, b) => a.name < b.name ? 1 : -1);
@@ -66,7 +74,7 @@ export class Data {
                     updatedProduct.properties.push(prop);
                 }
                 else {
-                    updatedProduct.properties.push({ name: p.name, ckeck: p.ckeck, ifdguid: p.ifdguid, originalValue: p.originalValue, unit: p.unit, value: p.value, type: p.type });
+                    updatedProduct.properties.push({ name: p.name, ifdguid: p.ifdguid, originalValue: ' ', unit: p.unit, value: ' ', type: p.type });
                 }
             });
             updatedGroup.push(updatedProduct);

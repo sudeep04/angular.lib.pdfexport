@@ -150,10 +150,14 @@ export abstract class JsonParser {
         const result: Settings = {
             sorting: 'asc',
             captions: {
-                architectureOffice: 'Architekturbüro',
                 project: 'Projekt',
-                bearbeiter: 'Bearbeiter',
-                id: 'Version'
+                bearbeiter: 'Bearbeiter'
+            },
+            translations: {
+                layout:{
+                    page: "Seite",
+                    date: "Datum"
+                }
             },
             showProductsImage: true,
             logo: {
@@ -175,11 +179,6 @@ export abstract class JsonParser {
 
         if (settings.captions) {
 
-            if (settings.captions.architectureOffice) {
-
-                result.captions.architectureOffice = settings.captions.architectureOffice;
-            }
-
             if (settings.captions.project) {
 
                 result.captions.project = settings.captions.project;
@@ -189,13 +188,21 @@ export abstract class JsonParser {
 
                 result.captions.bearbeiter = settings.captions.bearbeiter;
             }
-
-            if (settings.captions.id) {
-
-                result.captions.id = settings.captions.id;
-            }
         }
 
+        if (settings.translations.layout) {
+
+            if (settings.translations.layout.page) {
+
+                result.translations.layout.page = settings.translations.layout.page;
+            }
+
+            if (settings.translations.layout.date) {
+
+                result.translations.layout.date = settings.translations.layout.date;
+            }
+
+        }
         if (settings.showProductsImage !== undefined) {
 
             result.showProductsImage = settings.showProductsImage;
