@@ -17294,7 +17294,7 @@ var DocRenderer = /** @class */ (function () {
                             else {
                                 filterText_1 = property.unit + ' ' + filterText_1;
                             }
-                            row = { col1: property.name + (" (" + filterText_1 + ")") };
+                            row = { col1: property.name + ("\n(" + filterText_1 + ")") };
                         }
                         else {
                             row = { col1: property.name };

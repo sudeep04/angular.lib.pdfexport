@@ -180,7 +180,7 @@ export class DocRenderer {
                             else {
                                 filterText = property.unit + ' ' + filterText;
                             }
-                            row = { col1: property.name + ` (${filterText})` };
+                            row = { col1: property.name + `\n(${filterText})` };
                         }
                         else {
                             row = { col1: property.name };
