@@ -14,6 +14,7 @@ export interface Settings {
         layout: {
             page: string;
             date: string;
+            supplierName: string;
         };
     };
     sorting: 'asc' | 'dsc';

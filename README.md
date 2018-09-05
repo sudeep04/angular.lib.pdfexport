@@ -72,6 +72,7 @@ export class AppComponent implements OnInit {
             layout:{
                 page: string;
                 date: string;
+                supplierName: string;
             }
         };
         showProductsImage: boolean;

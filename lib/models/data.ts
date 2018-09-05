@@ -49,14 +49,14 @@ export class Data {
 
     private _updateProperties(product: Product): void {
         
-        var filtersMap = new Map(this._filters);
+        //var filtersMap = new Map(this._filters);
 
         product.properties.forEach((property: Property) => {
             if (!this._properties.find((prop: Property) => prop.name === property.name)) {
-                if (!this._settings.applyFilters || (filtersMap && filtersMap.has(property.ifdguid) && this._match(filtersMap.get(property.ifdguid), property.originalValue))) {
+                //if (!this._settings.applyFilters || (filtersMap && filtersMap.has(property.ifdguid) && this._match(filtersMap.get(property.ifdguid), property.originalValue))) {
 
                     this._properties.push(property);
-                }
+                //}
             }
         });
 

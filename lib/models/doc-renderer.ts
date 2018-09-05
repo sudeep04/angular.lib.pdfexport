@@ -229,7 +229,7 @@ export class DocRenderer {
                                 filterText = filterValue.toString();
                             }
 
-                        }
+                        
    
 
                         if (direction === 'afterValue') {
@@ -238,7 +238,13 @@ export class DocRenderer {
                             filterText = property.unit + ' ' + filterText;
                         }
                         row = { col1: property.name + ` (${filterText})` };
-                    }else{
+                        }
+                        else
+                        {
+                            row = { col1: property.name };
+                        }
+                    }
+                    else{
                         row = { col1: property.name };
                     }
                     rows.push(row);
@@ -331,7 +337,7 @@ export class DocRenderer {
         const columns: any[] = [{ dataKey: 'col1', title: '' }];
 
         const rows: any[] = [
-            { col1: 'Hersteller' }
+            { col1: this._data.settings.translations.layout.supplierName }
         ];
 
         const styles = {

@@ -25,12 +25,12 @@ export class Data {
         this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._properties);
     }
     _updateProperties(product) {
-        var filtersMap = new Map(this._filters);
+        //var filtersMap = new Map(this._filters);
         product.properties.forEach((property) => {
             if (!this._properties.find((prop) => prop.name === property.name)) {
-                if (!this._settings.applyFilters || (filtersMap && filtersMap.has(property.ifdguid) && this._match(filtersMap.get(property.ifdguid), property.originalValue))) {
-                    this._properties.push(property);
-                }
+                //if (!this._settings.applyFilters || (filtersMap && filtersMap.has(property.ifdguid) && this._match(filtersMap.get(property.ifdguid), property.originalValue))) {
+                this._properties.push(property);
+                //}
             }
         });
         this._sortProperties(this._properties);

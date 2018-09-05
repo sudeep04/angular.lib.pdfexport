@@ -174,14 +174,17 @@ export class DocRenderer {
                             else {
                                 filterText = filterValue.toString();
                             }
-                        }
-                        if (direction === 'afterValue') {
-                            filterText = filterText + ' ' + property.unit;
+                            if (direction === 'afterValue') {
+                                filterText = filterText + ' ' + property.unit;
+                            }
+                            else {
+                                filterText = property.unit + ' ' + filterText;
+                            }
+                            row = { col1: property.name + ` (${filterText})` };
                         }
                         else {
-                            filterText = property.unit + ' ' + filterText;
+                            row = { col1: property.name };
                         }
-                        row = { col1: property.name + ` (${filterText})` };
                     }
                     else {
                         row = { col1: property.name };
@@ -234,7 +237,7 @@ export class DocRenderer {
         }
         const columns = [{ dataKey: 'col1', title: '' }];
         const rows = [
-            { col1: 'Hersteller' }
+            { col1: this._data.settings.translations.layout.supplierName }
         ];
         const styles = {
             fillColor: [246, 246, 246],

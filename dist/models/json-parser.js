@@ -125,7 +125,8 @@ export class JsonParser {
             translations: {
                 layout: {
                     page: "Seite",
-                    date: "Datum"
+                    date: "Datum",
+                    supplierName: "Hersteller"
                 }
             },
             showProductsImage: true,
@@ -157,6 +158,9 @@ export class JsonParser {
             }
             if (settings.translations.layout.date) {
                 result.translations.layout.date = settings.translations.layout.date;
+            }
+            if (settings.translations.layout.supplierName) {
+                result.translations.layout.supplierName = settings.translations.layout.supplierName;
             }
         }
         if (settings.showProductsImage !== undefined) {

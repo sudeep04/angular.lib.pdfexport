@@ -23,6 +23,8 @@ export interface Settings {
             page: string;
 
             date: string;
+
+            supplierName: string;
         }
     };
 
