@@ -12,10 +12,11 @@ import { Product } from './product';
 import { Property } from './property.interface';
 import { logoImg } from './imagesBase64/logo-img';
 import { JsonParser } from './json-parser';
+import { isArray, isObject } from 'util';
 
-const IMAGES_TOP = 48;
+const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
-const HEADER_TOP = 48;
+//const HEADER_TOP = 48;
 
 export class DocRenderer {
 
@@ -186,7 +187,12 @@ export class DocRenderer {
         group.forEach((product: Product) => {
 
             columns.push({ dataKey: product.name, title: product.name });
-            config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 4.5] };
+            let lineW = this._docConfig.lineWidth + 0.5;
+            if(this._data.settings.showHighlights)
+            {
+                lineW = lineW + 4;
+            }
+            config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW] };
             if (rows.length === 0) {
                 product.properties.forEach((property: Property) => {
                     let row = {};
@@ -195,12 +201,17 @@ export class DocRenderer {
                                 = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
                                     'beforeValue'
                                     : 'afterValue';
-                        const filter = this._data.filters.find((filter: any) => filter.id === property.ifdguid);
-                        let filterText = ''
+                        let filterMap = new Map(this._data.filters);
+                        const filterValue = filterMap.get(property.ifdguid) as any;
+                        let filterText = '';
 
-                        if(filter.value && filter.value.length!=undefined){
-                            const listValues: string[] = filter.value;
-                            listValues.forEach((v: string, index: number) => {
+                        if(filterValue)
+                        {
+                            if(isArray(filterValue))
+                            {
+                                //List Values
+                                const listValues: string[] = filterValue;
+                                listValues.forEach((v: string, index: number) => {
                                 const val1 = v;
 
                                 if (index === 0) {
@@ -209,12 +220,17 @@ export class DocRenderer {
                                     filterText += ', ' + val1;
                                 }
                             });
-                        }else if
-                        (filter.value && filter.value.upper!=undefined&& filter.value.lower!=undefined){
-                            filterText = filter.value.lower + ' - ' + filter.value.upper;
-                        } else {
-                            filterText = filter.value;
                         }
+                        else if(filterValue.upper!=undefined&& filterValue.lower!=undefined)
+                        {
+                            filterText = filterValue.lower + ' - ' + filterValue.upper;
+                        }
+                         else  {
+                                filterText = filterValue.toString();
+                            }
+
+                        
+   
 
                         if (direction === 'afterValue') {
                             filterText = filterText + ' ' + property.unit;
@@ -222,7 +238,13 @@ export class DocRenderer {
                             filterText = property.unit + ' ' + filterText;
                         }
                         row = { col1: property.name + ` (${filterText})` };
-                    }else{
+                        }
+                        else
+                        {
+                            row = { col1: property.name };
+                        }
+                    }
+                    else{
                         row = { col1: property.name };
                     }
                     rows.push(row);
@@ -315,7 +337,7 @@ export class DocRenderer {
         const columns: any[] = [{ dataKey: 'col1', title: '' }];
 
         const rows: any[] = [
-            { col1: 'Hersteller' }
+            { col1: this._data.settings.translations.layout.supplierName }
         ];
 
         const styles = {
@@ -338,7 +360,7 @@ export class DocRenderer {
         const config: any = {
             styles,
             margin: {
-                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : HEADER_TOP,
+                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP,
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
@@ -407,9 +429,8 @@ export class DocRenderer {
         ];
 
         const rows = [
-            { col1: this._data.settings.captions.architectureOffice, col2: 'Datum: ' + moment(Date.now()).format('DD.MM.YY') },
-            { col1: this._data.settings.captions.project, col2: 'ID: ' + this._data.settings.captions.id },
-            { col1: this._data.settings.captions.bearbeiter, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
+            { col1: this._data.settings.captions.project , col2: this._data.settings.translations.layout.date + ": " + moment(Date.now()).format('DD.MM.YY') },
+            { col1: this._data.settings.captions.bearbeiter, col2:this._data.settings.translations.layout.page + ": "+ ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
         ];
 
         const styles = {

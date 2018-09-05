@@ -8,9 +8,10 @@ import '../assets/js/default_vfs';
 import 'jspdf-autotable';
 import { logoImg } from './imagesBase64/logo-img';
 import { JsonParser } from './json-parser';
-const IMAGES_TOP = 48;
+import { isArray } from 'util';
+const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
-const HEADER_TOP = 48;
+//const HEADER_TOP = 48;
 export class DocRenderer {
     constructor() {
         this._doc = new jsPDF();
@@ -138,7 +139,11 @@ export class DocRenderer {
         };
         group.forEach((product) => {
             columns.push({ dataKey: product.name, title: product.name });
-            config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 4.5] };
+            let lineW = this._docConfig.lineWidth + 0.5;
+            if (this._data.settings.showHighlights) {
+                lineW = lineW + 4;
+            }
+            config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW] };
             if (rows.length === 0) {
                 product.properties.forEach((property) => {
                     let row = {};
@@ -146,33 +151,40 @@ export class DocRenderer {
                         const direction = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit) => unit === property.unit) ?
                             'beforeValue'
                             : 'afterValue';
-                        const filter = this._data.filters.find((filter) => filter.id === property.ifdguid);
+                        let filterMap = new Map(this._data.filters);
+                        const filterValue = filterMap.get(property.ifdguid);
                         let filterText = '';
-                        if (filter.value && filter.value.length != undefined) {
-                            const listValues = filter.value;
-                            listValues.forEach((v, index) => {
-                                const val1 = v;
-                                if (index === 0) {
-                                    filterText += val1;
-                                }
-                                else {
-                                    filterText += ', ' + val1;
-                                }
-                            });
-                        }
-                        else if (filter.value && filter.value.upper != undefined && filter.value.lower != undefined) {
-                            filterText = filter.value.lower + ' - ' + filter.value.upper;
+                        if (filterValue) {
+                            if (isArray(filterValue)) {
+                                //List Values
+                                const listValues = filterValue;
+                                listValues.forEach((v, index) => {
+                                    const val1 = v;
+                                    if (index === 0) {
+                                        filterText += val1;
+                                    }
+                                    else {
+                                        filterText += ', ' + val1;
+                                    }
+                                });
+                            }
+                            else if (filterValue.upper != undefined && filterValue.lower != undefined) {
+                                filterText = filterValue.lower + ' - ' + filterValue.upper;
+                            }
+                            else {
+                                filterText = filterValue.toString();
+                            }
+                            if (direction === 'afterValue') {
+                                filterText = filterText + ' ' + property.unit;
+                            }
+                            else {
+                                filterText = property.unit + ' ' + filterText;
+                            }
+                            row = { col1: property.name + ` (${filterText})` };
                         }
                         else {
-                            filterText = filter.value;
+                            row = { col1: property.name };
                         }
-                        if (direction === 'afterValue') {
-                            filterText = filterText + ' ' + property.unit;
-                        }
-                        else {
-                            filterText = property.unit + ' ' + filterText;
-                        }
-                        row = { col1: property.name + ` (${filterText})` };
                     }
                     else {
                         row = { col1: property.name };
@@ -225,7 +237,7 @@ export class DocRenderer {
         }
         const columns = [{ dataKey: 'col1', title: '' }];
         const rows = [
-            { col1: 'Hersteller' }
+            { col1: this._data.settings.translations.layout.supplierName }
         ];
         const styles = {
             fillColor: [246, 246, 246],
@@ -244,7 +256,7 @@ export class DocRenderer {
         const config = {
             styles,
             margin: {
-                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : HEADER_TOP,
+                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP,
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
@@ -299,9 +311,8 @@ export class DocRenderer {
             { dataKey: 'col2' }
         ];
         const rows = [
-            { col1: this._data.settings.captions.architectureOffice, col2: 'Datum: ' + moment(Date.now()).format('DD.MM.YY') },
-            { col1: this._data.settings.captions.project, col2: 'ID: ' + this._data.settings.captions.id },
-            { col1: this._data.settings.captions.bearbeiter, col2: 'Seite: ' + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
+            { col1: this._data.settings.captions.project, col2: this._data.settings.translations.layout.date + ": " + moment(Date.now()).format('DD.MM.YY') },
+            { col1: this._data.settings.captions.bearbeiter, col2: this._data.settings.translations.layout.page + ": " + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
         ];
         const styles = {
             fillColor: [246, 246, 246],

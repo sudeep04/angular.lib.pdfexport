@@ -7,10 +7,15 @@ export interface Settings {
     showProductsImage: boolean;
     productsImageApiPath: string;
     captions: {
-        architectureOffice: string;
         project: string;
         bearbeiter: string;
-        id: string;
+    };
+    translations: {
+        layout: {
+            page: string;
+            date: string;
+            supplierName: string;
+        };
     };
     sorting: 'asc' | 'dsc';
     unitsBeforeValue: string[];
