@@ -25,6 +25,13 @@ export interface Settings {
             date: string;
 
             supplierName: string;
+        },
+        downloadTypes: {
+            brochure: string;
+
+            cadData: string;
+
+            bimModels: string;
         }
     };
 
