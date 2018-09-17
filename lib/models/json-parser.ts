@@ -309,6 +309,12 @@ export abstract class JsonParser {
             Check.isArray(jsonproduct.productData.details, 'productData.details');
             product.addDetails(jsonproduct.productData.details);
         }
+
+        // parse downloads
+        if (jsonproduct.productData.downloads !== undefined) {
+
+            product.addDownloads(jsonproduct.productData.downloads);
+        }
         return product;
 
     }

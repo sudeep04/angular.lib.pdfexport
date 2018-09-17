@@ -4,8 +4,8 @@ import { BimModel } from './download/bimModel.interface';
 import { BimModelCategory } from './download/bimModelCategory.interface';
 
 export interface Download {
-    brochures: Brochure[];
-    cadData: CadData[];
-    bimModels: BimModel[];
-    bimModelCategories: BimModelCategory[]
+    brochures?: Brochure[];
+    cadData?: CadData[];
+    bimModels?: BimModel[];
+    bimModelCategories?: BimModelCategory [];
 }
