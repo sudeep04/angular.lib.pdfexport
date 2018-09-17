@@ -315,6 +315,19 @@ export abstract class JsonParser {
 
             product.addDownloads(jsonproduct.productData.downloads);
         }
+
+        // parse imagesGallery
+        if (jsonproduct.productData.imageGallery !== undefined) {
+
+            jsonproduct.productData.imageGallery.forEach((image: any) => {
+
+                const imgUrl = data.settings.productsImageApiPath
+                    + image.uuid + '/content/'
+                    + image.content
+                    + '?quality=80&background=white&mode=pad&width=160&height=160';
+                product.addImageGallery(imgUrl);
+            });
+        }
         return product;
 
     }
