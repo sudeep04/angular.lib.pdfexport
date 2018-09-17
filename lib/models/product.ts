@@ -39,19 +39,19 @@ export class Product {
         return this._details;
     }
 
-    private _name: string;
+    public _name: string;
 
-    private _supplier: string;
+    public _supplier: string;
 
-    private _imageUrl: string;
+    public _imageUrl: string;
 
-    private _imageGallery: string [];
+    public _imageGallery: string [];
 
-    private _properties: Property[];
+    public _properties: Property[];
 
-    private _downloads?: Download;
+    public _downloads?: Download;
 
-    private _details: Detail[];
+    public _details: Detail[];
 
     constructor(name: string, supplier: string) {
 

@@ -34,7 +34,6 @@ export class DocRendererDetail implements IDocRenderer {
         this._data = JsonParser.parseDataProduct(jsonData);
         this._docConfig = docConfig;
 
-        console.log(this._data);
         /* let lastPage = 1;
         this._data.groups.forEach((group: Product[], index: number) => {
 
@@ -48,12 +47,12 @@ export class DocRendererDetail implements IDocRenderer {
 
                 this._doc.addPage();
             }
-        });
+        }); */
 
         for (let i = 1; i < this._doc.internal.pages.length; i++) {
             this._doc.setPage(i);
             this._drawLayout(i);
-        } */
+        }
     }
 
     public save(): void {
@@ -384,91 +383,27 @@ export class DocRendererDetail implements IDocRenderer {
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const pageHeight = this._doc.internal.pageSize.getHeight();
 
-        const columns = [
-            { dataKey: 'col1'},
-            { dataKey: 'col2'}
-        ];
+        // draw header
+        this._doc.setFont('GothamMedium', 'normal');
+        this._doc.setFontSize(12);
+        this._doc.setFillColor(230, 231, 233);
+        this._doc.rect(
+            this._docConfig.padding + this._docConfig.lineWidth / 2,
+            this._docConfig.padding + this._docConfig.lineWidth / 2,
+            pageWidth - (2 * this._docConfig.padding + this._docConfig.lineWidth),
+            10,
+            'F'
+        );
+        this._doc.text('Product Details', 12.9, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
 
-        const rows = [
-            // page header
-            {
-                col1: this._data.settings.captions.project,
-                col2: this._data.settings.translations.layout.date + ': ' + moment(Date.now()).format('DD.MM.YY')
-            },
-            {
-                col1: this._data.settings.captions.bearbeiter,
-                col2: this._data.settings.translations.layout.page + ': '
-                + ('0' + index).slice(-2) + ('0' + (this._doc.internal.pages.length - 1)).slice(-2)
-            }
-        ];
+        this._doc.setFont('GothamLight', 'normal');
+        // fix compute lines
+        this._doc.text(' - ' + this._data.productDetail._name, 46, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
 
-        const styles = {
-            fillColor: [246, 246, 246],
-            lineWidth: this._docConfig.lineWidth,
-            lineColor: 255,
-            cellPadding: [4.4, 4.3, 3.28, 4.3],
-            fontSize: 12,
-            textColor: 0
-        };
-
-        const columnStyles = {
-            col2: { columnWidth: this._docConfig.columnWidth }
-        };
-
-        const config: any = {
-            styles,
-            alternateRowStyles: styles,
-            columnStyles,
-            margin: {
-                top: this._docConfig.padding,
-                left: this._docConfig.padding
-            },
-            showHeader: 'never',
-            tableWidth: this._data.settings.logo.show ?
-                pageWidth - (2 * this._docConfig.padding + this._docConfig.columnWidth) :
-                pageWidth - (2 * this._docConfig.padding),
-            drawCell: (cell: any, opts: any) => {
-                this._doc.setFont('GothamMedium', 'normal');
-            }
-        };
-
-        this._doc.autoTable(columns, rows, config);
-
-        // draw logo
-        const tableHeight = this._doc.autoTable.previous.finalY - this._doc.autoTable.previous.pageStartY - this._docConfig.lineWidth;
-
-        if (this._data.settings.logo.show) {
-            // image
-            if (this._data.settings.logo.type === 'url') {
-
-                this._doc.addImage(
-                    this._data.settings.logo.data,
-                    pageWidth - this._docConfig.columnWidth - this._docConfig.padding +         this._docConfig.lineWidth / 2,
-                    this._docConfig.padding + this._docConfig.lineWidth / 2,
-                    this._docConfig.columnWidth - this._docConfig.lineWidth,
-                    tableHeight
-                );
-            }
-            // text
-            if (this._data.settings.logo.type === 'text') {
-                this._doc.setFont('GothamMedium', 'normal');
-
-                let fontSize = 14;
-                while ((this._doc.getStringUnitWidth(this._data.settings.logo.data) * fontSize) / 2.88 > this._docConfig.columnWidth - this._docConfig.lineWidth) {
-                    fontSize--;
-                }
-                const logoWidth = (this._doc.getStringUnitWidth(this._data.settings.logo.data) * fontSize) / 2.88;
-
-                this._doc.setFontSize(fontSize);
-                this._doc.text(
-                    this._data.settings.logo.data,
-                    pageWidth - this._docConfig.columnWidth - this._docConfig.padding +
-                        this._docConfig.lineWidth / 2 + (this._docConfig.columnWidth -
-                        this._docConfig.lineWidth - logoWidth) / 2,
-                    this._docConfig.padding + this._docConfig.lineWidth + tableHeight / 2
-                );
-            }
-        }
+        this._doc.setFontStyle('bold')
+                .setFont('GothamMedium', 'normal')
+                .text(this._data.settings.translations.layout.page + ': '
+                 + index + '/' + (this._doc.internal.pages.length - 1), 177,  this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
 
         // draw footer
         this._doc.setFont('GothamMedium', 'normal');
