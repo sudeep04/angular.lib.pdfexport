@@ -31,7 +31,7 @@ export abstract class JsonParser {
         const data = new Data(settings, jsonData.property_filters);
 
         const product = this._parseProduct(jsonData.product, data, settings);
-        data.addProduct(product);
+        data.setProductDetail(product);
 
         return data;
     }
@@ -199,6 +199,7 @@ export abstract class JsonParser {
             }
         }
 
+        // parse propertySets
         if (jsonproduct.productData.propertySets !== undefined) {
 
             Check.isArray(jsonproduct.productData.propertySets, 'productData.propertySets');
@@ -300,6 +301,13 @@ export abstract class JsonParser {
                     });
                 }
             });
+        }
+
+        // parse details
+        if (jsonproduct.productData.details !== undefined ) {
+
+            Check.isArray(jsonproduct.productData.details, 'productData.details');
+            product.addDetails(jsonproduct.productData.details);
         }
         return product;
 

@@ -13,7 +13,7 @@ export interface Settings {
     captions: {
 
         project: string;
-        
+
         bearbeiter: string;
 
     };

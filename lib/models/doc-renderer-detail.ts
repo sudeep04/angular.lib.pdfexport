@@ -34,7 +34,8 @@ export class DocRendererDetail implements IDocRenderer {
         this._data = JsonParser.parseDataProduct(jsonData);
         this._docConfig = docConfig;
 
-        let lastPage = 1;
+        console.log(this._data);
+        /* let lastPage = 1;
         this._data.groups.forEach((group: Product[], index: number) => {
 
             this._drawBody(group);
@@ -52,7 +53,7 @@ export class DocRendererDetail implements IDocRenderer {
         for (let i = 1; i < this._doc.internal.pages.length; i++) {
             this._doc.setPage(i);
             this._drawLayout(i);
-        }
+        } */
     }
 
     public save(): void {

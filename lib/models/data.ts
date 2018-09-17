@@ -19,6 +19,11 @@ export class Data {
         return this._filters;
     }
 
+    public get productDetail() {
+
+        return this._productDetail;
+    }
+
     private _groups: Product[][];
 
     private _properties: Property[];
@@ -27,6 +32,8 @@ export class Data {
 
     private _filters: any[];
 
+    private _productDetail?: Product;
+
     constructor(settings: Settings, filters: any[]) {
 
         this._settings = settings;
@@ -34,6 +41,11 @@ export class Data {
         this._properties = [];
         this._groups.push([]);
         this._filters = filters;
+    }
+
+    public setProductDetail(product: Product) {
+
+        this._productDetail = JSON.parse(JSON.stringify(product));
     }
 
     public addProduct(product: Product): void {

@@ -73,8 +73,9 @@ export class Product {
         this._imageUrl = imageUrl;
     }
 
-    public addDetail(detail: Detail): void {
-        this._details.push(detail);
+    public addDetails(details: Detail): void {
+
+        this._details = JSON.parse(JSON.stringify(details));
     }
 
     public addImageGallery(imageUrl: string): void {
