@@ -34,20 +34,20 @@ export class DocRendererDetail implements IDocRenderer {
         this._data = JsonParser.parseDataProduct(jsonData);
         this._docConfig = docConfig;
 
-        /* let lastPage = 1;
-        this._data.groups.forEach((group: Product[], index: number) => {
+        const topIndex = this._drawTitle();
+        this._drawPrimaryImage();
+        /*
 
-            this._drawBody(group);
-            for (let i = lastPage + 1; i < this._doc.internal.pages.length; i++) {
-                this._doc.setPage(i);
-                this._drawHeader(group, false);
-            }
-            lastPage = this._doc.internal.pages.length;
-            if (index < this._data.groups.length - 1) {
+        this._drawBody(group);
+        for (let i = lastPage + 1; i < this._doc.internal.pages.length; i++) {
+            this._doc.setPage(i);
+            this._drawHeader(group, false);
+        }
+        lastPage = this._doc.internal.pages.length;
+        if (index < this._data.groups.length - 1) {
 
-                this._doc.addPage();
-            }
-        }); */
+            this._doc.addPage();
+        } */
 
         for (let i = 1; i < this._doc.internal.pages.length; i++) {
             this._doc.setPage(i);
@@ -59,10 +59,71 @@ export class DocRendererDetail implements IDocRenderer {
         this._doc.save(this._data.settings.fileName);
     }
 
+    // draw title  and subtitle
+    private _drawTitle(): number {
+        const pageWidth = this._doc.internal.pageSize.getWidth();
+        const maxLineWidth = pageWidth / 2 - this._docConfig.padding * 2;
+
+        // title
+        let topIndex = 36;
+        const titleLines = this._splitLines(this._data.productDetail._name, maxLineWidth, 20);
+        this._doc.setFont('GothamMedium', 'normal');
+        this._doc.setFontSize(20);
+        this._doc.text(titleLines, 10, topIndex);
+
+        // subtitles
+        const subtitleLines = this._splitLines(this._data.productDetail._supplier, maxLineWidth, 20);
+        this._doc.setFont('GothamLight', 'normal');
+        this._doc.setFontSize(20);
+        topIndex += 9;
+        this._doc.setTextColor(80, 87, 98);
+        this._doc.text(subtitleLines, 10, topIndex);
+
+        return topIndex;
+    }
+
+    private _splitLines(text: string, maxLineWidth: number, fontSize: number): any {
+
+        return this._doc.setFont('helvetica', 'neue').setFontSize(fontSize).splitTextToSize(text, maxLineWidth);
+    }
+
+    // draw Primary Image
+    private _drawPrimaryImage() {
+        const imageUrl = this._data.productDetail._imageUrl;
+        const pageWidth = this._doc.internal.pageSize.getWidth();
+
+        const imageTop = 30 - this._docConfig.lineWidth;
+        const columnWidth = pageWidth - 100;
+        const imageWidth = pageWidth / 2 - this._docConfig.padding * 2 + 5;
+
+        this._doc.addImage(
+            boxShadowImg,
+            columnWidth,
+            imageTop,
+            imageWidth,
+            imageWidth
+        );
+        try {
+            this._doc.addImage(
+                imageUrl,
+                columnWidth + 4.2,
+                imageTop + 4.2,
+                imageWidth - 8.4,
+                imageWidth - 8.4
+            );
+        } catch (e) {
+            this._doc.addImage(this._data.settings.placeholderUrl,
+                columnWidth + 4.2,
+                imageTop + 4.2,
+                imageWidth - 8.4,
+                imageWidth - 8.4);
+        }
+    }
+
     // draw content
     private _drawBody(group: Product[]) {
         // draw header for first page
-        this._drawHeader(group, this._data.settings.showProductsImage);
+       // this._drawHeader(group, this._data.settings.showProductsImage);
 
         // table config
         let isFirstWithoutImages = !this._data.settings.showProductsImage;
@@ -248,51 +309,6 @@ export class DocRendererDetail implements IDocRenderer {
         this._doc.autoTable(columns, rows, config);
     }
 
-    // draw Primary Image and TableHeader
-    private _drawHeader(group: Product[], showProductsImage: boolean) {
-
-        const pageWidth = this._doc.internal.pageSize.getWidth();
-
-        if (group && group.length === 1) {
-            const product = group[0];
-            if (showProductsImage) {
-                this._drawPrimaryImage(product, pageWidth);
-            }
-            this._formatTableHeader(product, showProductsImage);
-        }
-    }
-
-    // draw Primary Image
-    private _drawPrimaryImage(product: Product, pageWidth: number, column: number = 1) {
-        this._doc.addImage(
-            boxShadowImg,
-            pageWidth - (this._docConfig.columnWidth * column  + this._docConfig.padding),
-            IMAGES_TOP + IMAGES_PADING_TOP,
-            this._docConfig.columnWidth,
-            this._docConfig.columnWidth
-        );
-        try {
-            this._doc.addImage(
-                // data image
-                product.imageUrl,
-                // x - left
-                pageWidth - (this._docConfig.columnWidth * column + this._docConfig.padding) + 3.2,
-                // y - top
-                IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
-                // width
-                this._docConfig.columnWidth - 6.4,
-                // height
-                this._docConfig.columnWidth - 6.4
-            );
-        } catch (e) {
-            this._doc.addImage(this._data.settings.placeholderUrl,
-                pageWidth - (this._docConfig.columnWidth * column + this._docConfig.padding) + 3.2,
-                IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
-                this._docConfig.columnWidth - 6.4,
-                this._docConfig.columnWidth - 6.4);
-        }
-    }
-
     // draw Table Header
     private _formatTableHeader(product: Product, showProductsImage: boolean = false) {
 
@@ -387,6 +403,7 @@ export class DocRendererDetail implements IDocRenderer {
         this._doc.setFont('GothamMedium', 'normal');
         this._doc.setFontSize(12);
         this._doc.setFillColor(230, 231, 233);
+        this._doc.setTextColor(0, 0, 0);
         this._doc.rect(
             this._docConfig.padding + this._docConfig.lineWidth / 2,
             this._docConfig.padding + this._docConfig.lineWidth / 2,

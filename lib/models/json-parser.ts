@@ -179,7 +179,6 @@ export abstract class JsonParser {
 
     private static _parseProduct(jsonproduct: any, data: any, settings: any): Product {
 
-        Check.notNullOrUndefined(jsonproduct, 'product');
         Check.notNullOrUndefined(jsonproduct.productData, 'productData');
         Check.notNullOrUndefined(jsonproduct.productData.name, 'productData.name');
         Check.notNullOrUndefined(jsonproduct.productData.supplier, 'productData.supplier');
