@@ -1,5 +1,4 @@
 import * as jsPDF from 'jspdf';
-import * as moment from 'moment';
 import { IDocRenderer } from './doc-renderer.interface';
 import { DocConfig } from './doc-config';
 import { Data } from './data';

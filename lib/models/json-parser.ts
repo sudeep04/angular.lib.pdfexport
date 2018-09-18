@@ -25,12 +25,12 @@ export abstract class JsonParser {
     public static parseDataProduct(jsonData: any): Data {
 
         Check.notNullOrUndefined(jsonData, 'jsonData');
-        Check.notNullOrUndefined(jsonData.product, 'jsonData.product');
+        Check.notEmptyArray(jsonData.products, 'jsonData.products');
 
         const settings: Settings = JsonParser.parseSettings(jsonData.settings);
         const data = new Data(settings, jsonData.property_filters);
 
-        const product = this._parseProduct(jsonData.product, data, settings);
+        const product = this._parseProduct(jsonData.products[0], data, settings);
         data.setProductDetail(product);
 
         return data;

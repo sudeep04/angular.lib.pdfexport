@@ -1,9 +1,9 @@
-export interface Brochure {
+export interface FileModel {
     content: string;
-    fileSize?: string;
+    fileSize: string;
     lastUpdated: string;
     name: string;
     contentType: string;
     uuid: string;
-    originalSource: string;
+    originalSource?: string;
 }

@@ -1,3 +1,6 @@
+import { FileModel } from './file-model.interface';
+
 export interface BimModelCategory {
-    content: string;
+    archicad?: FileModel[];
+    revit?: FileModel[];
 }
