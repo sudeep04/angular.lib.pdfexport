@@ -33,8 +33,10 @@ export class DocRendererDetail implements IDocRenderer {
         this._data = JsonParser.parseDataProduct(jsonData);
         this._docConfig = docConfig;
 
-        const topIndex = this._drawTitle();
-        this._drawPrimaryImage();
+        const topIndex = this._drawHeader();
+        const imageMargin = this._drawPrimaryImage();
+
+        this._drawDetails(topIndex, imageMargin);
         /*
 
         this._drawBody(group);
@@ -59,26 +61,28 @@ export class DocRendererDetail implements IDocRenderer {
     }
 
     // draw title  and subtitle
-    private _drawTitle(): number {
+    private _drawHeader(): number {
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const maxLineWidth = pageWidth / 2 - this._docConfig.padding * 2;
 
         // title
         let topIndex = 36;
-        const titleLines = this._splitLines(this._data.productDetail._name, maxLineWidth, 20);
-        this._doc.setFont('GothamMedium', 'normal');
-        this._doc.setFontSize(20);
-        this._doc.text(titleLines, 10, topIndex);
+        this._drawText(this._data.productDetail._name, maxLineWidth, 20, 10, topIndex, [9, 4, 3], ['GothamMedium', 'normal']);
 
         // subtitles
-        const subtitleLines = this._splitLines(this._data.productDetail._supplier, maxLineWidth, 20);
-        this._doc.setFont('GothamLight', 'normal');
-        this._doc.setFontSize(20);
         topIndex += 9;
-        this._doc.setTextColor(80, 87, 98);
-        this._doc.text(subtitleLines, 10, topIndex);
+        this._drawText(this._data.productDetail._supplier, maxLineWidth, 20, 10, topIndex, [80, 87, 98], ['GothamLight', 'normal']);
 
         return topIndex;
+    }
+
+    private _drawText(text: string, width: number, fontSize: number, marginLeft: number, marginTop: number, color: number[], font: string[] ) {
+
+        const split = this._splitLines(text, width, fontSize);
+        this._doc.setFont(font[0], font[1]);
+        this._doc.setFontSize(fontSize);
+        this._doc.setTextColor(color[0], color[1], color[2]);
+        this._doc.text(split, marginLeft, marginTop);
     }
 
     private _splitLines(text: string, maxLineWidth: number, fontSize: number): any {
@@ -87,7 +91,7 @@ export class DocRendererDetail implements IDocRenderer {
     }
 
     // draw Primary Image
-    private _drawPrimaryImage() {
+    private _drawPrimaryImage(): any {
         const imageUrl = this._data.productDetail._imageUrl;
         const pageWidth = this._doc.internal.pageSize.getWidth();
 
@@ -117,10 +121,317 @@ export class DocRendererDetail implements IDocRenderer {
                 imageWidth - 8.4,
                 imageWidth - 8.4);
         }
+
+        return {left: columnWidth, top: imageTop + imageWidth };
+    }
+
+    // draw details
+    private _drawDetails(topIndex: number, imageMargin: any) {
+        const details = this._data.productDetail._details;
+        // fix
+        const marginTop = topIndex + 20;
+
+        this._drawDetailsText(details, marginTop, imageMargin.top);
+    }
+
+    private _drawDetailsText(details: any[], marginTop: number, imageMargin: number) {
+
+        const specialElementHandlers = {
+            // element with id of "bypass" - jQuery style selector
+            '#bypassme'(element, renderer) {
+                // true = "handled elsewhere, bypass text extraction"
+                return true;
+            },
+            '.hide'(element, renderer) {
+                // true = "handled elsewhere, bypass text extraction"
+                return true;
+            }
+        };
+        marginTop += 9;
+        const widthColumn = (marginTop < imageMargin) ?
+            this._doc.internal.pageSize.getWidth() / 2 : this._doc.internal.pageSize.getWidth();
+        const margins = {
+            top: marginTop,
+            bottom: 20,
+            left: 10,
+            width: widthColumn
+        };
+
+        if (details.length === 0) {
+            if (marginTop < imageMargin && this._doc.internal.pages.length === 1) {marginTop = imageMargin; }
+
+            this._drawBody(marginTop);
+        } else {
+            const detail = details.pop();
+            // draw title
+            this._drawText(detail.name, margins.width, 20, margins.left, margins.top, [9, 4, 3], ['GothamMedium', 'normal']);
+
+            // draw detail
+            this._doc.fromHTML(
+                detail.content,
+                margins.left,
+                margins.top // y coord
+                , {
+                    width: margins.width, // max width of content on PDF
+                    elementHandlers: specialElementHandlers
+                },
+                (dispose) => {
+                    // this._drawDetailsText(details, dispose.y, imageMargin);
+                    this._drawDetailsText([], dispose.y, imageMargin);
+                },
+                margins
+            );
+        }
+    }
+
+    // draw Page Header and Footer
+    private _drawLayout(index: number) {
+
+        const pageWidth = this._doc.internal.pageSize.getWidth();
+        const pageHeight = this._doc.internal.pageSize.getHeight();
+
+        // draw header
+        this._doc.setFont('GothamMedium', 'normal');
+        this._doc.setFontSize(12);
+        this._doc.setFillColor(230, 231, 233);
+        this._doc.setTextColor(0, 0, 0);
+        this._doc.rect(
+            this._docConfig.padding + this._docConfig.lineWidth / 2,
+            this._docConfig.padding + this._docConfig.lineWidth / 2,
+            pageWidth - (2 * this._docConfig.padding + this._docConfig.lineWidth),
+            10,
+            'F'
+        );
+        const project = this._data.settings.captions.project;
+        this._doc.text(project, 12.9, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
+
+        const verticalOffset = this._verticalOffset(project, 12, 12.9);
+
+        this._doc.setFont('GothamLight', 'normal');
+        this._doc.text(' - ' + this._data.productDetail._name, verticalOffset, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
+
+        this._doc.setFontStyle('bold')
+                .setFont('GothamMedium', 'normal')
+                .text(this._data.settings.translations.layout.page + ': '
+                 + index + '/' + (this._doc.internal.pages.length - 1), 177,  this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
+
+        // draw footer
+        this._doc.setFont('GothamMedium', 'normal');
+        this._doc.setFontSize(9);
+        this._doc.setFillColor(246, 246, 246);
+        this._doc.rect(
+            this._docConfig.padding + this._docConfig.lineWidth / 2,
+            pageHeight - (this._docConfig.padding + this._docConfig.lineWidth / 2 + 10),
+            pageWidth - (2 * this._docConfig.padding + this._docConfig.lineWidth),
+            10,
+            'F'
+        );
+        this._doc.text('Copyright © 2018 Plan.One', 12.9, 283.2);
+
+        this._doc.addImage(logoImg, 175.5, 280, 21.6, 4.1);
+
+    }
+
+    private _verticalOffset(text: string, size: number, left: number): number {
+        return left + (text.length) * size / 5 ;
     }
 
     // draw content
-    private _drawBody(group: Product[]) {
+    private _drawBody( marginTop: number) {
+        let i = 0;
+        const pageWidth = this._doc.internal.pageSize.getWidth();
+        const pageHeight = this._doc.internal.pageSize.getHeight();
+
+        const product = this._data.productDetail;
+        marginTop += 5;
+        this._drawTableHeader(marginTop);
+        marginTop += 10;
+        if (marginTop + 20 > pageHeight ) { marginTop = 36; }
+
+        const columns: any [] = [{ dataKey: 'col1', title: '' }];
+        const rows: any[] = [];
+
+        const styles = {
+            fillColor: [255, 255, 255],
+            lineWidth: 0,
+            fontStyle: 'normal',
+            cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
+            fontSize: 9,
+            textColor: 0,
+            overflow: 'linebreak',
+            valign: 'middle'
+        };
+
+        let borders: any[] = [];
+
+        let checkImages: any[] = [];
+        const config: any = {
+            styles,
+            margin: {
+                top: marginTop,
+                right: this._docConfig.padding + this._docConfig.lineWidth / 2,
+                bottom: this._docConfig.padding + 3 * this._docConfig.lineWidth / 2 + 10,
+                left: this._docConfig.padding + this._docConfig.lineWidth / 2
+            },
+            columnStyles: {
+                col1: {
+                    columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 2
+                 }
+            },
+            alternateRowStyles: styles,
+            showHeader: 'never',
+            tableWidth: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
+            drawCell: (cell: any, opts: any) => {
+
+                if (opts.column.index !== 0) {
+
+                    if (product._properties[opts.row.index].ckeck !== undefined) {
+
+                        checkImages.push({
+                            left: cell.x + 3,
+                            top: cell.y + cell.height / 2 - 1.5,
+                            width: 3,
+                            height: 3,
+                            check: product._properties[opts.row.index].ckeck
+                        });
+                    }
+                }
+
+                this._doc.setFont(opts.column.dataKey === 'col1' ?
+                'GothamMedium' : 'GothamLight', 'normal');
+
+            },
+            drawHeaderCell: (cell: any, opts: any) => {
+
+                this._doc.setFont('GothamMedium', 'normal');
+            },
+            drawHeaderRow: (row: any, opts: any) => {
+
+                borders.push({
+                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
+                    top: row.y + row.height - 0.1,
+                    width: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
+                    height: 0.1
+                });
+            },
+            drawRow: (row: any, opts: any) => {
+
+                borders.push({
+                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
+                    top: row.y + row.height - 0.1,
+                    width: pageWidth - this._docConfig.columnWidth * 2 + 2 * this._docConfig.padding,
+                    height: 0.1
+                });
+            },
+            addPageContent: (data: any) => {
+
+                this._doc.setFillColor(0, 0, 0);
+                borders.forEach((border: any, index: number) => {
+
+                    if (index < borders.length - 1) {
+
+                        this._doc.rect(
+                            border.left, border.top, border.width, border.height, 'F'
+                        );
+                    }
+                });
+                borders = [];
+                checkImages.forEach((img: any) => {
+
+                    (img.check) ?
+                        this._doc.addImage(checkImg, img.left, img.top, img.width, img.height)
+                        : this._doc.addImage(unckeckImg, img.left, img.top, img.width, img.height);
+                });
+                checkImages = [];
+
+                data.settings.margin.top = 40;
+                i++;
+                if ( i !== 1 ) {
+                    this._drawTableHeader(36);
+                }
+
+            }
+        };
+
+        // fill values
+
+        columns.push({ dataKey: product._name, title: product._name });
+
+        let lineW = this._docConfig.lineWidth + 0.5;
+        if (this._data.settings.showHighlights) {
+            lineW = lineW + 4;
+        }
+
+        config.columnStyles[product._name] = {
+            columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 3,
+            cellPadding: [2.8, lineW, 2.8, lineW]
+        };
+
+        if (rows.length === 0) {
+            product._properties.forEach((property: Property) => {
+                let row = {};
+                if (this._data.settings.applyFilters) {
+
+                    const direction: 'afterValue' | 'beforeValue'
+                        = property.unit !== undefined &&
+                            this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
+                            'beforeValue' : 'afterValue';
+
+                    const filterMap = new Map(this._data.filters);
+                    const filterValue = filterMap.get(property.ifdguid) as any;
+                    let filterText = '';
+
+                    if (filterValue) {
+                        if (isArray(filterValue)) {
+                            // List Values
+                            const listValues: string[] = filterValue;
+                            listValues.forEach((v: string, index: number) => {
+                                const val1 = v;
+
+                                if (index === 0) {
+                                    filterText += val1;
+                                } else {
+                                    filterText += ', ' + val1;
+                                }
+                            });
+                        } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
+                            filterText = filterValue.lower + ' - ' + filterValue.upper;
+                        } else {
+                            filterText = filterValue.toString();
+                        }
+
+                        if (direction === 'afterValue') {
+                            filterText = filterText + ' ' + property.unit;
+                        } else {
+                            filterText = property.unit + ' ' + filterText;
+                        }
+                        row = { col1: property.name + `\n(${filterText})` };
+                    } else {
+                        row = { col1: property.name };
+                    }
+                } else {
+                    row = { col1: property.name };
+                }
+                rows.push(row);
+            });
+        }
+        product._properties.forEach((property: Property, index: number) => {
+
+            if (property.value !== undefined) {
+
+                rows[index][product._name] = property.value.toString();
+            }
+        });
+
+        this._doc.autoTable(columns, rows, config);
+    }
+
+    private _drawTableHeader(marginTop: number) {
+        this._drawText('Technische Informationen', this._doc.internal.pageSize.getWidth(), 20, 10, marginTop, [0, 0, 0], ['GothamMedium', 'normal']);
+    }
+    /*
+
+     private _drawBody(group: Product[]) {
         // draw header for first page
        // this._drawHeader(group, this._data.settings.showProductsImage);
 
@@ -307,7 +618,6 @@ export class DocRendererDetail implements IDocRenderer {
         });
         this._doc.autoTable(columns, rows, config);
     }
-
     // draw Table Header
     private _formatTableHeader(product: Product, showProductsImage: boolean = false) {
 
@@ -391,50 +701,6 @@ export class DocRendererDetail implements IDocRenderer {
             this._doc.rect(border.left, border.top, border.width, border.height, 'F');
         });
     }
+ */
 
-    // draw Page Header and Footer
-    private _drawLayout(index: number) {
-
-        const pageWidth = this._doc.internal.pageSize.getWidth();
-        const pageHeight = this._doc.internal.pageSize.getHeight();
-
-        // draw header
-        this._doc.setFont('GothamMedium', 'normal');
-        this._doc.setFontSize(12);
-        this._doc.setFillColor(230, 231, 233);
-        this._doc.setTextColor(0, 0, 0);
-        this._doc.rect(
-            this._docConfig.padding + this._docConfig.lineWidth / 2,
-            this._docConfig.padding + this._docConfig.lineWidth / 2,
-            pageWidth - (2 * this._docConfig.padding + this._docConfig.lineWidth),
-            10,
-            'F'
-        );
-        this._doc.text('Product Details', 12.9, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
-
-        this._doc.setFont('GothamLight', 'normal');
-        // fix compute lines
-        this._doc.text(' - ' + this._data.productDetail._name, 46, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
-
-        this._doc.setFontStyle('bold')
-                .setFont('GothamMedium', 'normal')
-                .text(this._data.settings.translations.layout.page + ': '
-                 + index + '/' + (this._doc.internal.pages.length - 1), 177,  this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
-
-        // draw footer
-        this._doc.setFont('GothamMedium', 'normal');
-        this._doc.setFontSize(9);
-        this._doc.setFillColor(246, 246, 246);
-        this._doc.rect(
-            this._docConfig.padding + this._docConfig.lineWidth / 2,
-            pageHeight - (this._docConfig.padding + this._docConfig.lineWidth / 2 + 10),
-            pageWidth - (2 * this._docConfig.padding + this._docConfig.lineWidth),
-            10,
-            'F'
-        );
-        this._doc.text('Copyright © 2018 Plan.One', 12.9, 283.2);
-
-        this._doc.addImage(logoImg, 175.5, 280, 21.6, 4.1);
-
-    }
 }
