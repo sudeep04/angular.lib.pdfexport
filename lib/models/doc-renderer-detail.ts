@@ -3,7 +3,6 @@ import { IDocRenderer } from './doc-renderer.interface';
 import { DocConfig } from './doc-config';
 import { Data } from './data';
 import { JsonParser } from './json-parser';
-import { Product } from './product';
 import { boxShadowImg } from '../../dist/models/imagesBase64/box-shadow-img';
 import { logoImg } from './imagesBase64/logo-img';
 import { Property } from './property.interface';
@@ -37,18 +36,8 @@ export class DocRendererDetail implements IDocRenderer {
         const imageMargin = this._drawPrimaryImage();
 
         this._drawDetails(topIndex, imageMargin);
-        /*
-
-        this._drawBody(group);
-        for (let i = lastPage + 1; i < this._doc.internal.pages.length; i++) {
-            this._doc.setPage(i);
-            this._drawHeader(group, false);
-        }
-        lastPage = this._doc.internal.pages.length;
-        if (index < this._data.groups.length - 1) {
-
-            this._doc.addPage();
-        } */
+        this._drawDownloads();
+        this._drawGallery();
 
         for (let i = 1; i < this._doc.internal.pages.length; i++) {
             this._doc.setPage(i);
@@ -136,48 +125,60 @@ export class DocRendererDetail implements IDocRenderer {
 
     private _drawDetailsText(details: any[], marginTop: number, imageMargin: number) {
 
-        const specialElementHandlers = {
-            // element with id of "bypass" - jQuery style selector
-            '#bypassme'(element, renderer) {
-                // true = "handled elsewhere, bypass text extraction"
-                return true;
-            },
-            '.hide'(element, renderer) {
-                // true = "handled elsewhere, bypass text extraction"
-                return true;
-            }
-        };
-        marginTop += 9;
-        const widthColumn = (marginTop < imageMargin) ?
-            this._doc.internal.pageSize.getWidth() / 2 : this._doc.internal.pageSize.getWidth();
-        const margins = {
-            top: marginTop,
-            bottom: 20,
-            left: 10,
-            width: widthColumn
-        };
-
         if (details.length === 0) {
-            if (marginTop < imageMargin && this._doc.internal.pages.length === 1) {marginTop = imageMargin; }
+            if (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) {marginTop = imageMargin; }
 
             this._drawBody(marginTop);
         } else {
+
+            const specialElementHandlers = {
+                // element with id of "bypass" - jQuery style selector
+                '#bypassme'(element, renderer) {
+                    // true = "handled elsewhere, bypass text extraction"
+                    return true;
+                },
+                '.hide'(element, renderer) {
+                    // true = "handled elsewhere, bypass text extraction"
+                    return true;
+                }
+            };
+
+            if (marginTop + 25 < this._doc.internal.pageSize.getHeight() - 36) {
+                marginTop += 10;
+            } else {
+                this._doc.addPage();
+                marginTop = 40;
+            }
+
+            const widthColumn = (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
+                this._doc.internal.pageSize.getWidth() / 2 : this._doc.internal.pageSize.getWidth() - 30;
+
+            const margins = {
+                top: 36,
+                bottom: 20,
+                left: 10,
+                width: widthColumn
+            };
+
             const detail = details.pop();
+            const div = document.createElement('div');
+
+            div.innerHTML = detail.content.replace('–', '-');
+
             // draw title
-            this._drawText(detail.name, margins.width, 20, margins.left, margins.top, [9, 4, 3], ['GothamMedium', 'normal']);
+            this._drawText(detail.name, margins.width, 20, margins.left, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
 
             // draw detail
             this._doc.fromHTML(
-                detail.content,
+                div,
                 margins.left,
-                margins.top // y coord
+                marginTop // y coord
                 , {
                     width: margins.width, // max width of content on PDF
                     elementHandlers: specialElementHandlers
                 },
                 (dispose) => {
-                    // this._drawDetailsText(details, dispose.y, imageMargin);
-                    this._drawDetailsText([], dispose.y, imageMargin);
+                    this._drawDetailsText(details, dispose.y, imageMargin);
                 },
                 margins
             );
@@ -233,20 +234,26 @@ export class DocRendererDetail implements IDocRenderer {
     }
 
     private _verticalOffset(text: string, size: number, left: number): number {
-        return left + (text.length) * size / 5 ;
+
+        return left + this._doc.getStringUnitWidth(text) * size / 2.8;
     }
 
-    // draw content
+    // draw table
     private _drawBody( marginTop: number) {
         let i = 0;
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const pageHeight = this._doc.internal.pageSize.getHeight();
 
         const product = this._data.productDetail;
+        marginTop += 8;
+        if (marginTop + 45 < pageHeight ) {
+            marginTop += 10;
+        } else {
+            this._doc.addPage();
+            marginTop = 40;
+        }
+        this._drawTableHeader(marginTop, 'Technische Informationen');
         marginTop += 5;
-        this._drawTableHeader(marginTop);
-        marginTop += 10;
-        if (marginTop + 20 > pageHeight ) { marginTop = 36; }
 
         const columns: any [] = [{ dataKey: 'col1', title: '' }];
         const rows: any[] = [];
@@ -310,7 +317,7 @@ export class DocRendererDetail implements IDocRenderer {
                 borders.push({
                     left: this._docConfig.padding + this._docConfig.lineWidth / 2,
                     top: row.y + row.height - 0.1,
-                    width: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
+                    width: pageWidth - 60,
                     height: 0.1
                 });
             },
@@ -319,7 +326,7 @@ export class DocRendererDetail implements IDocRenderer {
                 borders.push({
                     left: this._docConfig.padding + this._docConfig.lineWidth / 2,
                     top: row.y + row.height - 0.1,
-                    width: pageWidth - this._docConfig.columnWidth * 2 + 2 * this._docConfig.padding,
+                    width: pageWidth - 60,
                     height: 0.1
                 });
             },
@@ -345,9 +352,9 @@ export class DocRendererDetail implements IDocRenderer {
                 checkImages = [];
 
                 data.settings.margin.top = 40;
-                i++;
-                if ( i !== 1 ) {
-                    this._drawTableHeader(36);
+
+                if ( ++i !== 1 ) {
+                    this._drawTableHeader(36, 'Technische Informationen');
                 }
 
             }
@@ -426,22 +433,29 @@ export class DocRendererDetail implements IDocRenderer {
         this._doc.autoTable(columns, rows, config);
     }
 
-    private _drawTableHeader(marginTop: number) {
-        this._drawText('Technische Informationen', this._doc.internal.pageSize.getWidth(), 20, 10, marginTop, [0, 0, 0], ['GothamMedium', 'normal']);
+    private _drawTableHeader(marginTop: number, text: string) {
+        this._drawText(text, this._doc.internal.pageSize.getWidth(), 20, 10, marginTop, [0, 0, 0], ['GothamMedium', 'normal']);
     }
-    /*
 
-     private _drawBody(group: Product[]) {
-        // draw header for first page
-       // this._drawHeader(group, this._data.settings.showProductsImage);
-
-        // table config
-        let isFirstWithoutImages = !this._data.settings.showProductsImage;
-
+    private _drawDownloads() {
+        let i = 0;
         const pageWidth = this._doc.internal.pageSize.getWidth();
+        const pageHeight = this._doc.internal.pageSize.getHeight();
 
-        const columns: any[] = [{ dataKey: 'col1', title: '' }];
+        const product = this._data.productDetail;
+        let marginTop = this._doc.autoTable.previous.finalY + 15;
 
+        if (marginTop + 45 < pageHeight ) {
+            marginTop += 10;
+        } else {
+            this._doc.addPage();
+            marginTop = 40;
+        }
+
+        this._drawTableHeader(marginTop, 'Downloads');
+        marginTop += 5;
+
+        const columns: any [] = [{ dataKey: 'col1', title: '' }];
         const rows: any[] = [];
 
         const styles = {
@@ -458,33 +472,34 @@ export class DocRendererDetail implements IDocRenderer {
         let borders: any[] = [];
 
         let checkImages: any[] = [];
-
         const config: any = {
             styles,
             margin: {
-                top: this._doc.autoTable.previous.finalY,
+                top: marginTop,
                 right: this._docConfig.padding + this._docConfig.lineWidth / 2,
                 bottom: this._docConfig.padding + 3 * this._docConfig.lineWidth / 2 + 10,
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
-                col1: {}
+                col1: {
+                    columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 2
+                 }
             },
             alternateRowStyles: styles,
             showHeader: 'never',
             tableWidth: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
-
+                // fix
                 if (opts.column.index !== 0) {
 
-                    if (group[opts.column.index - 1].properties[opts.row.index].ckeck !== undefined) {
+                    if (product._properties[opts.row.index].ckeck !== undefined) {
 
                         checkImages.push({
                             left: cell.x + 3,
                             top: cell.y + cell.height / 2 - 1.5,
                             width: 3,
                             height: 3,
-                            check: group[opts.column.index - 1].properties[opts.row.index].ckeck
+                            check: product._properties[opts.row.index].ckeck
                         });
                     }
                 }
@@ -511,11 +526,12 @@ export class DocRendererDetail implements IDocRenderer {
                 borders.push({
                     left: this._docConfig.padding + this._docConfig.lineWidth / 2,
                     top: row.y + row.height - 0.1,
-                    width: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
+                    width: pageWidth - this._docConfig.columnWidth * 2 + 2 * this._docConfig.padding,
                     height: 0.1
                 });
             },
             addPageContent: (data: any) => {
+
                 this._doc.setFillColor(0, 0, 0);
                 borders.forEach((border: any, index: number) => {
 
@@ -529,178 +545,129 @@ export class DocRendererDetail implements IDocRenderer {
                 borders = [];
                 checkImages.forEach((img: any) => {
 
-                    if (img.check) {
-
-                        this._doc.addImage(checkImg, img.left, img.top, img.width, img.height);
-                    } else {
-
-                        this._doc.addImage(unckeckImg, img.left, img.top, img.width, img.height);
-                    }
+                    (img.check) ?
+                        this._doc.addImage(checkImg, img.left, img.top, img.width, img.height)
+                        : this._doc.addImage(unckeckImg, img.left, img.top, img.width, img.height);
                 });
                 checkImages = [];
-                if (!isFirstWithoutImages) {
-                    isFirstWithoutImages = true;
-                    data.settings.margin.top -= IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2;
+
+                data.settings.margin.top = 40;
+
+                if ( ++i !== 1 ) {
+                    this._drawTableHeader(36, 'Downloads');
                 }
+
             }
         };
 
         // fill values
-        group.forEach((product: Product) => {
 
-            columns.push({ dataKey: product.name, title: product.name });
+        columns.push({ dataKey: product._name, title: product._name });
 
-            let lineW = this._docConfig.lineWidth + 0.5;
-            if (this._data.settings.showHighlights) {
-                lineW = lineW + 4;
-            }
+        let lineW = this._docConfig.lineWidth + 0.5;
+        if (this._data.settings.showHighlights) {
+            lineW = lineW + 4;
+        }
 
-            config.columnStyles[product.name] = {
-                columnWidth: pageWidth / 2 - this._docConfig.padding * 2,
-                cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW]
-            };
+        config.columnStyles[product._name] = {
+            columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 3,
+            cellPadding: [2.8, lineW, 2.8, lineW]
+        };
 
-            if (rows.length === 0) {
-                product.properties.forEach((property: Property) => {
-                    let row = {};
-                    if (this._data.settings.applyFilters) {
+        // fix
+        if (rows.length === 0) {
+            product._properties.forEach((property: Property) => {
+                let row = {};
+                if (this._data.settings.applyFilters) {
 
-                        const direction: 'afterValue' | 'beforeValue'
-                            = property.unit !== undefined &&
+                    const direction: 'afterValue' | 'beforeValue'
+                        = property.unit !== undefined &&
                             this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
-                                'beforeValue' : 'afterValue';
+                            'beforeValue' : 'afterValue';
 
-                        const filterMap = new Map(this._data.filters);
-                        const filterValue = filterMap.get(property.ifdguid) as any;
-                        let filterText = '';
+                    const filterMap = new Map(this._data.filters);
+                    const filterValue = filterMap.get(property.ifdguid) as any;
+                    let filterText = '';
 
-                        if (filterValue) {
-                            if (isArray(filterValue)) {
-                                // List Values
-                                const listValues: string[] = filterValue;
-                                listValues.forEach((v: string, index: number) => {
-                                    const val1 = v;
+                    if (filterValue) {
+                        if (isArray(filterValue)) {
+                            // List Values
+                            const listValues: string[] = filterValue;
+                            listValues.forEach((v: string, index: number) => {
+                                const val1 = v;
 
-                                    if (index === 0) {
-                                        filterText += val1;
-                                    } else {
-                                        filterText += ', ' + val1;
-                                    }
-                                });
-                            } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
-                                filterText = filterValue.lower + ' - ' + filterValue.upper;
-                            } else {
-                                filterText = filterValue.toString();
-                            }
-
-                            if (direction === 'afterValue') {
-                                filterText = filterText + ' ' + property.unit;
-                            } else {
-                                filterText = property.unit + ' ' + filterText;
-                            }
-                            row = { col1: property.name + `\n(${filterText})` };
+                                if (index === 0) {
+                                    filterText += val1;
+                                } else {
+                                    filterText += ', ' + val1;
+                                }
+                            });
+                        } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
+                            filterText = filterValue.lower + ' - ' + filterValue.upper;
                         } else {
-                            row = { col1: property.name };
+                            filterText = filterValue.toString();
                         }
+
+                        if (direction === 'afterValue') {
+                            filterText = filterText + ' ' + property.unit;
+                        } else {
+                            filterText = property.unit + ' ' + filterText;
+                        }
+                        row = { col1: property.name + `\n(${filterText})` };
                     } else {
                         row = { col1: property.name };
                     }
-                    rows.push(row);
-                });
-            }
-            product.properties.forEach((property: Property, index: number) => {
-
-                if (property.value !== undefined) {
-
-                    rows[index][product.name] = property.value.toString();
-                }
-            });
-        });
-        this._doc.autoTable(columns, rows, config);
-    }
-    // draw Table Header
-    private _formatTableHeader(product: Product, showProductsImage: boolean = false) {
-
-        const pageWidth = this._doc.internal.pageSize.getWidth();
-
-        const styles = {
-            fillColor: [246, 246, 246],
-            lineWidth: 0,
-            fontStyle: 'normal',
-            cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
-            fontSize: 9,
-            textColor: 0,
-            overflow: 'linebreak',
-            valign: 'middle'
-        };
-        const borders: any[] = [];
-
-        const config: any = {
-            styles,
-            margin: {
-                top: showProductsImage ? IMAGES_TOP + IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2 : IMAGES_TOP,
-                left: this._docConfig.padding + this._docConfig.lineWidth / 2
-            },
-            columnStyles: {
-                col1: {}
-            },
-            alternateRowStyles: styles,
-            tableWidth: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
-            drawCell: (cell: any, opts: any) => {
-                if (opts.column.dataKey === 'col1') {
-
-                    this._doc.setFont('GothamMedium', 'normal');
                 } else {
-
-                    this._doc.setFont('GothamLight', 'normal');
+                    row = { col1: property.name };
                 }
-            },
-            drawHeaderCell: (cell: any, opts: any) => {
+                rows.push(row);
+            });
+        }
+        product._properties.forEach((property: Property, index: number) => {
 
-                this._doc.setFont('GothamMedium', 'normal');
-            },
-            drawHeaderRow: (row: any, opts: any) => {
+            if (property.value !== undefined) {
 
-                // set border row
-                borders.push({
-                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                    top: row.y + row.height - 0.1,
-                    width: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
-                    height: 0.1
-                });
-            },
-            drawRow: (row: any, opts: any) => {
-
-                // set border row
-                borders.push({
-                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                    top: row.y + row.height - 0.1,
-                    width: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
-                    height: 0.1
-                });
+                rows[index][product._name] = property.value.toString();
             }
-        };
-
-        // first column
-        const columns: any[] = [{ dataKey: 'col1', title: '' }];
-        const rows: any[] = [
-            { col1: this._data.settings.translations.layout.supplierName }
-        ];
-
-        // second column
-        columns.push({ dataKey: product.name, title: product.name });
-        rows[0][product.name] = product.supplier;
-
-        config.columnStyles[product.name] = {
-            columnWidth: pageWidth / 2 - this._docConfig.padding * 2
-        };
+        });
 
         this._doc.autoTable(columns, rows, config);
-        this._doc.setFillColor(0, 0, 0);
-        borders.forEach((border: any) => {
-            this._doc.rect(border.left, border.top, border.width, border.height, 'F');
+    }
+
+    private _drawGallery() {
+        this._doc.addPage();
+        const pageHeight = this._doc.internal.pageSize.getHeight();
+        const imageWidth = pageHeight / 3 - (this._docConfig.padding * 2 + 2)  ;
+
+        const initialTop = 26;
+        const column1 = 10;
+        const column2 = imageWidth + this._docConfig.padding * 1.7 ;
+
+        let imageLeft = column1;
+        let imageTop = initialTop;
+
+        this._data.productDetail._imageGallery.forEach((imageUrl: string, i: number) => {
+
+            imageLeft = (i % 2 !== 0) ? column2 : column1;
+
+            if ((imageTop + imageWidth) >= (pageHeight - 20)) {
+                imageTop = initialTop;
+                this._doc.addPage();
+            }
+            try {
+                this._doc.addImage(
+                    imageUrl,
+                    imageLeft,
+                    imageTop,
+                    imageWidth,
+                    imageWidth
+                );
+            } catch (e) {
+                console.log('Error loading image: ' + imageUrl);
+            }
+            if (i % 2 !== 0) {
+                imageTop += imageWidth + 4;
+            }
         });
     }
- */
-
 }
