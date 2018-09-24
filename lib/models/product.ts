@@ -1,7 +1,6 @@
 import { Property } from './property.interface';
 import { Download } from './download.interface';
 import { Detail } from './detail/detail.interface';
-import { JsonParser } from '../../dist/models/json-parser';
 
 export class Product {
 
@@ -10,9 +9,19 @@ export class Product {
         return this._name;
     }
 
+    public set name(name: string){
+
+        this._name = name;
+    }
+
     public get supplier(): string {
 
         return this._supplier;
+    }
+
+    public set supplier(supplier: string) {
+
+        this._supplier = supplier;
     }
 
     public get imageUrl(): string {
@@ -20,9 +29,19 @@ export class Product {
         return this._imageUrl;
     }
 
+    public set imageUrl(imageUrl: string) {
+
+        this._imageUrl = imageUrl;
+    }
+
     public get imageGallery(): string[] {
 
         return this._imageGallery;
+    }
+
+    public set imageGallery(imageGallery: string []) {
+
+        this._imageGallery = JSON.parse(JSON.stringify(imageGallery));
     }
 
     public get properties(): Property[] {
@@ -30,28 +49,43 @@ export class Product {
         return this._properties;
     }
 
+    public set properties(properties: Property[]) {
+
+        this._properties = JSON.parse(JSON.stringify(properties));
+    }
+
     public get downloads(): Download {
 
         return this._downloads;
+    }
+    
+    public set downloads(downloads: Download) {
+
+       this._downloads = JSON.parse(JSON.stringify(downloads));
     }
 
     public get details(): Detail[] {
         return this._details;
     }
 
-    public _name: string;
+    public set details(details: Detail[]){
 
-    public _supplier: string;
+        this._details = JSON.parse(JSON.stringify(details));
+    }
 
-    public _imageUrl: string;
+    private _name: string;
 
-    public _imageGallery: string [];
+    private _supplier: string;
 
-    public _properties: Property[];
+    private _imageUrl: string;
 
-    public _downloads?: Download;
+    private _imageGallery: string [];
 
-    public _details: Detail[];
+    private _properties: Property[];
+
+    private _downloads?: Download;
+
+    private _details: Detail[];
 
     constructor(name: string, supplier: string) {
 
@@ -68,23 +102,8 @@ export class Product {
         this._properties.push(property);
     }
 
-    public addImageUrl(imageUrl: string): void {
-
-        this._imageUrl = imageUrl;
-    }
-
-    public addDetails(details: Detail): void {
-
-        this._details = JSON.parse(JSON.stringify(details));
-    }
-
     public addImageGallery(imageUrl: string): void {
 
         this._imageGallery.push(imageUrl);
-    }
-
-    public addDownloads(downloads: Download): void {
-
-       this._downloads = JSON.parse(JSON.stringify(downloads));
     }
 }

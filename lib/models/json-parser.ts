@@ -190,11 +190,11 @@ export abstract class JsonParser {
             if (jsonproduct.productData.primaryImage) {
                 const imgUrl = data.settings.productsImageApiPath
                     + jsonproduct.productData.primaryImage.uuid + '/content/' + jsonproduct.productData.primaryImage.content  + '?quality=80&background=white&mode=pad&width=160&height=160';
-                product.addImageUrl(imgUrl);
+                product.imageUrl = imgUrl;
             } else {
 
                 Check.notNullOrUndefined(settings.placeholderUrl, 'settings.placeholderUrl');
-                product.addImageUrl(settings.placeholderUrl);
+                product.imageUrl = settings.placeholderUrl;
             }
         }
 
@@ -306,13 +306,13 @@ export abstract class JsonParser {
         if (jsonproduct.productData.details !== undefined ) {
 
             Check.isArray(jsonproduct.productData.details, 'productData.details');
-            product.addDetails(jsonproduct.productData.details);
+            product.details = jsonproduct.productData.details;
         }
 
         // parse downloads
         if (jsonproduct.productData.downloads !== undefined) {
 
-            product.addDownloads(jsonproduct.productData.downloads);
+            product.downloads = jsonproduct.productData.downloads;
         }
 
         // parse imagesGallery

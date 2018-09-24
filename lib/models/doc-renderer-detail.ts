@@ -56,11 +56,11 @@ export class DocRendererDetail implements IDocRenderer {
 
         // title
         let topIndex = 36;
-        this._drawText(this._data.productDetail._name, maxLineWidth, 20, 10, topIndex, [9, 4, 3], ['GothamMedium', 'normal']);
+        this._drawText(this._data.productDetail.name, maxLineWidth, 20, 10, topIndex, [9, 4, 3], ['GothamMedium', 'normal']);
 
         // subtitles
         topIndex += 9;
-        this._drawText(this._data.productDetail._supplier, maxLineWidth, 20, 10, topIndex, [80, 87, 98], ['GothamLight', 'normal']);
+        this._drawText(this._data.productDetail.supplier, maxLineWidth, 20, 10, topIndex, [80, 87, 98], ['GothamLight', 'normal']);
 
         return topIndex;
     }
@@ -81,7 +81,7 @@ export class DocRendererDetail implements IDocRenderer {
 
     // draw Primary Image
     private _drawPrimaryImage(): any {
-        const imageUrl = this._data.productDetail._imageUrl;
+        const imageUrl = this._data.productDetail.imageUrl;
         const pageWidth = this._doc.internal.pageSize.getWidth();
 
         const imageTop = 30 - this._docConfig.lineWidth;
@@ -116,7 +116,7 @@ export class DocRendererDetail implements IDocRenderer {
 
     // draw details
     private _drawDetails(topIndex: number, imageMargin: any) {
-        const details = this._data.productDetail._details;
+        const details = this._data.productDetail.details;
         // fix
         const marginTop = topIndex + 20;
 
@@ -194,7 +194,7 @@ export class DocRendererDetail implements IDocRenderer {
         // draw header
         this._doc.setFont('GothamMedium', 'normal');
         this._doc.setFontSize(12);
-        this._doc.setFillColor(230, 231, 233);
+        this._doc.setFillColor(240, 240, 240);
         this._doc.setTextColor(0, 0, 0);
         this._doc.rect(
             this._docConfig.padding + this._docConfig.lineWidth / 2,
@@ -209,7 +209,7 @@ export class DocRendererDetail implements IDocRenderer {
         const verticalOffset = this._verticalOffset(project, 12, 12.9);
 
         this._doc.setFont('GothamLight', 'normal');
-        this._doc.text(' - ' + this._data.productDetail._name, verticalOffset, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
+        this._doc.text(' - ' + this._data.productDetail.name, verticalOffset, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
 
         this._doc.setFontStyle('bold')
                 .setFont('GothamMedium', 'normal')
@@ -219,7 +219,7 @@ export class DocRendererDetail implements IDocRenderer {
         // draw footer
         this._doc.setFont('GothamMedium', 'normal');
         this._doc.setFontSize(9);
-        this._doc.setFillColor(246, 246, 246);
+        this._doc.setFillColor(240, 240, 240);
         this._doc.rect(
             this._docConfig.padding + this._docConfig.lineWidth / 2,
             pageHeight - (this._docConfig.padding + this._docConfig.lineWidth / 2 + 10),
@@ -292,14 +292,14 @@ export class DocRendererDetail implements IDocRenderer {
 
                 if (opts.column.index !== 0) {
 
-                    if (product._properties[opts.row.index].ckeck !== undefined) {
+                    if (product.properties[opts.row.index].ckeck !== undefined) {
 
                         checkImages.push({
                             left: cell.x + 3,
                             top: cell.y + cell.height / 2 - 1.5,
                             width: 3,
                             height: 3,
-                            check: product._properties[opts.row.index].ckeck
+                            check: product.properties[opts.row.index].ckeck
                         });
                     }
                 }
@@ -362,20 +362,20 @@ export class DocRendererDetail implements IDocRenderer {
 
         // fill values
 
-        columns.push({ dataKey: product._name, title: product._name });
+        columns.push({ dataKey: product.name, title: product.name });
 
         let lineW = this._docConfig.lineWidth + 0.5;
         if (this._data.settings.showHighlights) {
             lineW = lineW + 4;
         }
 
-        config.columnStyles[product._name] = {
+        config.columnStyles[product.name] = {
             columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 3,
             cellPadding: [2.8, lineW, 2.8, lineW]
         };
 
         if (rows.length === 0) {
-            product._properties.forEach((property: Property) => {
+            product.properties.forEach((property: Property) => {
                 let row = {};
                 if (this._data.settings.applyFilters) {
 
@@ -422,11 +422,11 @@ export class DocRendererDetail implements IDocRenderer {
                 rows.push(row);
             });
         }
-        product._properties.forEach((property: Property, index: number) => {
+        product.properties.forEach((property: Property, index: number) => {
 
             if (property.value !== undefined) {
 
-                rows[index][product._name] = property.value.toString();
+                rows[index][product.name] = property.value.toString();
             }
         });
 
@@ -492,14 +492,14 @@ export class DocRendererDetail implements IDocRenderer {
                 // fix
                 if (opts.column.index !== 0) {
 
-                    if (product._properties[opts.row.index].ckeck !== undefined) {
+                    if (product.properties[opts.row.index].ckeck !== undefined) {
 
                         checkImages.push({
                             left: cell.x + 3,
                             top: cell.y + cell.height / 2 - 1.5,
                             width: 3,
                             height: 3,
-                            check: product._properties[opts.row.index].ckeck
+                            check: product.properties[opts.row.index].ckeck
                         });
                     }
                 }
@@ -562,21 +562,21 @@ export class DocRendererDetail implements IDocRenderer {
 
         // fill values
 
-        columns.push({ dataKey: product._name, title: product._name });
+        columns.push({ dataKey: product.name, title: product.name });
 
         let lineW = this._docConfig.lineWidth + 0.5;
         if (this._data.settings.showHighlights) {
             lineW = lineW + 4;
         }
 
-        config.columnStyles[product._name] = {
+        config.columnStyles[product.name] = {
             columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 3,
             cellPadding: [2.8, lineW, 2.8, lineW]
         };
 
         // fix
         if (rows.length === 0) {
-            product._properties.forEach((property: Property) => {
+            product.properties.forEach((property: Property) => {
                 let row = {};
                 if (this._data.settings.applyFilters) {
 
@@ -623,11 +623,11 @@ export class DocRendererDetail implements IDocRenderer {
                 rows.push(row);
             });
         }
-        product._properties.forEach((property: Property, index: number) => {
+        product.properties.forEach((property: Property, index: number) => {
 
             if (property.value !== undefined) {
 
-                rows[index][product._name] = property.value.toString();
+                rows[index][product.name] = property.value.toString();
             }
         });
 
@@ -646,7 +646,7 @@ export class DocRendererDetail implements IDocRenderer {
         let imageLeft = column1;
         let imageTop = initialTop;
 
-        this._data.productDetail._imageGallery.forEach((imageUrl: string, i: number) => {
+        this._data.productDetail.imageGallery.forEach((imageUrl: string, i: number) => {
 
             imageLeft = (i % 2 !== 0) ? column2 : column1;
 

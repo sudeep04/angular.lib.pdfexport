@@ -44,8 +44,13 @@ export class Data {
     }
 
     public setProductDetail(product: Product) {
-
-        this._productDetail = JSON.parse(JSON.stringify(product));
+        
+        this._productDetail = new Product(product.name, product.supplier);
+        this._productDetail.imageUrl = product.imageUrl;
+        this._productDetail.imageGallery = product.imageGallery;
+        this._productDetail.properties = product.properties;
+        this._productDetail.downloads = product.downloads;
+        this._productDetail.details = product.details;
     }
 
     public addProduct(product: Product): void {
@@ -114,7 +119,7 @@ export class Data {
 
             const updatedProduct = new Product(product.name, product.supplier);
 
-            updatedProduct.addImageUrl(product.imageUrl);
+            updatedProduct.imageUrl = product.imageUrl;
 
             properties.forEach((p: Property, index: number) => {
 
