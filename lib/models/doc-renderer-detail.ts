@@ -126,7 +126,6 @@ export class DocRendererDetail implements IDocRenderer {
     private _drawDetailsText(details: any[], marginTop: number, imageMargin: number) {
 
         if (details.length === 0) {
-            if (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) {marginTop = imageMargin; }
 
             this._drawBody(marginTop);
         } else {
@@ -151,7 +150,7 @@ export class DocRendererDetail implements IDocRenderer {
             }
 
             const widthColumn = (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
-                this._doc.internal.pageSize.getWidth() / 2 : this._doc.internal.pageSize.getWidth() - 30;
+                this._doc.internal.pageSize.getWidth() / 2  - this._docConfig.padding : this._doc.internal.pageSize.getWidth() - 30;
 
             const margins = {
                 top: 36,
@@ -178,7 +177,9 @@ export class DocRendererDetail implements IDocRenderer {
                     elementHandlers: specialElementHandlers
                 },
                 (dispose) => {
-                    this._drawDetailsText(details, dispose.y, imageMargin);
+                    const y  = (dispose.y < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
+                        imageMargin : dispose.y;
+                    this._drawDetailsText(details, y, imageMargin);
                 },
                 margins
             );
