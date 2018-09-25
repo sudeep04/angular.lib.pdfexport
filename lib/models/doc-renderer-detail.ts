@@ -161,8 +161,8 @@ export class DocRendererDetail implements IDocRenderer {
 
             const detail = details.pop();
             const div = document.createElement('div');
-
-            div.innerHTML = detail.content.replace('–', '-');
+            const css = '<style> * { font-family: sans-serif !important; font-size: 11pt !important;}; </style>';
+            div.innerHTML = css + detail.content.replace('–', '-') ;
 
             // draw title
             this._drawText(detail.name, margins.width, 20, margins.left, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
