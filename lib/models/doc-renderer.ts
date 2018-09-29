@@ -224,17 +224,19 @@ export class DocRenderer implements IDocRenderer {
                                 filterText = filterValue.toString();
                             }
 
+                        
+   
 
                         if (typeof  property.unit == 'undefined')
                         {
                             filterText = filterText;
                         }else
                         {
-                            if (direction === 'afterValue') {
-                                filterText = filterText + ' ' + property.unit;
-                            } else {
-                                filterText = property.unit + ' ' + filterText;
-                            }
+                        if (direction === 'afterValue') {
+                            filterText = filterText + ' ' + property.unit;
+                        } else {
+                            filterText = property.unit + ' ' + filterText;
+                        }
                     }
                             row = { col1: property.name + `\n(${filterText})` };
                         } else {
