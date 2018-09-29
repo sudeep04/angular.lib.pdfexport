@@ -11,22 +11,22 @@ import { JsonParser } from './json-parser';
 import { isArray } from 'util';
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
-//const HEADER_TOP = 48;
+// const HEADER_TOP = 48;
 export class DocRenderer {
     constructor() {
         this._doc = new jsPDF();
         this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
         this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
     }
-    drow(jsonData, docConfig) {
+    draw(jsonData, docConfig) {
         this._data = JsonParser.parseData(jsonData);
         this._docConfig = docConfig;
         let lastPage = 1;
         this._data.groups.forEach((group, index) => {
-            this._drowBody(group);
+            this._drawBody(group);
             for (let i = lastPage + 1; i < this._doc.internal.pages.length; i++) {
                 this._doc.setPage(i);
-                this._drowHeader(group, false);
+                this._drawHeader(group, false);
             }
             lastPage = this._doc.internal.pages.length;
             if (index < this._data.groups.length - 1) {
@@ -35,14 +35,14 @@ export class DocRenderer {
         });
         for (let i = 1; i < this._doc.internal.pages.length; i++) {
             this._doc.setPage(i);
-            this._drowLayout(i);
+            this._drawLayout(i);
         }
     }
     save() {
         this._doc.save(this._data.settings.fileName);
     }
-    _drowBody(group) {
-        this._drowHeader(group, this._data.settings.showProductsImage);
+    _drawBody(group) {
+        this._drawHeader(group, this._data.settings.showProductsImage);
         let isFirstWithoutImages = !this._data.settings.showProductsImage;
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const columns = [{ dataKey: 'col1', title: '' }];
@@ -151,12 +151,12 @@ export class DocRenderer {
                         const direction = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit) => unit === property.unit) ?
                             'beforeValue'
                             : 'afterValue';
-                        let filterMap = new Map(this._data.filters);
+                        const filterMap = new Map(this._data.filters);
                         const filterValue = filterMap.get(property.ifdguid);
                         let filterText = '';
                         if (filterValue) {
                             if (isArray(filterValue)) {
-                                //List Values
+                                // List Values
                                 const listValues = filterValue;
                                 listValues.forEach((v, index) => {
                                     const val1 = v;
@@ -168,19 +168,24 @@ export class DocRenderer {
                                     }
                                 });
                             }
-                            else if (filterValue.upper != undefined && filterValue.lower != undefined) {
+                            else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
                                 filterText = filterValue.lower + ' - ' + filterValue.upper;
                             }
                             else {
                                 filterText = filterValue.toString();
                             }
-                            if (direction === 'afterValue') {
-                                filterText = filterText + ' ' + property.unit;
+                            if (typeof property.unit == 'undefined') {
+                                filterText = filterText;
                             }
                             else {
-                                filterText = property.unit + ' ' + filterText;
+                                if (direction === 'afterValue') {
+                                    filterText = filterText + ' ' + property.unit;
+                                }
+                                else {
+                                    filterText = property.unit + ' ' + filterText;
+                                }
                             }
-                            row = { col1: property.name + ` (${filterText})` };
+                            row = { col1: property.name + `\n(${filterText})` };
                         }
                         else {
                             row = { col1: property.name };
@@ -200,7 +205,7 @@ export class DocRenderer {
         });
         this._doc.autoTable(columns, rows, config);
     }
-    _drowHeader(group, showProductsImage) {
+    _drawHeader(group, showProductsImage) {
         const pageWidth = this._doc.internal.pageSize.getWidth();
         if (showProductsImage) {
             group.forEach((product, index) => {
@@ -293,7 +298,13 @@ export class DocRenderer {
             }
         };
         group.forEach((product) => {
-            columns.push({ dataKey: product.name, title: product.name });
+            let productName = product.name;
+            if (product.name.length === 26 || product.name.length === 27) {
+                let x = productName.split(" ");
+                x[x.length - 1] = "\n" + x[x.length - 1];
+                productName = x.join(" ");
+            }
+            columns.push({ dataKey: product.name, title: productName });
             rows[0][product.name] = product.supplier;
             config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth };
         });
@@ -303,7 +314,7 @@ export class DocRenderer {
             this._doc.rect(border.left, border.top, border.width, border.height, 'F');
         });
     }
-    _drowLayout(index) {
+    _drawLayout(index) {
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const pageHeight = this._doc.internal.pageSize.getHeight();
         const columns = [
@@ -311,8 +322,11 @@ export class DocRenderer {
             { dataKey: 'col2' }
         ];
         const rows = [
-            { col1: this._data.settings.captions.project, col2: this._data.settings.translations.layout.date + ": " + moment(Date.now()).format('DD.MM.YY') },
-            { col1: this._data.settings.captions.bearbeiter, col2: this._data.settings.translations.layout.page + ": " + ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
+            { col1: this._data.settings.captions.project, col2: this._data.settings.translations.layout.date + ': ' + moment(Date.now()).format('DD.MM.YY') },
+            {
+                col1: this._data.settings.captions.bearbeiter, col2: this._data.settings.translations.layout.page + ': ' + ('0' + index).slice(-2) + '/'
+                    + ('0' + (this._doc.internal.pages.length - 1)).slice(-2)
+            }
         ];
         const styles = {
             fillColor: [246, 246, 246],

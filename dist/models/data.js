@@ -9,12 +9,23 @@ export class Data {
     get filters() {
         return this._filters;
     }
+    get productDetail() {
+        return this._productDetail;
+    }
     constructor(settings, filters) {
         this._settings = settings;
         this._groups = [];
         this._properties = [];
         this._groups.push([]);
         this._filters = filters;
+    }
+    setProductDetail(product) {
+        this._productDetail = new Product(product.name, product.supplier);
+        this._productDetail.imageUrl = product.imageUrl;
+        this._productDetail.imageGallery = product.imageGallery;
+        this._productDetail.properties = product.properties;
+        this._productDetail.downloads = product.downloads;
+        this._productDetail.details = product.details;
     }
     addProduct(product) {
         if (this._groups[this._groups.length - 1].length > 2) {
@@ -25,19 +36,19 @@ export class Data {
         this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._properties);
     }
     _updateProperties(product) {
-        //var filtersMap = new Map(this._filters);
+        // var filtersMap = new Map(this._filters);
         product.properties.forEach((property) => {
             if (!this._properties.find((prop) => prop.name === property.name)) {
-                //if (!this._settings.applyFilters || (filtersMap && filtersMap.has(property.ifdguid) && this._match(filtersMap.get(property.ifdguid), property.originalValue))) {
+                // if (!this._settings.applyFilters || (filtersMap && filtersMap.has(property.ifdguid) && this._match(filtersMap.get(property.ifdguid), property.originalValue))) {
                 this._properties.push(property);
-                //}
+                // }
             }
         });
         this._sortProperties(this._properties);
     }
     _match(filter, value) {
-        if (filter.lower != undefined && filter.upper != undefined) {
-            if (value.lower != undefined && value.upper != undefined) {
+        if (filter.lower !== undefined && filter.upper !== undefined) {
+            if (value.lower !== undefined && value.upper !== undefined) {
                 return value.lower >= filter.lower && value.lower <= filter.upper && value.upper >= filter.lower && value.upper <= filter.upper;
             }
             else {
@@ -45,9 +56,10 @@ export class Data {
             }
         }
         else if (Array.isArray(filter) || Array.isArray(value)) {
-            for (var i = 0; i < filter.length; i++) {
-                if (value.indexOf(filter[i]) === -1)
+            for (const i of filter) {
+                if (value.indexOf(filter[i]) === -1) {
                     return false;
+                }
             }
             return true;
         }
@@ -67,7 +79,7 @@ export class Data {
         const updatedGroup = [];
         group.forEach((product) => {
             const updatedProduct = new Product(product.name, product.supplier);
-            updatedProduct.addImageUrl(product.imageUrl);
+            updatedProduct.imageUrl = product.imageUrl;
             properties.forEach((p, index) => {
                 const prop = product.properties.find((property) => property.name === p.name);
                 if (prop) {

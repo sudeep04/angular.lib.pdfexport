@@ -19,6 +19,11 @@ export class Data {
         return this._filters;
     }
 
+    public get productDetail() {
+
+        return this._productDetail;
+    }
+
     private _groups: Product[][];
 
     private _properties: Property[];
@@ -27,6 +32,8 @@ export class Data {
 
     private _filters: any[];
 
+    private _productDetail?: Product;
+
     constructor(settings: Settings, filters: any[]) {
 
         this._settings = settings;
@@ -34,6 +41,16 @@ export class Data {
         this._properties = [];
         this._groups.push([]);
         this._filters = filters;
+    }
+
+    public setProductDetail(product: Product) {
+        
+        this._productDetail = new Product(product.name, product.supplier);
+        this._productDetail.imageUrl = product.imageUrl;
+        this._productDetail.imageGallery = product.imageGallery;
+        this._productDetail.properties = product.properties;
+        this._productDetail.downloads = product.downloads;
+        this._productDetail.details = product.details;
     }
 
     public addProduct(product: Product): void {
@@ -48,40 +65,38 @@ export class Data {
     }
 
     private _updateProperties(product: Product): void {
-        
-        //var filtersMap = new Map(this._filters);
+
+        // var filtersMap = new Map(this._filters);
 
         product.properties.forEach((property: Property) => {
             if (!this._properties.find((prop: Property) => prop.name === property.name)) {
-                //if (!this._settings.applyFilters || (filtersMap && filtersMap.has(property.ifdguid) && this._match(filtersMap.get(property.ifdguid), property.originalValue))) {
+                // if (!this._settings.applyFilters || (filtersMap && filtersMap.has(property.ifdguid) && this._match(filtersMap.get(property.ifdguid), property.originalValue))) {
 
                     this._properties.push(property);
-                //}
+                // }
             }
         });
 
         this._sortProperties(this._properties);
     }
 
-    private _match(filter:any, value: any): boolean {
+    private _match(filter: any, value: any): boolean {
 
-        if(filter.lower!=undefined && filter.upper!=undefined){
-            if(value.lower!=undefined && value.upper!=undefined){
-                return value.lower>=filter.lower && value.lower<=filter.upper && value.upper>=filter.lower && value.upper<=filter.upper;
-            }else{
-                return value>=filter.lower && value<=filter.upper;
+        if (filter.lower !== undefined && filter.upper !== undefined) {
+            if (value.lower !== undefined && value.upper !== undefined) {
+                return value.lower >= filter.lower && value.lower <= filter.upper && value.upper >= filter.lower && value.upper <= filter.upper;
+            } else {
+                return value >= filter.lower && value <= filter.upper;
             }
-        }else if(Array.isArray(filter) || Array.isArray(value))
-        {
-            for(var i = 0; i < filter.length; i++){
-                if(value.indexOf(filter[i]) === -1)
-                   return false;
-              }
-              return true;
-        }
-        else
-        {
-            return JSON.stringify({value}) === JSON.stringify({value:filter});
+        } else if (Array.isArray(filter) || Array.isArray(value)) {
+            for (const i of filter) {
+                if (value.indexOf(filter[i]) === -1) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return JSON.stringify({value}) === JSON.stringify({value: filter});
         }
     }
 
@@ -104,7 +119,7 @@ export class Data {
 
             const updatedProduct = new Product(product.name, product.supplier);
 
-            updatedProduct.addImageUrl(product.imageUrl);           
+            updatedProduct.imageUrl = product.imageUrl;
 
             properties.forEach((p: Property, index: number) => {
 
@@ -113,7 +128,7 @@ export class Data {
                     updatedProduct.properties.push(prop);
                 } else {
 
-                    updatedProduct.properties.push({ name: p.name,ifdguid:p.ifdguid,originalValue:' ',unit:p.unit,value:' ',type:p.type });
+                    updatedProduct.properties.push({ name: p.name, ifdguid: p.ifdguid, originalValue: ' ', unit: p.unit, value: ' ', type: p.type });
                 }
             });
             updatedGroup.push(updatedProduct);

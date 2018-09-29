@@ -13,12 +13,13 @@ import { Property } from './property.interface';
 import { logoImg } from './imagesBase64/logo-img';
 import { JsonParser } from './json-parser';
 import { isArray, isObject } from 'util';
+import { IDocRenderer } from './doc-renderer.interface';
 
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
-//const HEADER_TOP = 48;
+// const HEADER_TOP = 48;
 
-export class DocRenderer {
+export class DocRenderer implements IDocRenderer {
 
     private _doc: any;
 
@@ -33,7 +34,7 @@ export class DocRenderer {
         this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
     }
 
-    public drow(jsonData: any, docConfig: DocConfig) {
+    public draw(jsonData: any, docConfig: DocConfig) {
 
         this._data = JsonParser.parseData(jsonData);
         this._docConfig = docConfig;
@@ -42,10 +43,10 @@ export class DocRenderer {
 
         this._data.groups.forEach((group: Product[], index: number) => {
 
-            this._drowBody(group);
+            this._drawBody(group);
             for (let i = lastPage + 1; i < this._doc.internal.pages.length; i++) {
                 this._doc.setPage(i);
-                this._drowHeader(group, false);
+                this._drawHeader(group, false);
             }
             lastPage = this._doc.internal.pages.length;
             if (index < this._data.groups.length - 1) {
@@ -56,7 +57,7 @@ export class DocRenderer {
 
         for (let i = 1; i < this._doc.internal.pages.length; i++) {
             this._doc.setPage(i);
-            this._drowLayout(i);
+            this._drawLayout(i);
         }
     }
 
@@ -65,9 +66,9 @@ export class DocRenderer {
         this._doc.save(this._data.settings.fileName);
     }
 
-    private _drowBody(group: Product[]) {
+    private _drawBody(group: Product[]) {
 
-        this._drowHeader(group, this._data.settings.showProductsImage);
+        this._drawHeader(group, this._data.settings.showProductsImage);
 
         let isFirstWithoutImages = !this._data.settings.showProductsImage;
 
@@ -188,28 +189,25 @@ export class DocRenderer {
 
             columns.push({ dataKey: product.name, title: product.name });
             let lineW = this._docConfig.lineWidth + 0.5;
-            if(this._data.settings.showHighlights)
-            {
+            if (this._data.settings.showHighlights) {
                 lineW = lineW + 4;
             }
             config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW] };
             if (rows.length === 0) {
                 product.properties.forEach((property: Property) => {
                     let row = {};
-                    if(this._data.settings.applyFilters){
+                    if (this._data.settings.applyFilters) {
                         const direction: 'afterValue' | 'beforeValue'
                                 = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
                                     'beforeValue'
                                     : 'afterValue';
-                        let filterMap = new Map(this._data.filters);
+                        const filterMap = new Map(this._data.filters);
                         const filterValue = filterMap.get(property.ifdguid) as any;
                         let filterText = '';
 
-                        if(filterValue)
-                        {
-                            if(isArray(filterValue))
-                            {
-                                //List Values
+                        if (filterValue) {
+                            if (isArray(filterValue)) {
+                                // List Values
                                 const listValues: string[] = filterValue;
                                 listValues.forEach((v: string, index: number) => {
                                 const val1 = v;
@@ -220,31 +218,31 @@ export class DocRenderer {
                                     filterText += ', ' + val1;
                                 }
                             });
-                        }
-                        else if(filterValue.upper!=undefined&& filterValue.lower!=undefined)
-                        {
-                            filterText = filterValue.lower + ' - ' + filterValue.upper;
-                        }
-                         else  {
+                            } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
+                                filterText = filterValue.lower + ' - ' + filterValue.upper;
+                            } else {
                                 filterText = filterValue.toString();
                             }
 
                         
    
 
+                        if (typeof  property.unit == 'undefined')
+                        {
+                            filterText = filterText;
+                        }else
+                        {
                         if (direction === 'afterValue') {
                             filterText = filterText + ' ' + property.unit;
                         } else {
                             filterText = property.unit + ' ' + filterText;
                         }
-                        row = { col1: property.name + ` (${filterText})` };
-                        }
-                        else
-                        {
+                    }
+                            row = { col1: property.name + `\n(${filterText})` };
+                        } else {
                             row = { col1: property.name };
                         }
-                    }
-                    else{
+                    } else {
                         row = { col1: property.name };
                     }
                     rows.push(row);
@@ -261,7 +259,7 @@ export class DocRenderer {
         this._doc.autoTable(columns, rows, config);
     }
 
-    private _drowHeader(group: Product[], showProductsImage: boolean) {
+    private _drawHeader(group: Product[], showProductsImage: boolean) {
 
         const pageWidth = this._doc.internal.pageSize.getWidth();
 
@@ -276,13 +274,13 @@ export class DocRenderer {
                             IMAGES_TOP + IMAGES_PADING_TOP,
                             this._docConfig.columnWidth,
                             this._docConfig.columnWidth);
-                        try{
+                        try {
                             this._doc.addImage(product.imageUrl,
                                 pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2,
                                 IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
                                 this._docConfig.columnWidth - 6.4,
                                 this._docConfig.columnWidth - 6.4);
-                        }catch(e){
+                        } catch (e) {
                             this._doc.addImage(this._data.settings.placeholderUrl,
                                 pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2,
                                 IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
@@ -296,13 +294,13 @@ export class DocRenderer {
                             IMAGES_TOP + IMAGES_PADING_TOP,
                             this._docConfig.columnWidth,
                             this._docConfig.columnWidth);
-                        try{
+                        try {
                             this._doc.addImage(product.imageUrl,
                                 pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2,
                                 IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
                                 this._docConfig.columnWidth - 6.4,
                                 this._docConfig.columnWidth - 6.4);
-                        }catch(e){
+                        } catch (e) {
                             this._doc.addImage(this._data.settings.placeholderUrl,
                                 pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2,
                                 IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
@@ -316,13 +314,13 @@ export class DocRenderer {
                             IMAGES_TOP + IMAGES_PADING_TOP,
                             this._docConfig.columnWidth,
                             this._docConfig.columnWidth);
-                        try{
+                        try {
                             this._doc.addImage(product.imageUrl,
                                 pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2,
                                 IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
                                 this._docConfig.columnWidth - 6.4,
                                 this._docConfig.columnWidth - 6.4);
-                        }catch(e){
+                        } catch (e) {
                             this._doc.addImage(this._data.settings.placeholderUrl,
                                 pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2,
                                 IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
@@ -404,7 +402,15 @@ export class DocRenderer {
 
         group.forEach((product: Product) => {
 
-            columns.push({ dataKey: product.name, title: product.name });
+            let productName = product.name;
+            if(product.name.length === 26 || product.name.length === 27)
+            {
+                let x = productName.split(" ");
+                x[x.length -1 ] = "\n"+ x[x.length -1 ];
+                productName = x.join(" ");
+            }
+
+            columns.push({ dataKey: product.name, title: productName });
             rows[0][product.name] = product.supplier;
             config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth };
         });
@@ -418,7 +424,7 @@ export class DocRenderer {
         });
     }
 
-    private _drowLayout(index: number) {
+    private _drawLayout(index: number) {
 
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const pageHeight = this._doc.internal.pageSize.getHeight();
@@ -429,8 +435,11 @@ export class DocRenderer {
         ];
 
         const rows = [
-            { col1: this._data.settings.captions.project , col2: this._data.settings.translations.layout.date + ": " + moment(Date.now()).format('DD.MM.YY') },
-            { col1: this._data.settings.captions.bearbeiter, col2:this._data.settings.translations.layout.page + ": "+ ('0' + index).slice(-2) + '/' + ('0' + (this._doc.internal.pages.length - 1)).slice(-2) }
+            { col1: this._data.settings.captions.project, col2: this._data.settings.translations.layout.date + ': ' + moment(Date.now()).format('DD.MM.YY') },
+            {
+                col1: this._data.settings.captions.bearbeiter, col2: this._data.settings.translations.layout.page + ': ' + ('0' + index).slice(-2) + '/'
+                    + ('0' + (this._doc.internal.pages.length - 1)).slice(-2)
+            }
         ];
 
         const styles = {
