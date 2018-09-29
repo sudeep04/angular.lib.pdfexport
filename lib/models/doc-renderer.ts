@@ -224,11 +224,18 @@ export class DocRenderer implements IDocRenderer {
                                 filterText = filterValue.toString();
                             }
 
+
+                        if (typeof  property.unit == 'undefined')
+                        {
+                            filterText = filterText;
+                        }else
+                        {
                             if (direction === 'afterValue') {
                                 filterText = filterText + ' ' + property.unit;
                             } else {
                                 filterText = property.unit + ' ' + filterText;
                             }
+                    }
                             row = { col1: property.name + `\n(${filterText})` };
                         } else {
                             row = { col1: property.name };
@@ -393,7 +400,15 @@ export class DocRenderer implements IDocRenderer {
 
         group.forEach((product: Product) => {
 
-            columns.push({ dataKey: product.name, title: product.name });
+            let productName = product.name;
+            if(product.name.length === 26 || product.name.length === 27)
+            {
+                let x = productName.split(" ");
+                x[x.length -1 ] = "\n"+ x[x.length -1 ];
+                productName = x.join(" ");
+            }
+
+            columns.push({ dataKey: product.name, title: productName });
             rows[0][product.name] = product.supplier;
             config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth };
         });
