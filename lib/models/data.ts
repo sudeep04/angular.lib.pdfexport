@@ -44,7 +44,7 @@ export class Data {
     }
 
     public setProductDetail(product: Product) {
-        
+
         this._productDetail = new Product(product.name, product.supplier);
         this._productDetail.imageUrl = product.imageUrl;
         this._productDetail.imageGallery = product.imageGallery;

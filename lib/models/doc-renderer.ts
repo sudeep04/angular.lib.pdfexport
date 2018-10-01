@@ -127,13 +127,7 @@ export class DocRenderer implements IDocRenderer {
                     }
                 }
 
-                if (opts.column.dataKey === 'col1') {
-
-                    this._doc.setFont('GothamMedium', 'normal');
-                } else {
-
-                    this._doc.setFont('GothamLight', 'normal');
-                }
+                this._doc.setFont('GothamLight', 'normal');
             },
             drawHeaderCell: (cell: any, opts: any) => {
 
@@ -224,20 +218,15 @@ export class DocRenderer implements IDocRenderer {
                                 filterText = filterValue.toString();
                             }
 
-                        
-   
-
-                        if (typeof  property.unit == 'undefined')
-                        {
-                            filterText = filterText;
-                        }else
-                        {
-                        if (direction === 'afterValue') {
-                            filterText = filterText + ' ' + property.unit;
-                        } else {
-                            filterText = property.unit + ' ' + filterText;
-                        }
-                    }
+                            if (typeof property.unit === 'undefined') {
+                                filterText = filterText;
+                            } else {
+                                if (direction === 'afterValue') {
+                                    filterText = filterText + ' ' + property.unit;
+                                } else {
+                                    filterText = property.unit + ' ' + filterText;
+                                }
+                            }
                             row = { col1: property.name + `\n(${filterText})` };
                         } else {
                             row = { col1: property.name };
@@ -368,13 +357,7 @@ export class DocRenderer implements IDocRenderer {
             tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
 
-                if (opts.column.dataKey === 'col1') {
-
-                    this._doc.setFont('GothamMedium', 'normal');
-                } else {
-
-                    this._doc.setFont('GothamLight', 'normal');
-                }
+                this._doc.setFont('GothamLight', 'normal');
             },
             drawHeaderCell: (cell: any, opts: any) => {
 
@@ -403,11 +386,10 @@ export class DocRenderer implements IDocRenderer {
         group.forEach((product: Product) => {
 
             let productName = product.name;
-            if(product.name.length === 26 || product.name.length === 27)
-            {
-                let x = productName.split(" ");
-                x[x.length -1 ] = "\n"+ x[x.length -1 ];
-                productName = x.join(" ");
+            if (product.name.length === 26 || product.name.length === 27) {
+                const x = productName.split(' ');
+                x[x.length - 1 ] = '\n' + x[x.length - 1 ];
+                productName = x.join(' ');
             }
 
             columns.push({ dataKey: product.name, title: productName });
