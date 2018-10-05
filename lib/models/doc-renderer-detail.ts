@@ -427,7 +427,7 @@ export class DocRendererDetail implements IDocRenderer {
 
             if (property.value !== undefined) {
 
-                rows[index][product.name] = property.value.toString();
+                rows[index][product.name] = this._data.translate(property.value);
             }
         });
 
@@ -628,7 +628,7 @@ export class DocRendererDetail implements IDocRenderer {
 
             if (property.value !== undefined) {
 
-                rows[index][product.name] = property.value.toString();
+                rows[index][product.name] = this._data.translate(property.value);
             }
         });
 

@@ -58,6 +58,10 @@ export abstract class JsonParser {
                     brochure : 'Broschüre',
                     cadData : 'CAD Data',
                     bimModels: 'BIM Models'
+                },
+                booleanValues: {
+                    true: 'Yes',
+                    false: 'No'
                 }
             },
             showProductsImage: true,

@@ -210,34 +210,29 @@ export class DocRenderer implements IDocRenderer {
                                 // List Values
                                 const listValues: string[] = filterValue;
                                 listValues.forEach((v: string, index: number) => {
-                                const val1 = v;
+                                    const val1 = v;
 
-                                if (index === 0) {
-                                    filterText += val1;
-                                } else {
-                                    filterText += ', ' + val1;
-                                }
-                            });
+                                    if (index === 0) {
+                                        filterText += val1;
+                                    } else {
+                                        filterText += ', ' + val1;
+                                    }
+                                });
                             } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
                                 filterText = filterValue.lower + ' - ' + filterValue.upper;
                             } else {
                                 filterText = filterValue.toString();
                             }
 
-                        
-   
-
-                        if (typeof  property.unit == 'undefined')
-                        {
-                            filterText = filterText;
-                        }else
-                        {
-                        if (direction === 'afterValue') {
-                            filterText = filterText + ' ' + property.unit;
-                        } else {
-                            filterText = property.unit + ' ' + filterText;
-                        }
-                    }
+                            if (typeof property.unit == 'undefined') {
+                                filterText = filterText;
+                            } else {
+                                if (direction === 'afterValue') {
+                                    filterText = filterText + ' ' + property.unit;
+                                } else {
+                                    filterText = property.unit + ' ' + filterText;
+                                }
+                            }
                             row = { col1: property.name + `\n(${filterText})` };
                         } else {
                             row = { col1: property.name };
@@ -252,7 +247,7 @@ export class DocRenderer implements IDocRenderer {
 
                 if (property.value !== undefined) {
 
-                    rows[index][product.name] = property.value.toString();
+                    rows[index][product.name] = this._data.translate(property.value);
                 }
             });
         });
@@ -403,11 +398,10 @@ export class DocRenderer implements IDocRenderer {
         group.forEach((product: Product) => {
 
             let productName = product.name;
-            if(product.name.length === 26 || product.name.length === 27)
-            {
-                let x = productName.split(" ");
-                x[x.length -1 ] = "\n"+ x[x.length -1 ];
-                productName = x.join(" ");
+            if (product.name.length === 26 || product.name.length === 27) {
+                const x = productName.split(' ');
+                x[x.length - 1 ] = '\n' + x[x.length - 1 ];
+                productName = x.join(' ');
             }
 
             columns.push({ dataKey: product.name, title: productName });

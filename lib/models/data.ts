@@ -77,6 +77,11 @@ export class Data {
         this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._properties);
     }
 
+    public translate(value: string): string {
+        const trans = this._settings.translations.booleanValues[value];
+        return trans ? trans : value;
+    }
+
     private _updateProperties(product: Product): void {
 
         // var filtersMap = new Map(this._filters);
