@@ -33,6 +33,10 @@ export abstract class JsonParser {
         const product = this._parseProduct(jsonData.products[0], data, settings);
         data.setProductDetail(product);
 
+        if (jsonData.downloads) {
+            data.downloads = jsonData.downloads;
+        }
+
         return data;
     }
 

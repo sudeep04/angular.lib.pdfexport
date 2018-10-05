@@ -305,7 +305,8 @@ export class DocRendererDetail implements IDocRenderer {
                     }
                 }
 
-                this._doc.setFont('GothamLight', 'normal');
+                this._doc.setFont(opts.column.dataKey === 'col1' ?
+                'GothamMedium' : 'GothamLight', 'normal');
 
             },
             drawHeaderCell: (cell: any, opts: any) => {
@@ -504,7 +505,8 @@ export class DocRendererDetail implements IDocRenderer {
                     }
                 }
 
-                this._doc.setFont('GothamLight', 'normal');
+                this._doc.setFont(opts.column.dataKey === 'col1' ?
+                'GothamMedium' : 'GothamLight', 'normal');
 
             },
             drawHeaderCell: (cell: any, opts: any) => {

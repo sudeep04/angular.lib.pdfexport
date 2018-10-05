@@ -1,6 +1,8 @@
 import { Product } from './product';
 import { Property } from './property.interface';
 import { Settings } from './settings.interface';
+import { DownloadList } from './download/download-list.interface';
+import { DownloadValue } from './download/download-value.interface';
 
 export class Data {
 
@@ -24,6 +26,14 @@ export class Data {
         return this._productDetail;
     }
 
+    public get downloads(): DownloadList | DownloadValue[] {
+        return this._downloads;
+    }
+
+    public set downloads(downloads: DownloadList | DownloadValue[]) {
+        this._downloads = JSON.parse(JSON.stringify(downloads));
+    }
+
     private _groups: Product[][];
 
     private _properties: Property[];
@@ -34,6 +44,8 @@ export class Data {
 
     private _productDetail?: Product;
 
+    private _downloads: DownloadList | DownloadValue[];
+
     constructor(settings: Settings, filters: any[]) {
 
         this._settings = settings;
@@ -41,10 +53,11 @@ export class Data {
         this._properties = [];
         this._groups.push([]);
         this._filters = filters;
+        this._downloads = [];
     }
 
     public setProductDetail(product: Product) {
-        
+
         this._productDetail = new Product(product.name, product.supplier);
         this._productDetail.imageUrl = product.imageUrl;
         this._productDetail.imageGallery = product.imageGallery;
