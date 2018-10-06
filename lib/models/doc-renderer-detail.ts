@@ -9,6 +9,8 @@ import { Property } from './property.interface';
 import { isArray } from 'util';
 import { checkImg } from './imagesBase64/check-img';
 import { unckeckImg } from './imagesBase64/uncheck-img';
+import { DownloadElement } from './download/download-element.interface';
+import { DownloadValue } from './download/download-value.interface';
 
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
@@ -443,7 +445,7 @@ export class DocRendererDetail implements IDocRenderer {
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const pageHeight = this._doc.internal.pageSize.getHeight();
 
-        const product = this._data.productDetail;
+        const downloads = this._data.downloads;
         let marginTop = this._doc.autoTable.previous.finalY + 15;
 
         if (marginTop + 45 < pageHeight ) {
@@ -472,7 +474,6 @@ export class DocRendererDetail implements IDocRenderer {
 
         let borders: any[] = [];
 
-        let checkImages: any[] = [];
         const config: any = {
             styles,
             margin: {
@@ -490,20 +491,6 @@ export class DocRendererDetail implements IDocRenderer {
             showHeader: 'never',
             tableWidth: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
-                // fix
-                if (opts.column.index !== 0) {
-
-                    if (product.properties[opts.row.index].ckeck !== undefined) {
-
-                        checkImages.push({
-                            left: cell.x + 3,
-                            top: cell.y + cell.height / 2 - 1.5,
-                            width: 3,
-                            height: 3,
-                            check: product.properties[opts.row.index].ckeck
-                        });
-                    }
-                }
 
                 this._doc.setFont(opts.column.dataKey === 'col1' ?
                 'GothamMedium' : 'GothamLight', 'normal');
@@ -544,13 +531,6 @@ export class DocRendererDetail implements IDocRenderer {
                     }
                 });
                 borders = [];
-                checkImages.forEach((img: any) => {
-
-                    (img.check) ?
-                        this._doc.addImage(checkImg, img.left, img.top, img.width, img.height)
-                        : this._doc.addImage(unckeckImg, img.left, img.top, img.width, img.height);
-                });
-                checkImages = [];
 
                 data.settings.margin.top = 40;
 
@@ -563,73 +543,44 @@ export class DocRendererDetail implements IDocRenderer {
 
         // fill values
 
-        columns.push({ dataKey: product.name, title: product.name });
+        columns.push({ dataKey: 'col2', title: 'col2' });
 
         let lineW = this._docConfig.lineWidth + 0.5;
         if (this._data.settings.showHighlights) {
             lineW = lineW + 4;
         }
 
-        config.columnStyles[product.name] = {
+        config.columnStyles['col2'] = {
             columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 3,
             cellPadding: [2.8, lineW, 2.8, lineW]
         };
 
         // fix
         if (rows.length === 0) {
-            product.properties.forEach((property: Property) => {
+            downloads.forEach((elem: DownloadElement) => {
                 let row = {};
-                if (this._data.settings.applyFilters) {
-
-                    const direction: 'afterValue' | 'beforeValue'
-                        = property.unit !== undefined &&
-                            this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
-                            'beforeValue' : 'afterValue';
-
-                    const filterMap = new Map(this._data.filters);
-                    const filterValue = filterMap.get(property.ifdguid) as any;
-                    let filterText = '';
-
-                    if (filterValue) {
-                        if (isArray(filterValue)) {
-                            // List Values
-                            const listValues: string[] = filterValue;
-                            listValues.forEach((v: string, index: number) => {
-                                const val1 = v;
-
-                                if (index === 0) {
-                                    filterText += val1;
-                                } else {
-                                    filterText += ', ' + val1;
-                                }
-                            });
-                        } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
-                            filterText = filterValue.lower + ' - ' + filterValue.upper;
-                        } else {
-                            filterText = filterValue.toString();
-                        }
-
-                        if (direction === 'afterValue') {
-                            filterText = filterText + ' ' + property.unit;
-                        } else {
-                            filterText = property.unit + ' ' + filterText;
-                        }
-                        row = { col1: property.name + `\n(${filterText})` };
-                    } else {
-                        row = { col1: property.name };
-                    }
-                } else {
-                    row = { col1: property.name };
-                }
+                row = { col1: elem.label };
                 rows.push(row);
             });
         }
-        product.properties.forEach((property: Property, index: number) => {
-
-            if (property.value !== undefined) {
+        downloads.forEach((elem: DownloadElement, index: number) => {
+            if (elem.singleValue) {
+                rows[index]['col2'] = elem.singleValue.name;
+            } else {
+                let item = '';
+                elem.listValues.forEach((value: DownloadValue, idx: number) => {
+                    if (idx === 0) {
+                        item = value.name;
+                    } else {
+                        item += `\n${value.name}`;
+                    }
+                });
+                rows[index]['col2'] = item;
+            }
+            /* if (d.value !== undefined) {
 
                 rows[index][product.name] = this._data.translate(property.value);
-            }
+            } */
         });
 
         this._doc.autoTable(columns, rows, config);
