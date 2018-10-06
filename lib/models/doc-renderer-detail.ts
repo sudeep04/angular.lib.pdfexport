@@ -30,6 +30,7 @@ export class DocRendererDetail implements IDocRenderer {
     public draw(jsonData: any, docConfig: DocConfig): void {
 
         this._data = JsonParser.parseDataProduct(jsonData);
+        console.log(this._data);
         this._docConfig = docConfig;
 
         const topIndex = this._drawHeader();

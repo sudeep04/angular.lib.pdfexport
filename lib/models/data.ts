@@ -1,8 +1,7 @@
 import { Product } from './product';
 import { Property } from './property.interface';
 import { Settings } from './settings.interface';
-import { DownloadList } from './download/download-list.interface';
-import { DownloadValue } from './download/download-value.interface';
+import { DownloadElement } from './download/download-element.interface';
 
 export class Data {
 
@@ -26,11 +25,11 @@ export class Data {
         return this._productDetail;
     }
 
-    public get downloads(): DownloadList | DownloadValue[] {
+    public get downloads(): DownloadElement[] {
         return this._downloads;
     }
 
-    public set downloads(downloads: DownloadList | DownloadValue[]) {
+    public set downloads(downloads: DownloadElement[]) {
         this._downloads = JSON.parse(JSON.stringify(downloads));
     }
 
@@ -44,7 +43,7 @@ export class Data {
 
     private _productDetail?: Product;
 
-    private _downloads: DownloadList | DownloadValue[];
+    private _downloads: DownloadElement[];
 
     constructor(settings: Settings, filters: any[]) {
 
