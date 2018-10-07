@@ -96,7 +96,9 @@ export class DocRenderer implements IDocRenderer {
         let borders: any[] = [];
 
         let checkImages: any[] = [];
-
+        const filtersIndex: number[] = [];
+        let spanp: number = 0;
+        let lastRow: number = -1;
         const config: any = {
             styles,
             margin: {
@@ -113,21 +115,42 @@ export class DocRenderer implements IDocRenderer {
             tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
 
+                const filterPos = filtersIndex.findIndex((v: number) => v === opts.row.index);
+                this._doc.setFont(opts.column.dataKey === 'col1' &&  filterPos === -1 ?
+                'GothamMedium' : 'GothamLight', 'normal');
+
+                if ( filterPos !== -1 ) {
+                    cell.textPos.y -= 1.8;
+                    cell.height -= 4;
+                    cell.contentHeight = cell.height;
+                    if (lastRow !== opts.row.index) {
+                        lastRow = opts.row.index;
+                        spanp++;
+                    }
+                }
+                const previousFilter = filtersIndex.findIndex((v: number) => v === (opts.row.index + 1));
+                if (previousFilter !== -1) {
+                    cell.textPos.y += 1.8;
+                    if (opts.column.dataKey !== 'col1') {
+                        cell.textPos.y += 1.9;
+                        cell.height += 7;
+                    }
+                }
+
                 if (opts.column.index !== 0) {
 
-                    if (group[opts.column.index - 1].properties[opts.row.index].ckeck !== undefined) {
+                    if (group[opts.column.index - 1].properties[opts.row.index - spanp].ckeck !== undefined && filterPos === -1) {
 
                         checkImages.push({
                             left: cell.x + 3,
                             top: cell.y + cell.height / 2 - 1.5,
                             width: 3,
                             height: 3,
-                            check: group[opts.column.index - 1].properties[opts.row.index].ckeck
+                            check: group[opts.column.index - 1].properties[opts.row.index - spanp].ckeck
                         });
                     }
                 }
 
-                this._doc.setFont('GothamLight', 'normal');
             },
             drawHeaderCell: (cell: any, opts: any) => {
 
@@ -144,14 +167,17 @@ export class DocRenderer implements IDocRenderer {
             },
             drawRow: (row: any, opts: any) => {
 
+                if ( filtersIndex.findIndex((v: number) => v === opts.row.index + 1 ) === -1 ) {
                 borders.push({
                     left: this._docConfig.padding + this._docConfig.lineWidth / 2,
                     top: row.y + row.height - 0.1,
                     width: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
                     height: 0.1
                 });
+            }
             },
             addPageContent: (data: any) => {
+
                 this._doc.setFillColor(0, 0, 0);
                 borders.forEach((border: any, index: number) => {
 
@@ -180,7 +206,6 @@ export class DocRenderer implements IDocRenderer {
         };
 
         group.forEach((product: Product) => {
-
             columns.push({ dataKey: product.name, title: product.name });
             let lineW = this._docConfig.lineWidth + 0.5;
             if (this._data.settings.showHighlights) {
@@ -189,7 +214,6 @@ export class DocRenderer implements IDocRenderer {
             config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW] };
             if (rows.length === 0) {
                 product.properties.forEach((property: Property) => {
-                    let row = {};
                     if (this._data.settings.applyFilters) {
                         const direction: 'afterValue' | 'beforeValue'
                                 = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
@@ -222,26 +246,32 @@ export class DocRenderer implements IDocRenderer {
                                 filterText = filterText;
                             } else {
                                 if (direction === 'afterValue') {
-                                    filterText = filterText + ' ' + property.unit;
+                                    filterText = filterText + ' ' + property.unit.toString();
                                 } else {
                                     filterText = property.unit + ' ' + filterText;
                                 }
                             }
-                            row = { col1: property.name + `\n(${filterText})` };
+                            rows.push({ col1: property.name});
+                            filtersIndex.push(rows.push({ col1: `(${filterText})` }) - 1);
+
                         } else {
-                            row = { col1: property.name };
+                            rows.push({ col1: property.name });
                         }
                     } else {
-                        row = { col1: property.name };
+                        rows.push({ col1: property.name });
                     }
-                    rows.push(row);
                 });
             }
-            product.properties.forEach((property: Property, index: number) => {
-
-                if (property.value !== undefined) {
-
-                    rows[index][product.name] = property.value.toString();
+            let span = 0;
+            rows.forEach((value: any, idx: number) => {
+                if (filtersIndex.findIndex((e: number) => e === idx) !== -1) {
+                    span ++;
+                    rows[idx][product.name] = '';
+                } else {
+                    const prd = product.properties[idx - span];
+                    if (prd.value !== undefined) {
+                        rows[idx][product.name] = prd.value.toString();
+                    }
                 }
             });
         });
@@ -357,7 +387,8 @@ export class DocRenderer implements IDocRenderer {
             tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
 
-                this._doc.setFont('GothamLight', 'normal');
+                this._doc.setFont(opts.column.dataKey === 'col1' ?
+                'GothamMedium' : 'GothamLight', 'normal');
             },
             drawHeaderCell: (cell: any, opts: any) => {
 
