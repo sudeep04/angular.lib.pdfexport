@@ -134,11 +134,11 @@ export class DocRendererDetail implements IDocRenderer {
 
             const specialElementHandlers = {
                 // element with id of "bypass" - jQuery style selector
-                '#bypassme'(element, renderer) {
+                '#bypassme'(element: any, renderer: any) {
                     // true = "handled elsewhere, bypass text extraction"
                     return true;
                 },
-                '.hide'(element, renderer) {
+                '.hide'(element: any, renderer: any) {
                     // true = "handled elsewhere, bypass text extraction"
                     return true;
                 }
@@ -178,7 +178,7 @@ export class DocRendererDetail implements IDocRenderer {
                     width: margins.width, // max width of content on PDF
                     elementHandlers: specialElementHandlers
                 },
-                (dispose) => {
+                (dispose: any) => {
                     const y  = (dispose.y < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
                         imageMargin : dispose.y;
                     this._drawDetailsText(details, y, imageMargin);
