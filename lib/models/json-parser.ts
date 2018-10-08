@@ -33,6 +33,10 @@ export abstract class JsonParser {
         const product = this._parseProduct(jsonData.products[0], data, settings);
         data.setProductDetail(product);
 
+        if (jsonData.downloads) {
+            data.downloads = jsonData.downloads;
+        }
+
         return data;
     }
 
@@ -54,6 +58,10 @@ export abstract class JsonParser {
                     brochure : 'Broschüre',
                     cadData : 'CAD Data',
                     bimModels: 'BIM Models'
+                },
+                booleanValues: {
+                    true: 'Yes',
+                    false: 'No'
                 }
             },
             showProductsImage: true,
@@ -189,7 +197,7 @@ export abstract class JsonParser {
         if (data.settings.showProductsImage) {
             if (jsonproduct.productData.primaryImage) {
                 const imgUrl = data.settings.productsImageApiPath
-                    + jsonproduct.productData.primaryImage.uuid + '/content/' + jsonproduct.productData.primaryImage.content  + '?quality=80&background=white&mode=pad&width=160&height=160';
+                    + jsonproduct.productData.primaryImage.uuid + '/content/' + jsonproduct.productData.primaryImage.content  + '?quality=100&background=white&mode=pad&width=360&height=360';
                 product.imageUrl = imgUrl;
             } else {
 
@@ -323,7 +331,7 @@ export abstract class JsonParser {
                 const imgUrl = data.settings.productsImageApiPath
                     + image.uuid + '/content/'
                     + image.content
-                    + '?quality=80&background=white&mode=pad&width=160&height=160';
+                    + '?quality=100&background=white&mode=pad&width=360&height=360';
                 product.addImageGallery(imgUrl);
             });
         }
