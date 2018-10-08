@@ -3,7 +3,7 @@ import { IDocRenderer } from './doc-renderer.interface';
 import { DocConfig } from './doc-config';
 import { Data } from './data';
 import { JsonParser } from './json-parser';
-import { boxShadowImg } from '../../dist/models/imagesBase64/box-shadow-img';
+import { boxShadowImg } from './imagesBase64/box-shadow-img';
 import { logoImg } from './imagesBase64/logo-img';
 import { Property } from './property.interface';
 import { isArray } from 'util';
@@ -164,7 +164,15 @@ export class DocRendererDetail implements IDocRenderer {
             const detail = details.pop();
             const div = document.createElement('div');
             const css = '<style> * { font-family: sans-serif !important; font-size: 11pt !important;}; </style>';
-            div.innerHTML = css + detail.content.replace('–', '-') ;
+            if(detail.content  !== undefined)
+            { 
+               div.innerHTML = css + detail.content.replace('–', '-') ;
+            }
+            else
+            {
+                div.innerHTML = css;
+            }
+        
 
             // draw title
             this._drawText(detail.name, margins.width, 20, margins.left, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
