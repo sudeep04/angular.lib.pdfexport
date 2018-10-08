@@ -33,6 +33,10 @@ export abstract class JsonParser {
         const product = this._parseProduct(jsonData.products[0], data, settings);
         data.setProductDetail(product);
 
+        if (jsonData.downloads) {
+            data.downloads = jsonData.downloads;
+        }
+
         return data;
     }
 
@@ -54,6 +58,10 @@ export abstract class JsonParser {
                     brochure : 'Broschüre',
                     cadData : 'CAD Data',
                     bimModels: 'BIM Models'
+                },
+                booleanValues: {
+                    true: 'Yes',
+                    false: 'No'
                 }
             },
             showProductsImage: true,

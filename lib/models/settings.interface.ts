@@ -32,6 +32,11 @@ export interface Settings {
             cadData: string;
 
             bimModels: string;
+        },
+        booleanValues: {
+            true: string,
+
+            false: string
         }
     };
 

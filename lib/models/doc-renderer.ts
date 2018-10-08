@@ -228,14 +228,14 @@ export class DocRenderer implements IDocRenderer {
                                 // List Values
                                 const listValues: string[] = filterValue;
                                 listValues.forEach((v: string, index: number) => {
-                                const val1 = v;
+                                    const val1 = v;
 
-                                if (index === 0) {
-                                    filterText += val1;
-                                } else {
-                                    filterText += ', ' + val1;
-                                }
-                            });
+                                    if (index === 0) {
+                                        filterText += val1;
+                                    } else {
+                                        filterText += ', ' + val1;
+                                    }
+                                });
                             } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
                                 filterText = filterValue.lower + ' - ' + filterValue.upper;
                             } else {
@@ -270,7 +270,7 @@ export class DocRenderer implements IDocRenderer {
                 } else {
                     const prd = product.properties[idx - span];
                     if (prd.value !== undefined) {
-                        rows[idx][product.name] = prd.value.toString();
+                        rows[idx][product.name] =  this._data.translate(prd.value);
                     }
                 }
             });
