@@ -59,9 +59,10 @@ export class DocRenderer implements IDocRenderer {
             this._doc.setPage(i);
             this._drawLayout(i);
         }
+        this._save();
     }
 
-    public save() {
+    private _save() {
 
         this._doc.save(this._data.settings.fileName);
     }
