@@ -93,12 +93,12 @@ export class DocRendererDetail implements IDocRenderer {
                 imageWidth
             );
             } catch (e) {
-                console.log('The box image is corrupted in some way that prevents it from being loaded.');
+                console.log('The box image is corrupted in some way that prevents it from being loaded  by jsPDF.');
             }
             this._drawPrimaryImg({columnWidth, imageTop, imageWidth}, topIndex);
         });
         img.onerror = (() => {
-            console.log('The box primary image is corrupted in some way that prevents it from being loaded.');
+            console.log('The box image is corrupted in some way that prevents it from being loaded.');
             // call
             this._drawPrimaryImg({columnWidth, imageTop, imageWidth}, topIndex);
         });
@@ -119,7 +119,7 @@ export class DocRendererDetail implements IDocRenderer {
                     margins.imageWidth - 8.4
                 );
             } catch (e) {
-                console.log('The box image is corrupted in some way that prevents it from being loaded.');
+                console.log('The primary image is corrupted in some way that prevents it from being loaded by jsPDF.');
             }
             this._drawDetails(topIndex, {left: margins.columnWidth, top: margins.imageTop + margins.imageWidth });
         });
@@ -686,7 +686,7 @@ export class DocRendererDetail implements IDocRenderer {
                         imageWidth
                     );
                 } catch (e) {
-                    console.log('Error loading image: ' + imagesGallery[index]);
+                    console.log('Error loading image by jsPDF: ' + imagesGallery[index]);
                 }
                 if (index % 2 !== 0) {
                     imageTop += imageWidth + 4;

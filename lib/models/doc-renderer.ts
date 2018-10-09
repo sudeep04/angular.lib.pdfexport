@@ -27,6 +27,10 @@ export class DocRenderer implements IDocRenderer {
 
     private _docConfig: DocConfig;
 
+    private _checkedHTMLImage: HTMLImageElement;
+    private _uncheckedHTMLImage: HTMLImageElement;
+    private _boxShadowImage: HTMLImageElement;
+
     constructor() {
 
         this._doc = new jsPDF();
@@ -39,8 +43,61 @@ export class DocRenderer implements IDocRenderer {
         this._data = JsonParser.parseData(jsonData);
         this._docConfig = docConfig;
 
-        let lastPage = 1;
+        this._loadImagesTables();
+    }
 
+    private _loadImagesTables(): void {
+        if (this._data.settings.applyFilters) {
+            const elems: string[] = [checkImg, unckeckImg, boxShadowImg];
+            const elemsHTML: HTMLImageElement[] = [];
+            this._loadElems(0, elems, elemsHTML, this._drawElems.bind(this));
+        } else {
+            this._drawElems([]);
+        }
+    }
+
+    // load images
+    private _loadElems(index: number, input: string[], output: HTMLImageElement[], callback: any): void {
+        if (index < input.length) {
+            const img = new Image();
+            img.onload = (() => {
+                output.push(img);
+                this._loadElems(++index, input, output, callback);
+            });
+            img.onerror = (() => {
+                console.log('The image is corrupted in some way that prevents it from being loaded.');
+                output.push(null);
+                this._loadElems(++index, input, output, callback);
+            });
+            img.src = input[index];
+            img.crossOrigin = 'anonymous';
+        } else {
+            callback(output);
+        }
+    }
+
+    private _drawElems(output: HTMLImageElement[]): void {
+
+        if (output && output.length === 3) {
+            this._checkedHTMLImage = output[0];
+            this._uncheckedHTMLImage = output[1];
+            this._boxShadowImage = output[2];
+        }
+
+        // loadImages
+        // const elems: string[] = [];
+        // this._data.groups.forEach((group: Product[]) => {
+        //     group.forEach((product: Product) => {
+        //         elems.push(product.imageUrl);
+        //     });
+        // });
+        // const elemsHTML: HTMLImageElement[] = [];
+        // this._loadElems(0, elems, elemsHTML, this._drawElemsData.bind(this));
+        this._drawElemsData([]);
+    }
+
+    private _drawElemsData(images: HTMLImageElement[]): void {
+        let lastPage = 1;
         this._data.groups.forEach((group: Product[], index: number) => {
 
             this._drawBody(group);
@@ -55,11 +112,7 @@ export class DocRenderer implements IDocRenderer {
             }
         });
 
-        for (let i = 1; i < this._doc.internal.pages.length; i++) {
-            this._doc.setPage(i);
-            this._drawLayout(i);
-        }
-        this._save();
+        this._drawLayout();
     }
 
     private _save() {
@@ -168,16 +221,16 @@ export class DocRenderer implements IDocRenderer {
                     }
                 });
                 borders = [];
-                checkImages.forEach((img: any) => {
+                if (this._checkedHTMLImage && this._uncheckedHTMLImage) {
+                    checkImages.forEach((img: any) => {
 
-                    if (img.check) {
-
-                        this._doc.addImage(checkImg, img.left, img.top, img.width, img.height);
-                    } else {
-
-                        this._doc.addImage(unckeckImg, img.left, img.top, img.width, img.height);
-                    }
-                });
+                        if (img.check) {
+                            this._doc.addImage(this._checkedHTMLImage, img.left, img.top, img.width, img.height);
+                        } else {
+                            this._doc.addImage(this._uncheckedHTMLImage, img.left, img.top, img.width, img.height);
+                        }
+                    });
+                }
                 checkImages = [];
                 if (!isFirstWithoutImages) {
                     isFirstWithoutImages = true;
@@ -265,7 +318,7 @@ export class DocRenderer implements IDocRenderer {
 
                 switch (index) {
                     case 0:
-                        this._doc.addImage(boxShadowImg,
+                        this._doc.addImage(this._boxShadowImage,
                             pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding),
                             IMAGES_TOP + IMAGES_PADING_TOP,
                             this._docConfig.columnWidth,
@@ -285,7 +338,7 @@ export class DocRenderer implements IDocRenderer {
                         }
                         break;
                     case 1:
-                        this._doc.addImage(boxShadowImg,
+                        this._doc.addImage(this._boxShadowImage,
                             pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding),
                             IMAGES_TOP + IMAGES_PADING_TOP,
                             this._docConfig.columnWidth,
@@ -305,7 +358,7 @@ export class DocRenderer implements IDocRenderer {
                         }
                         break;
                     case 2:
-                        this._doc.addImage(boxShadowImg,
+                        this._doc.addImage(this._boxShadowImage,
                             pageWidth - (this._docConfig.columnWidth + this._docConfig.padding),
                             IMAGES_TOP + IMAGES_PADING_TOP,
                             this._docConfig.columnWidth,
@@ -419,7 +472,27 @@ export class DocRenderer implements IDocRenderer {
         });
     }
 
-    private _drawLayout(index: number) {
+    private _drawLayout(): void {
+        const img = new Image();
+        img.onload = (() => {
+            this._drawLayoutIter(img);
+        });
+        img.onerror = (() => {
+            this._drawLayoutIter(null);
+        });
+        img.src = logoImg;
+        img.crossOrigin = 'anonymous';
+    }
+
+    private _drawLayoutIter(img: HTMLImageElement): void {
+        for (let i = 1; i < this._doc.internal.pages.length; i++) {
+            this._doc.setPage(i);
+            this._drawLayoutData(i, img);
+        }
+        this._save();
+    }
+
+    private _drawLayoutData(index: number, logo: HTMLImageElement) {
 
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const pageHeight = this._doc.internal.pageSize.getHeight();
@@ -499,6 +572,8 @@ export class DocRenderer implements IDocRenderer {
 
         this._doc.text('Copyright © 2018 Plan.One', 12.9, 283.2);
 
-        this._doc.addImage(logoImg, 175.5, 280, 21.6, 4.1);
+        if (logo) {
+            this._doc.addImage(logo, 'png', 175.5, 280, 21.6, 4.1);
+        }
     }
 }
