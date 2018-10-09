@@ -85,25 +85,29 @@ export class DocRenderer implements IDocRenderer {
         }
 
         // loadImages
-        // const elems: string[] = [];
-        // this._data.groups.forEach((group: Product[]) => {
-        //     group.forEach((product: Product) => {
-        //         elems.push(product.imageUrl);
-        //     });
-        // });
-        // const elemsHTML: HTMLImageElement[] = [];
-        // this._loadElems(0, elems, elemsHTML, this._drawElemsData.bind(this));
-        this._drawElemsData([]);
+        if (this._data.settings.showProductsImage) {
+            const elems: string[] = [];
+            this._data.groups.forEach((group: Product[]) => {
+                group.forEach((product: Product) => {
+                    elems.push(product.imageUrl);
+                });
+            });
+            const elemsHTML: HTMLImageElement[] = [];
+            this._loadElems(0, elems, elemsHTML, this._drawElemsData.bind(this));
+        } else {
+            this._drawElemsData([]);
+        }
     }
 
     private _drawElemsData(images: HTMLImageElement[]): void {
+
         let lastPage = 1;
         this._data.groups.forEach((group: Product[], index: number) => {
 
-            this._drawBody(group);
+            this._drawBody(group, images, index);
             for (let i = lastPage + 1; i < this._doc.internal.pages.length; i++) {
                 this._doc.setPage(i);
-                this._drawHeader(group, false);
+                this._drawHeader(group, false, null, null);
             }
             lastPage = this._doc.internal.pages.length;
             if (index < this._data.groups.length - 1) {
@@ -120,9 +124,9 @@ export class DocRenderer implements IDocRenderer {
         this._doc.save(this._data.settings.fileName);
     }
 
-    private _drawBody(group: Product[]) {
+    private _drawBody(group: Product[], images: HTMLImageElement[], indexParent: number) {
 
-        this._drawHeader(group, this._data.settings.showProductsImage);
+        this._drawHeader(group, this._data.settings.showProductsImage, images, indexParent);
 
         let isFirstWithoutImages = !this._data.settings.showProductsImage;
 
@@ -308,14 +312,13 @@ export class DocRenderer implements IDocRenderer {
         this._doc.autoTable(columns, rows, config);
     }
 
-    private _drawHeader(group: Product[], showProductsImage: boolean) {
+    private _drawHeader(group: Product[], showProductsImage: boolean, images: HTMLImageElement[], indexParent: number) {
 
         const pageWidth = this._doc.internal.pageSize.getWidth();
 
         if (showProductsImage) {
 
             group.forEach((product: Product, index: number) => {
-
                 switch (index) {
                     case 0:
                         this._doc.addImage(this._boxShadowImage,
@@ -324,17 +327,13 @@ export class DocRenderer implements IDocRenderer {
                             this._docConfig.columnWidth,
                             this._docConfig.columnWidth);
                         try {
-                            this._doc.addImage(product.imageUrl,
+                            this._doc.addImage(images[indexParent * 3 + index],
                                 pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2,
                                 IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
                                 this._docConfig.columnWidth - 6.4,
                                 this._docConfig.columnWidth - 6.4);
                         } catch (e) {
-                            this._doc.addImage(this._data.settings.placeholderUrl,
-                                pageWidth - (this._docConfig.columnWidth * 3 + this._docConfig.padding) + 3.2,
-                                IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
-                                this._docConfig.columnWidth - 6.4,
-                                this._docConfig.columnWidth - 6.4);
+                            console.log('Error loading image by jsPDF ');
                         }
                         break;
                     case 1:
@@ -344,17 +343,13 @@ export class DocRenderer implements IDocRenderer {
                             this._docConfig.columnWidth,
                             this._docConfig.columnWidth);
                         try {
-                            this._doc.addImage(product.imageUrl,
+                            this._doc.addImage(images[indexParent * 3 + index],
                                 pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2,
                                 IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
                                 this._docConfig.columnWidth - 6.4,
                                 this._docConfig.columnWidth - 6.4);
                         } catch (e) {
-                            this._doc.addImage(this._data.settings.placeholderUrl,
-                                pageWidth - (this._docConfig.columnWidth * 2 + this._docConfig.padding) + 3.2,
-                                IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
-                                this._docConfig.columnWidth - 6.4,
-                                this._docConfig.columnWidth - 6.4);
+                            console.log('Error loading image by jsPDF ');
                         }
                         break;
                     case 2:
@@ -364,17 +359,13 @@ export class DocRenderer implements IDocRenderer {
                             this._docConfig.columnWidth,
                             this._docConfig.columnWidth);
                         try {
-                            this._doc.addImage(product.imageUrl,
+                            this._doc.addImage(images[indexParent * 3 + index],
                                 pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2,
                                 IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
                                 this._docConfig.columnWidth - 6.4,
                                 this._docConfig.columnWidth - 6.4);
                         } catch (e) {
-                            this._doc.addImage(this._data.settings.placeholderUrl,
-                                pageWidth - (this._docConfig.columnWidth + this._docConfig.padding) + 3.2,
-                                IMAGES_TOP + IMAGES_PADING_TOP + 3.2,
-                                this._docConfig.columnWidth - 6.4,
-                                this._docConfig.columnWidth - 6.4);
+                            console.log('Error loading image by jsPDF ');
                         }
                         break;
                 }
