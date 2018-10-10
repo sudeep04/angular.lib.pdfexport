@@ -35,19 +35,11 @@ export class DocRendererDetail implements IDocRenderer {
         this._docConfig = docConfig;
 
         const topIndex = this._drawHeader();
-        const imageMargin = this._drawPrimaryImage();
+        this._drawBoxImage(topIndex);
 
-        this._drawDetails(topIndex, imageMargin);
-        this._drawDownloads();
-        this._drawGallery();
-
-        for (let i = 1; i < this._doc.internal.pages.length; i++) {
-            this._doc.setPage(i);
-            this._drawLayout(i);
-        }
     }
 
-    public save(): void {
+    private save(): void {
         this._doc.save(this._data.settings.fileName);
     }
 
@@ -82,38 +74,61 @@ export class DocRendererDetail implements IDocRenderer {
     }
 
     // draw Primary Image
-    private _drawPrimaryImage(): any {
-        const imageUrl = this._data.productDetail.imageUrl;
+    private _drawBoxImage(topIndex: number): void {
+
         const pageWidth = this._doc.internal.pageSize.getWidth();
 
         const imageTop = 30 - this._docConfig.lineWidth;
         const columnWidth = pageWidth - 100;
         const imageWidth = pageWidth / 2 - this._docConfig.padding * 2 + 5;
 
-        this._doc.addImage(
-            boxShadowImg,
-            columnWidth,
-            imageTop,
-            imageWidth,
-            imageWidth
-        );
-        try {
-            this._doc.addImage(
-                imageUrl,
-                columnWidth + 4.2,
-                imageTop + 4.2,
-                imageWidth - 8.4,
-                imageWidth - 8.4
+        const img = new Image();
+        img.onload = (() =>  {
+            try {
+                this._doc.addImage(
+                img,
+                columnWidth,
+                imageTop,
+                imageWidth,
+                imageWidth
             );
-        } catch (e) {
-            this._doc.addImage(this._data.settings.placeholderUrl,
-                columnWidth + 4.2,
-                imageTop + 4.2,
-                imageWidth - 8.4,
-                imageWidth - 8.4);
-        }
+            } catch (e) {
+                console.log('The box image is corrupted in some way that prevents it from being loaded  by jsPDF.');
+            }
+            this._drawPrimaryImg({columnWidth, imageTop, imageWidth}, topIndex);
+        });
+        img.onerror = (() => {
+            console.log('The box image is corrupted in some way that prevents it from being loaded.');
+            // call
+            this._drawPrimaryImg({columnWidth, imageTop, imageWidth}, topIndex);
+        });
+        img.src = boxShadowImg;
+        img.crossOrigin = 'anonymous';
+       // return {left: columnWidth, top: imageTop + imageWidth };
+    }
 
-        return {left: columnWidth, top: imageTop + imageWidth };
+    private _drawPrimaryImg(margins: any, topIndex: number) {
+        const img = new Image();
+        img.onload = (() => {
+            try {
+                this._doc.addImage(
+                    img,
+                    margins.columnWidth + 4.2,
+                    margins.imageTop + 4.2,
+                    margins.imageWidth - 8.4,
+                    margins.imageWidth - 8.4
+                );
+            } catch (e) {
+                console.log('The primary image is corrupted in some way that prevents it from being loaded by jsPDF.');
+            }
+            this._drawDetails(topIndex, {left: margins.columnWidth, top: margins.imageTop + margins.imageWidth });
+        });
+        img.onerror = (() => {
+            console.log('The primary image is corrupted in some way that prevents it from being loaded.');
+            this._drawDetails(topIndex, {left: margins.columnWidth, top: margins.imageTop + margins.imageWidth });
+        });
+        img.src = this._data.productDetail.imageUrl;
+        img.crossOrigin = 'anonymous';
     }
 
     // draw details
@@ -123,13 +138,14 @@ export class DocRendererDetail implements IDocRenderer {
         const marginTop = topIndex + 20;
 
         this._drawDetailsText(details, marginTop, imageMargin.top);
+
     }
 
     private _drawDetailsText(details: any[], marginTop: number, imageMargin: number) {
 
         if (details.length === 0) {
 
-            this._drawBody(marginTop);
+            this._drawCheckedImage(marginTop);
         } else {
 
             const specialElementHandlers = {
@@ -196,8 +212,27 @@ export class DocRendererDetail implements IDocRenderer {
         }
     }
 
+    private _drawLayout(): void {
+        const img = new Image();
+        img.onload = (() => {
+            this._drawLayoutIter(img);
+        });
+        img.onerror = (() => {
+            this._drawLayoutIter(null);
+        });
+        img.src = logoImg;
+        img.crossOrigin = 'anonymous';
+    }
+    private _drawLayoutIter(img: HTMLImageElement): void {
+        for (let i = 1; i < this._doc.internal.pages.length; i++) {
+            this._doc.setPage(i);
+            this._drawLayoutData(i, img);
+        }
+        this.save();
+    }
+
     // draw Page Header and Footer
-    private _drawLayout(index: number) {
+    private _drawLayoutData(index: number, logo: HTMLImageElement) {
 
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const pageHeight = this._doc.internal.pageSize.getHeight();
@@ -239,9 +274,9 @@ export class DocRendererDetail implements IDocRenderer {
             'F'
         );
         this._doc.text('Copyright © 2018 Plan.One', 12.9, 283.2);
-
-        this._doc.addImage(logoImg, 175.5, 280, 21.6, 4.1);
-
+        if (logo) {
+            this._doc.addImage(logo, 'png', 175.5, 280, 21.6, 4.1);
+        }
     }
 
     private _verticalOffset(text: string, size: number, left: number): number {
@@ -249,8 +284,33 @@ export class DocRendererDetail implements IDocRenderer {
         return left + this._doc.getStringUnitWidth(text) * size / 2.8;
     }
 
-    // draw table
-    private _drawBody( marginTop: number) {
+    // load check image
+    private _drawCheckedImage(marginTop: number): void {
+        const img = new Image();
+        img.onload = (() => {
+            this._drawUncheckedImage(marginTop, img);
+        });
+        img.onerror = (() => {
+            this._drawUncheckedImage(marginTop, null);
+        });
+        img.src = checkImg;
+        img.crossOrigin = 'anonymous';
+    }
+    // load uncheck image
+    private _drawUncheckedImage(marginTop: number, check: HTMLImageElement): void {
+        const img = new Image();
+        img.onload = (() => {
+            this._drawBody(marginTop, check, img);
+        });
+        img.onerror = (() => {
+            this._drawBody(marginTop, check, null);
+        });
+        img.src = unckeckImg;
+        img.crossOrigin = 'anonymous';
+    }
+    // draw table information
+    private _drawBody( marginTop: number, checkImage: HTMLImageElement, uncheckImage: HTMLImageElement) {
+
         let i = 0;
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const pageHeight = this._doc.internal.pageSize.getHeight();
@@ -354,12 +414,14 @@ export class DocRendererDetail implements IDocRenderer {
                     }
                 });
                 borders = [];
-                checkImages.forEach((img: any) => {
+                if (checkImage && uncheckImage) {
+                    checkImages.forEach((img: any) => {
 
-                    (img.check) ?
-                        this._doc.addImage(checkImg, img.left, img.top, img.width, img.height)
-                        : this._doc.addImage(unckeckImg, img.left, img.top, img.width, img.height);
-                });
+                        (img.check) ?
+                            this._doc.addImage(checkImage, img.left, img.top, img.width, img.height)
+                            : this._doc.addImage(uncheckImage, img.left, img.top, img.width, img.height);
+                    });
+                }
                 checkImages = [];
 
                 data.settings.margin.top = 40;
@@ -442,6 +504,10 @@ export class DocRendererDetail implements IDocRenderer {
         });
 
         this._doc.autoTable(columns, rows, config);
+
+        // load others sections
+        this._drawDownloads();
+        this._drawGallery();
     }
 
     private _drawTableHeader(marginTop: number, text: string) {
@@ -594,40 +660,59 @@ export class DocRendererDetail implements IDocRenderer {
         this._doc.autoTable(columns, rows, config);
     }
 
-    private _drawGallery() {
+    private _drawGallery(): void {
         this._doc.addPage();
-        const pageHeight = this._doc.internal.pageSize.getHeight();
-        const imageWidth = pageHeight / 3 - (this._docConfig.padding * 2 + 2)  ;
 
-        const initialTop = 26;
-        const column1 = 10;
-        const column2 = imageWidth + this._docConfig.padding * 1.7 ;
+        const imagesGallery = this._data.productDetail.imageGallery;
+        if (imagesGallery && imagesGallery.length > 0) {
+            this._loadImageGallery(0, 26);
+        } else {
+           this._drawLayout();
+        }
+    }
 
-        let imageLeft = column1;
-        let imageTop = initialTop;
-
-        this._data.productDetail.imageGallery.forEach((imageUrl: string, i: number) => {
-
-            imageLeft = (i % 2 !== 0) ? column2 : column1;
+    private _loadImageGallery( index: number, imageTop: number ): void {
+        const imagesGallery = this._data.productDetail.imageGallery;
+        if (index < imagesGallery.length) {
+            const pageHeight = this._doc.internal.pageSize.getHeight();
+            const imageWidth = pageHeight / 3 - (this._docConfig.padding * 2 + 2);
+            const imageLeft = (index % 2 !== 0) ? imageWidth + this._docConfig.padding * 1.7 : 10;
 
             if ((imageTop + imageWidth) >= (pageHeight - 20)) {
-                imageTop = initialTop;
+                imageTop = 26;
                 this._doc.addPage();
             }
-            try {
-                this._doc.addImage(
-                    imageUrl,
-                    imageLeft,
-                    imageTop,
-                    imageWidth,
-                    imageWidth
-                );
-            } catch (e) {
-                console.log('Error loading image: ' + imageUrl);
-            }
-            if (i % 2 !== 0) {
-                imageTop += imageWidth + 4;
-            }
-        });
+
+            const img = new Image();
+            img.onload = (() => {
+                try {
+                    this._doc.addImage(
+                        img,
+                        imageLeft,
+                        imageTop,
+                        imageWidth,
+                        imageWidth
+                    );
+                } catch (e) {
+                    console.log('Error loading image by jsPDF: ' + imagesGallery[index]);
+                }
+                if (index % 2 !== 0) {
+                    imageTop += imageWidth + 4;
+                }
+                this._loadImageGallery(++index, imageTop);
+            });
+            img.onerror = (() => {
+                console.log('The image of gallery is corrupted in some way that prevents it from being loaded.');
+                if (index % 2 !== 0) {
+                    imageTop += imageWidth + 4;
+                }
+                this._loadImageGallery(++index, imageTop);
+            });
+            img.src = imagesGallery[index];
+            img.crossOrigin = 'anonymous';
+        } else {
+            this._drawLayout();
+        }
     }
+
 }
