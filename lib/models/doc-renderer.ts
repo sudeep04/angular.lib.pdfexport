@@ -19,20 +19,14 @@ const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
 // const HEADER_TOP = 48;
 
-export class DocRenderer implements IDocRenderer {
-
-    private _doc: any;
-
-    private _data: Data;
-
-    private _docConfig: DocConfig;
+export class DocRenderer extends IDocRenderer {
 
     private _checkedHTMLImage: HTMLImageElement;
     private _uncheckedHTMLImage: HTMLImageElement;
     private _boxShadowImage: HTMLImageElement;
 
     constructor() {
-
+        super();
         this._doc = new jsPDF();
         this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
         this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
@@ -56,73 +50,6 @@ export class DocRenderer implements IDocRenderer {
         }
     }
 
-    // load images
-    private _loadImages(index: number, input: string[], output: HTMLImageElement[], callback: any): void {
-
-        let loaded: number = 0;
-
-        input.forEach((url: string) => {
-            const img = new Image();
-            img.onload = (() => {
-                setTimeout(waitForLoaded(img, 100), 100);
-                if (loaded === input.length) {
-                    callback(output);
-                }
-            });
-            img.onerror = (() => {
-                console.log('Error loading image:' + url);
-                loaded++;
-                output.push(img);
-                if (loaded === input.length) {
-                    callback(output);
-                }
-            });
-            img.src = url;
-            img.crossOrigin = 'anonymous';
-        });
-
-        const waitForLoaded = ((image: HTMLImageElement, total: number) => {
-
-            if ((image.complete && image.naturalWidth !== 0 && image.naturalHeight !== 0 ) || (total > 5000)) {
-                loaded++;
-                output.push(image);
-            } else {
-                setTimeout(waitForLoaded(image, total + 100), 100);
-            }
-        });
-
-    }
-    private _toDataURL(urls: string[], callback: any): void {
-        let loaded: number = 0;
-        urls.forEach(( url: string, index: number) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('get', url);
-            xhr.responseType = 'blob';
-            xhr.onload = (() => {
-                const fr = new FileReader();
-
-                fr.onload = (() => {
-                    urls[index] = fr.result.toString();
-                    callLoaded();
-                });
-
-                fr.readAsDataURL(xhr.response);
-            });
-            xhr.onerror = (() => {
-                callLoaded();
-            });
-
-            xhr.send();
-        });
-
-        const callLoaded = (() => {
-            loaded++;
-            if (loaded === urls.length) {
-                callback(0, urls, [], this._drawElemsData.bind(this));
-            }
-        });
-    }
-
     private _drawElems(output: HTMLImageElement[]): void {
 
         if (output && output.length === 3) {
@@ -140,7 +67,7 @@ export class DocRenderer implements IDocRenderer {
                 });
             });
             const elemsHTML: HTMLImageElement[] = [];
-            this._toDataURL(elems, this._loadImages.bind(this));
+            this._toDataURL(elems, this._loadImages.bind(this), this._drawElemsData.bind(this));
         } else {
             this._drawElemsData([]);
         }

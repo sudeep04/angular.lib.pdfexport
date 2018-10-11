@@ -1,7 +1,6 @@
 import * as jsPDF from 'jspdf';
 import { IDocRenderer } from './doc-renderer.interface';
 import { DocConfig } from './doc-config';
-import { Data } from './data';
 import { JsonParser } from './json-parser';
 import { boxShadowImg } from '../../dist/models/imagesBase64/box-shadow-img';
 import { logoImg } from './imagesBase64/logo-img';
@@ -15,15 +14,10 @@ import { DownloadValue } from './download/download-value.interface';
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
 
-export class DocRendererDetail implements IDocRenderer {
-
-    private _doc: any;
-
-    private _data: Data;
-
-    private _docConfig: DocConfig;
+export class DocRendererDetail extends IDocRenderer {
 
     constructor() {
+        super();
         this._doc = new jsPDF();
         this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
         this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
