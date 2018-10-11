@@ -103,16 +103,23 @@ export class DocRenderer implements IDocRenderer {
 
                 fr.onload = (() => {
                     urls[index] = fr.result.toString();
-                    loaded++;
-                    if (loaded === urls.length) {
-                        callback(0, urls, [], this._drawElemsData.bind(this));
-                    }
+                    callLoaded();
                 });
 
                 fr.readAsDataURL(xhr.response);
             });
+            xhr.onerror = (() => {
+                callLoaded();
+            });
 
             xhr.send();
+        });
+
+        const callLoaded = (() => {
+            loaded++;
+            if (loaded === urls.length) {
+                callback(0, urls, [], this._drawElemsData.bind(this));
+            }
         });
     }
 
