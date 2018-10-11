@@ -50,30 +50,70 @@ export class DocRenderer implements IDocRenderer {
         if (this._data.settings.applyFilters) {
             const elems: string[] = [checkImg, unckeckImg, boxShadowImg];
             const elemsHTML: HTMLImageElement[] = [];
-            this._loadElems(0, elems, elemsHTML, this._drawElems.bind(this));
+            this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
         } else {
             this._drawElems([]);
         }
     }
 
     // load images
-    private _loadElems(index: number, input: string[], output: HTMLImageElement[], callback: any): void {
-        if (index < input.length) {
+    private _loadImages(index: number, input: string[], output: HTMLImageElement[], callback: any): void {
+
+        let loaded: number = 0;
+
+        input.forEach((url: string) => {
             const img = new Image();
             img.onload = (() => {
-                output.push(img);
-                this._loadElems(++index, input, output, callback);
+                setTimeout(waitForLoaded(img, 100), 100);
+                if (loaded === input.length) {
+                    callback(output);
+                }
             });
             img.onerror = (() => {
-                console.log('The image is corrupted in some way that prevents it from being loaded.');
-                output.push(null);
-                this._loadElems(++index, input, output, callback);
+                console.log('Error loading image:' + url);
+                loaded++;
+                output.push(img);
+                if (loaded === input.length) {
+                    callback(output);
+                }
             });
-            img.src = input[index];
+            img.src = url;
             img.crossOrigin = 'anonymous';
-        } else {
-            callback(output);
-        }
+        });
+
+        const waitForLoaded = ((image: HTMLImageElement, total: number) => {
+
+            if ((image.complete && image.naturalWidth !== 0 && image.naturalHeight !== 0 ) || (total > 5000)) {
+                loaded++;
+                output.push(image);
+            } else {
+                setTimeout(waitForLoaded(image, total + 100), 100);
+            }
+        });
+
+    }
+    private _toDataURL(urls: string[], callback: any): void {
+        let loaded: number = 0;
+        urls.forEach(( url: string, index: number) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('get', url);
+            xhr.responseType = 'blob';
+            xhr.onload = (() => {
+                const fr = new FileReader();
+
+                fr.onload = (() => {
+                    urls[index] = fr.result.toString();
+                    loaded++;
+                    if (loaded === urls.length) {
+                        callback(0, urls, [], this._drawElemsData.bind(this));
+                    }
+                });
+
+                fr.readAsDataURL(xhr.response);
+            });
+
+            xhr.send();
+        });
     }
 
     private _drawElems(output: HTMLImageElement[]): void {
@@ -93,7 +133,7 @@ export class DocRenderer implements IDocRenderer {
                 });
             });
             const elemsHTML: HTMLImageElement[] = [];
-            this._loadElems(0, elems, elemsHTML, this._drawElemsData.bind(this));
+            this._toDataURL(elems, this._loadImages.bind(this));
         } else {
             this._drawElemsData([]);
         }
