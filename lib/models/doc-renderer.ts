@@ -66,7 +66,7 @@ export class DocRenderer extends IDocRenderer {
                     elems.push(product.imageUrl);
                 });
             });
-            const elemsHTML: HTMLImageElement[] = [];
+
             this._toDataURL(elems, this._loadImages.bind(this), this._drawElemsData.bind(this));
         } else {
             this._drawElemsData([]);

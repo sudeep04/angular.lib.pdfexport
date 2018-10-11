@@ -16,6 +16,8 @@ const IMAGES_PADING_TOP = 6.2;
 
 export class DocRendererDetail extends IDocRenderer {
 
+    private _marginsPrimaryImage: any;
+
     constructor() {
         super();
         this._doc = new jsPDF();
@@ -28,8 +30,7 @@ export class DocRendererDetail extends IDocRenderer {
         this._data = JsonParser.parseDataProduct(jsonData);
         this._docConfig = docConfig;
 
-        const topIndex = this._drawHeader();
-        this._drawBoxImage(topIndex);
+        this._loadImages(0, [boxShadowImg], [], this._drawBoxImage.bind(this));
 
     }
 
@@ -68,61 +69,47 @@ export class DocRendererDetail extends IDocRenderer {
     }
 
     // draw Primary Image
-    private _drawBoxImage(topIndex: number): void {
-
+    private _drawBoxImage(images: HTMLImageElement[]): void {
+        const img = images[0];
+        const topIndex = this._drawHeader();
         const pageWidth = this._doc.internal.pageSize.getWidth();
 
         const imageTop = 30 - this._docConfig.lineWidth;
         const columnWidth = pageWidth - 100;
         const imageWidth = pageWidth / 2 - this._docConfig.padding * 2 + 5;
 
-        const img = new Image();
-        img.onload = (() =>  {
-            try {
-                this._doc.addImage(
+        try {
+            this._doc.addImage(
                 img,
                 columnWidth,
                 imageTop,
                 imageWidth,
                 imageWidth
             );
-            } catch (e) {
-                console.log('The box image is corrupted in some way that prevents it from being loaded  by jsPDF.');
-            }
-            this._drawPrimaryImg({columnWidth, imageTop, imageWidth}, topIndex);
-        });
-        img.onerror = (() => {
-            console.log('The box image is corrupted in some way that prevents it from being loaded.');
-            // call
-            this._drawPrimaryImg({columnWidth, imageTop, imageWidth}, topIndex);
-        });
-        img.src = boxShadowImg;
-        img.crossOrigin = 'anonymous';
-       // return {left: columnWidth, top: imageTop + imageWidth };
+        } catch (e) {
+            console.log('The box image is corrupted in some way that prevents it from being loaded  by jsPDF.');
+        }
+        this._marginsPrimaryImage = { columnWidth, imageTop, imageWidth , topIndex};
+        this._toDataURL([this._data.productDetail.imageUrl], this._loadImages.bind(this), this._drawPrimaryImg.bind(this));
+
     }
 
-    private _drawPrimaryImg(margins: any, topIndex: number) {
-        const img = new Image();
-        img.onload = (() => {
-            try {
-                this._doc.addImage(
-                    img,
-                    margins.columnWidth + 4.2,
-                    margins.imageTop + 4.2,
-                    margins.imageWidth - 8.4,
-                    margins.imageWidth - 8.4
-                );
-            } catch (e) {
-                console.log('The primary image is corrupted in some way that prevents it from being loaded by jsPDF.');
-            }
-            this._drawDetails(topIndex, {left: margins.columnWidth, top: margins.imageTop + margins.imageWidth });
-        });
-        img.onerror = (() => {
-            console.log('The primary image is corrupted in some way that prevents it from being loaded.');
-            this._drawDetails(topIndex, {left: margins.columnWidth, top: margins.imageTop + margins.imageWidth });
-        });
-        img.src = this._data.productDetail.imageUrl;
-        img.crossOrigin = 'anonymous';
+    private _drawPrimaryImg(images: HTMLImageElement[]) {
+
+        const img = images[0];
+        // img.onload = (() => {
+        try {
+            this._doc.addImage(
+                img,
+                this._marginsPrimaryImage.columnWidth + 4.2,
+                this._marginsPrimaryImage.imageTop + 4.2,
+                this._marginsPrimaryImage.imageWidth - 8.4,
+                this._marginsPrimaryImage.imageWidth - 8.4
+            );
+        } catch (e) {
+            console.log('The primary image is corrupted in some way that prevents it from being loaded by jsPDF.');
+        }
+        this._drawDetails(this._marginsPrimaryImage.topIndex, { left: this._marginsPrimaryImage.columnWidth, top: this._marginsPrimaryImage.imageTop + this._marginsPrimaryImage.imageWidth });
     }
 
     // draw details
@@ -493,7 +480,13 @@ export class DocRendererDetail extends IDocRenderer {
 
         // load others sections
         this._drawDownloads();
-        this._drawGallery();
+        // call to load gallery
+        const imagesGallery = this._data.productDetail.imageGallery;
+        if (imagesGallery && imagesGallery.length > 0) {
+            this._toDataURL(imagesGallery, this._loadImages.bind(this), this._drawGallery.bind(this));
+        } else {
+           this._drawLayout();
+        }
     }
 
     private _drawTableHeader(marginTop: number, text: string) {
@@ -646,59 +639,43 @@ export class DocRendererDetail extends IDocRenderer {
         this._doc.autoTable(columns, rows, config);
     }
 
-    private _drawGallery(): void {
+    private _drawGallery(images: HTMLImageElement[]): void {
         this._doc.addPage();
 
-        const imagesGallery = this._data.productDetail.imageGallery;
-        if (imagesGallery && imagesGallery.length > 0) {
-            this._loadImageGallery(0, 26);
-        } else {
-           this._drawLayout();
-        }
-    }
+        const pageHeight = this._doc.internal.pageSize.getHeight();
+        const imageWidth = pageHeight / 3 - (this._docConfig.padding * 2 + 2)  ;
 
-    private _loadImageGallery( index: number, imageTop: number ): void {
-        const imagesGallery = this._data.productDetail.imageGallery;
-        if (index < imagesGallery.length) {
-            const pageHeight = this._doc.internal.pageSize.getHeight();
-            const imageWidth = pageHeight / 3 - (this._docConfig.padding * 2 + 2);
-            const imageLeft = (index % 2 !== 0) ? imageWidth + this._docConfig.padding * 1.7 : 10;
+        const initialTop = 26;
+        const column1 = 10;
+        const column2 = imageWidth + this._docConfig.padding * 1.7 ;
+
+        let imageLeft = column1;
+        let imageTop = initialTop;
+
+        images.forEach((imageUrl: HTMLImageElement, i: number) => {
+
+            imageLeft = (i % 2 !== 0) ? column2 : column1;
 
             if ((imageTop + imageWidth) >= (pageHeight - 20)) {
-                imageTop = 26;
+                imageTop = initialTop;
                 this._doc.addPage();
             }
+            try {
+                this._doc.addImage(
+                    imageUrl,
+                    imageLeft,
+                    imageTop,
+                    imageWidth,
+                    imageWidth
+                );
+            } catch (e) {
+                console.log('Error loading image: ' + imageUrl);
+            }
+            if (i % 2 !== 0) {
+                imageTop += imageWidth + 4;
+            }
+        });
+        this._drawLayout();
 
-            const img = new Image();
-            img.onload = (() => {
-                try {
-                    this._doc.addImage(
-                        img,
-                        imageLeft,
-                        imageTop,
-                        imageWidth,
-                        imageWidth
-                    );
-                } catch (e) {
-                    console.log('Error loading image by jsPDF: ' + imagesGallery[index]);
-                }
-                if (index % 2 !== 0) {
-                    imageTop += imageWidth + 4;
-                }
-                this._loadImageGallery(++index, imageTop);
-            });
-            img.onerror = (() => {
-                console.log('The image of gallery is corrupted in some way that prevents it from being loaded.');
-                if (index % 2 !== 0) {
-                    imageTop += imageWidth + 4;
-                }
-                this._loadImageGallery(++index, imageTop);
-            });
-            img.src = imagesGallery[index];
-            img.crossOrigin = 'anonymous';
-        } else {
-            this._drawLayout();
-        }
     }
-
 }
