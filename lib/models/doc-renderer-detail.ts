@@ -518,6 +518,7 @@ export class DocRendererDetail extends IDocRenderer {
             fillColor: [255, 255, 255],
             lineWidth: 0,
             fontStyle: 'normal',
+            // top...left
             cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
             fontSize: 9,
             textColor: 0,
@@ -549,38 +550,44 @@ export class DocRendererDetail extends IDocRenderer {
                 'GothamMedium' : 'GothamLight', 'normal');
 
             },
-            drawHeaderCell: (cell: any, opts: any) => {
-
-                this._doc.setFont('GothamMedium', 'normal');
-            },
-            drawHeaderRow: (row: any, opts: any) => {
-
-                borders.push({
-                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                    top: row.y + row.height - 0.1,
-                    width: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
-                    height: 0.1
-                });
-            },
             drawRow: (row: any, opts: any) => {
+                if (!row.raw.first && !row.raw.last) {
+                    row.height = 5;
+                }
+                if (!row.raw.single) {
+                    if (row.raw.last) {
+                        row.cells['col1'].styles.cellPadding[0] = 0;
+                        row.cells['col1'].styles.valign = 'top';
+                        row.cells['col2'].styles.cellPadding[0] = 0;
+                        row.cells['col2'].styles.valign = 'top';
+                        row.height = 7;
+                    }
+                    if (row.raw.first) {
+                        row.cells['col1'].styles.cellPadding[2] = 0;
+                        row.cells['col1'].styles.valign = 'bottom';
+                        row.cells['col2'].styles.cellPadding[2] = 0;
+                        row.cells['col2'].styles.valign = 'bottom';
+                        row.height = 7;
+                    }
+                }
 
-                borders.push({
-                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                    top: row.y + row.height - 0.1,
-                    width: pageWidth - this._docConfig.columnWidth * 2 + 2 * this._docConfig.padding,
-                    height: 0.1
-                });
+                if (row.raw.last) {
+
+                    borders.push({
+                        left: this._docConfig.padding + this._docConfig.lineWidth / 2,
+                        top: row.y + row.height - 0.1,
+                        width: pageWidth - this._docConfig.columnWidth * 2 + 2 * this._docConfig.padding,
+                        height: 0.1
+                    });
+                }
             },
             addPageContent: (data: any) => {
-
+                console.log(data);
                 this._doc.setFillColor(0, 0, 0);
                 borders.forEach((border: any, index: number) => {
 
                     if (index < borders.length - 1) {
-
-                        this._doc.rect(
-                            border.left, border.top, border.width, border.height, 'F'
-                        );
+                        this._doc.rect(border.left, border.top, border.width, border.height, 'F');
                     }
                 });
                 borders = [];
@@ -608,32 +615,24 @@ export class DocRendererDetail extends IDocRenderer {
             cellPadding: [2.8, lineW, 2.8, lineW]
         };
 
-        // fix
-        if (rows.length === 0) {
-            downloads.forEach((elem: DownloadElement) => {
-                let row = {};
-                row = { col1: elem.label };
-                rows.push(row);
-            });
-        }
+        let spanLines = 0;
         downloads.forEach((elem: DownloadElement, index: number) => {
+            rows.push({ col1: elem.label, first: true});
             if (elem.singleValue) {
-                rows[index]['col2'] = elem.singleValue.name;
+                rows[spanLines]['col2'] = '•    ' + elem.singleValue.name;
+                rows[spanLines]['last'] = true;
+                rows[spanLines]['single'] = true;
+                spanLines++;
             } else {
-                let item = '';
                 elem.listValues.forEach((value: DownloadValue, idx: number) => {
-                    if (idx === 0) {
-                        item = value.name;
-                    } else {
-                        item += `\n${value.name}`;
+                    if (idx !== 0) { rows.push({ col1: '' }); }
+                    rows[spanLines]['col2'] = '•    ' + value.name;
+                    if (idx === elem.listValues.length - 1) {
+                        rows[spanLines]['last'] = true;
                     }
+                    spanLines++;
                 });
-                rows[index]['col2'] = item;
             }
-            /* if (d.value !== undefined) {
-
-                rows[index][product.name] = this._data.translate(property.value);
-            } */
         });
 
         this._doc.autoTable(columns, rows, config);
