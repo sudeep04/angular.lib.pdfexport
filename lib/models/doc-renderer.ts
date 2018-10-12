@@ -41,13 +41,13 @@ export class DocRenderer extends IDocRenderer {
     }
 
     private _loadImagesTables(): void {
-        if (this._data.settings.applyFilters) {
+        //if (this._data.settings.applyFilters) {
             const elems: string[] = [checkImg, unckeckImg, boxShadowImg];
             const elemsHTML: HTMLImageElement[] = [];
             this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
-        } else {
-            this._drawElems([]);
-        }
+        // } else {
+        //     this._drawElems([]);
+        // }
     }
 
     private _drawElems(output: HTMLImageElement[]): void {
