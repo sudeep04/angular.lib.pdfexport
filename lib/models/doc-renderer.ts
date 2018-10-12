@@ -19,20 +19,14 @@ const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
 // const HEADER_TOP = 48;
 
-export class DocRenderer implements IDocRenderer {
-
-    private _doc: any;
-
-    private _data: Data;
-
-    private _docConfig: DocConfig;
+export class DocRenderer extends IDocRenderer {
 
     private _checkedHTMLImage: HTMLImageElement;
     private _uncheckedHTMLImage: HTMLImageElement;
     private _boxShadowImage: HTMLImageElement;
 
     constructor() {
-
+        super();
         this._doc = new jsPDF();
         this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
         this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
@@ -50,29 +44,9 @@ export class DocRenderer implements IDocRenderer {
         if (this._data.settings.applyFilters) {
             const elems: string[] = [checkImg, unckeckImg, boxShadowImg];
             const elemsHTML: HTMLImageElement[] = [];
-            this._loadElems(0, elems, elemsHTML, this._drawElems.bind(this));
+            this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
         } else {
             this._drawElems([]);
-        }
-    }
-
-    // load images
-    private _loadElems(index: number, input: string[], output: HTMLImageElement[], callback: any): void {
-        if (index < input.length) {
-            const img = new Image();
-            img.onload = (() => {
-                output.push(img);
-                this._loadElems(++index, input, output, callback);
-            });
-            img.onerror = (() => {
-                console.log('The image is corrupted in some way that prevents it from being loaded.');
-                output.push(null);
-                this._loadElems(++index, input, output, callback);
-            });
-            img.src = input[index];
-            img.crossOrigin = 'anonymous';
-        } else {
-            callback(output);
         }
     }
 
@@ -92,8 +66,8 @@ export class DocRenderer implements IDocRenderer {
                     elems.push(product.imageUrl);
                 });
             });
-            const elemsHTML: HTMLImageElement[] = [];
-            this._loadElems(0, elems, elemsHTML, this._drawElemsData.bind(this));
+
+            this._toDataURL(elems, this._loadImages.bind(this), this._drawElemsData.bind(this));
         } else {
             this._drawElemsData([]);
         }
