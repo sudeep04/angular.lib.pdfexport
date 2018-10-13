@@ -527,7 +527,7 @@ export class DocRendererDetail extends IDocRenderer {
         };
 
         let borders: any[] = [];
-
+        let links: any[] = [];
         const config: any = {
             styles,
             margin: {
@@ -548,7 +548,6 @@ export class DocRendererDetail extends IDocRenderer {
 
                 this._doc.setFont(opts.column.dataKey === 'col1' ?
                 'GothamMedium' : 'GothamLight', 'normal');
-
             },
             drawRow: (row: any, opts: any) => {
                 if (!row.raw.first && !row.raw.last) {
@@ -580,9 +579,11 @@ export class DocRendererDetail extends IDocRenderer {
                         height: 0.1
                     });
                 }
+
+                links.push(row.cells['col2'].textPos);
             },
             addPageContent: (data: any) => {
-                console.log(data);
+
                 this._doc.setFillColor(0, 0, 0);
                 borders.forEach((border: any, index: number) => {
 
@@ -591,6 +592,33 @@ export class DocRendererDetail extends IDocRenderer {
                     }
                 });
                 borders = [];
+
+                this._doc.setTextColor(0, 172, 165);
+                let iter: number = 0;
+                downloads.forEach((elem: DownloadElement) => {
+
+                    if (elem.singleValue) {
+                        const elemSplit = this._splitLines(elem.singleValue.name, this._docConfig.columnWidth + this._docConfig.padding * 2, 11);
+                        this._doc.setFont('GothamLight', 'normal');
+                        this._doc.setFontSize(9);
+                        let val = '';
+                        elemSplit.forEach((element: string, index: number) => {
+                            val += (index !== 0) ? '\n' + element : element;
+                        });
+                        this._doc.textWithLink(val, links[iter].x + 4, links[iter].y , {
+                            url: elem.singleValue.link
+                          });
+                        iter++;
+                    } else {
+                        elem.listValues.forEach((value: DownloadValue, idx: number) => {
+                            this._doc.textWithLink(value.name, links[iter].x + 4, links[iter].y , {
+                                url: value.link
+                              });
+                            iter++;
+                        });
+                    }
+                });
+                links = [];
 
                 data.settings.margin.top = 40;
 
@@ -619,14 +647,14 @@ export class DocRendererDetail extends IDocRenderer {
         downloads.forEach((elem: DownloadElement, index: number) => {
             rows.push({ col1: elem.label, first: true});
             if (elem.singleValue) {
-                rows[spanLines]['col2'] = '•    ' + elem.singleValue.name;
+                rows[spanLines]['col2'] = '•';
                 rows[spanLines]['last'] = true;
                 rows[spanLines]['single'] = true;
                 spanLines++;
             } else {
                 elem.listValues.forEach((value: DownloadValue, idx: number) => {
                     if (idx !== 0) { rows.push({ col1: '' }); }
-                    rows[spanLines]['col2'] = '•    ' + value.name;
+                    rows[spanLines]['col2'] = '•';
                     if (idx === elem.listValues.length - 1) {
                         rows[spanLines]['last'] = true;
                     }
