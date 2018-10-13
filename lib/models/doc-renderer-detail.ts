@@ -65,7 +65,10 @@ export class DocRendererDetail extends IDocRenderer {
 
     private _splitLines(text: string, maxLineWidth: number, fontSize: number): any {
 
-        return this._doc.setFont('helvetica', 'neue').setFontSize(fontSize).splitTextToSize(text, maxLineWidth);
+        const split = this._doc.setFont('helvetica', 'neue').setFontSize(fontSize).splitTextToSize(text, maxLineWidth);
+        this._doc.setFont('GothamLight', 'normal');
+        this._doc.setFontSize(9);
+        return split;
     }
 
     // draw Primary Image
@@ -528,6 +531,7 @@ export class DocRendererDetail extends IDocRenderer {
 
         let borders: any[] = [];
         let links: any[] = [];
+        let elemsPage: number[] = [];
         const config: any = {
             styles,
             margin: {
@@ -556,8 +560,10 @@ export class DocRendererDetail extends IDocRenderer {
                 if (!row.raw.single) {
                     if (row.raw.last) {
                         row.cells['col1'].styles.cellPadding[0] = 0;
+                        row.cells['col1'].styles.cellPadding[2] = 2.5;
                         row.cells['col1'].styles.valign = 'top';
                         row.cells['col2'].styles.cellPadding[0] = 0;
+                        row.cells['col2'].styles.cellPadding[2] = 2.5;
                         row.cells['col2'].styles.valign = 'top';
                         row.height = 7;
                     }
@@ -568,6 +574,9 @@ export class DocRendererDetail extends IDocRenderer {
                         row.cells['col2'].styles.valign = 'bottom';
                         row.height = 7;
                     }
+                } else {
+                    const split = this._splitLines(downloads[row.raw.index].singleValue.name, this._docConfig.columnWidth + this._docConfig.padding * 2, 11);
+                    row.height += split.length * 3.1;
                 }
 
                 if (row.raw.last) {
@@ -578,6 +587,9 @@ export class DocRendererDetail extends IDocRenderer {
                         width: pageWidth - this._docConfig.columnWidth * 2 + 2 * this._docConfig.padding,
                         height: 0.1
                     });
+                }
+                if (row.raw.index !== undefined) {
+                    elemsPage.push(row.raw.index);
                 }
 
                 links.push(row.cells['col2'].textPos);
@@ -595,30 +607,40 @@ export class DocRendererDetail extends IDocRenderer {
 
                 this._doc.setTextColor(0, 172, 165);
                 let iter: number = 0;
-                downloads.forEach((elem: DownloadElement) => {
 
+                elemsPage.forEach((it: number) => {
+                    const elem = downloads[it];
                     if (elem.singleValue) {
                         const elemSplit = this._splitLines(elem.singleValue.name, this._docConfig.columnWidth + this._docConfig.padding * 2, 11);
-                        this._doc.setFont('GothamLight', 'normal');
-                        this._doc.setFontSize(9);
+
                         let val = '';
                         elemSplit.forEach((element: string, index: number) => {
                             val += (index !== 0) ? '\n' + element : element;
                         });
-                        this._doc.textWithLink(val, links[iter].x + 4, links[iter].y , {
+                        this._doc.textWithLink(val, links[iter].x, links[iter].y, {
                             url: elem.singleValue.link
                           });
                         iter++;
                     } else {
                         elem.listValues.forEach((value: DownloadValue, idx: number) => {
-                            this._doc.textWithLink(value.name, links[iter].x + 4, links[iter].y , {
+                            let y = links[iter].y;
+                            if (idx === 0) {
+                                y -= 1.2;
+                            } else if (idx === elem.listValues.length - 1) {
+                                y += 2.75;
+                            } else {
+                                y += 0.8;
+                            }
+                            this._doc.textWithLink(value.name, links[iter].x + 4 , y , {
                                 url: value.link
                               });
                             iter++;
                         });
                     }
                 });
+
                 links = [];
+                elemsPage = [];
 
                 data.settings.margin.top = 40;
 
@@ -645,9 +667,9 @@ export class DocRendererDetail extends IDocRenderer {
 
         let spanLines = 0;
         downloads.forEach((elem: DownloadElement, index: number) => {
-            rows.push({ col1: elem.label, first: true});
+            rows.push({ col1: elem.label, first: true, index});
             if (elem.singleValue) {
-                rows[spanLines]['col2'] = '•';
+                rows[spanLines]['col2'] = '';
                 rows[spanLines]['last'] = true;
                 rows[spanLines]['single'] = true;
                 spanLines++;
