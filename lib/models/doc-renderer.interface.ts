@@ -40,7 +40,7 @@ export class IDocRenderer {
 
         const waitForLoaded = ((image: HTMLImageElement, total: number) => {
 
-            if ((image.complete && image.naturalWidth !== 0 && image.naturalHeight !== 0 ) || (total > 5000)) {
+            if ((image.complete && image.naturalWidth !== 0 && image.naturalHeight !== 0 ) || (total > 30000)) {
                 loaded++;
                 output.push(image);
             } else {
