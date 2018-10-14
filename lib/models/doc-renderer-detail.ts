@@ -128,63 +128,68 @@ export class DocRendererDetail extends IDocRenderer {
     private _drawDetailsText(details: any[], marginTop: number, imageMargin: number) {
 
         if (details.length === 0) {
-
+            if (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) {
+                marginTop = imageMargin;
+            }
             this._drawCheckedImage(marginTop);
         } else {
-
-            const specialElementHandlers = {
-                // element with id of "bypass" - jQuery style selector
-                '#bypassme'(element, renderer) {
-                    // true = "handled elsewhere, bypass text extraction"
-                    return true;
-                },
-                '.hide'(element, renderer) {
-                    // true = "handled elsewhere, bypass text extraction"
-                    return true;
-                }
-            };
-
-            if (marginTop + 25 < this._doc.internal.pageSize.getHeight() - 36) {
-                marginTop += 10;
-            } else {
-                this._doc.addPage();
-                marginTop = 40;
-            }
-
-            const widthColumn = (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
-                this._doc.internal.pageSize.getWidth() / 2  - this._docConfig.padding : this._doc.internal.pageSize.getWidth() - 30;
-
-            const margins = {
-                top: 36,
-                bottom: 20,
-                left: 10,
-                width: widthColumn
-            };
-
             const detail = details.pop();
-            const div = document.createElement('div');
-            const css = '<style> * { font-family: sans-serif !important; font-size: 11pt !important;}; </style>';
-            div.innerHTML = css + detail.content.replace('–', '-') ;
+            if (detail.content !== undefined) {
+                const specialElementHandlers = {
+                    // element with id of "bypass" - jQuery style selector
+                    '#bypassme'(element, renderer) {
+                        // true = "handled elsewhere, bypass text extraction"
+                        return true;
+                    },
+                    '.hide'(element, renderer) {
+                        // true = "handled elsewhere, bypass text extraction"
+                        return true;
+                    }
+                };
+                if (marginTop + 25 < this._doc.internal.pageSize.getHeight() - 36) {
+                    marginTop += 10;
+                } else {
+                    this._doc.addPage();
+                    marginTop = 40;
+                }
 
-            // draw title
-            this._drawText(detail.name, margins.width, 20, margins.left, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
+                const widthColumn = (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
+                    this._doc.internal.pageSize.getWidth() / 2 - this._docConfig.padding : this._doc.internal.pageSize.getWidth() - 30;
 
-            // draw detail
-            this._doc.fromHTML(
-                div,
-                margins.left,
-                marginTop // y coord
-                , {
-                    width: margins.width, // max width of content on PDF
-                    elementHandlers: specialElementHandlers
-                },
-                (dispose) => {
-                    const y  = (dispose.y < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
-                        imageMargin : dispose.y;
-                    this._drawDetailsText(details, y, imageMargin);
-                },
-                margins
-            );
+                const margins = {
+                    top: 36,
+                    bottom: 20,
+                    left: 10,
+                    width: widthColumn
+                };
+
+
+                const div = document.createElement('div');
+                const css = '<style> * { font-family: sans-serif !important; font-size: 11pt !important;}; </style>';
+                div.innerHTML = css + detail.content.replace('–', '-');
+
+                // draw title
+                this._drawText(detail.name, margins.width, 20, margins.left, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
+
+                // draw detail
+                this._doc.fromHTML(
+                    div,
+                    margins.left,
+                    marginTop // y coord
+                    , {
+                        width: margins.width, // max width of content on PDF
+                        elementHandlers: specialElementHandlers
+                    },
+                    (dispose) => {
+                        const y = (dispose.y < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
+                            imageMargin : dispose.y;
+                        this._drawDetailsText(details, y, imageMargin);
+                    },
+                    margins
+                );
+            } else {
+                this._drawDetailsText(details, marginTop, imageMargin);
+            }
         }
     }
 
@@ -689,41 +694,43 @@ export class DocRendererDetail extends IDocRenderer {
     }
 
     private _drawGallery(images: HTMLImageElement[]): void {
-        this._doc.addPage();
+        if (images.length > 0) {
+            this._doc.addPage();
 
-        const pageHeight = this._doc.internal.pageSize.getHeight();
-        const imageWidth = pageHeight / 3 - (this._docConfig.padding * 2 + 2)  ;
+            const pageHeight = this._doc.internal.pageSize.getHeight();
+            const imageWidth = pageHeight / 3 - (this._docConfig.padding * 2 + 2);
 
-        const initialTop = 26;
-        const column1 = 10;
-        const column2 = imageWidth + this._docConfig.padding * 1.7 ;
+            const initialTop = 26;
+            const column1 = 10;
+            const column2 = imageWidth + this._docConfig.padding * 1.7;
 
-        let imageLeft = column1;
-        let imageTop = initialTop;
+            let imageLeft = column1;
+            let imageTop = initialTop;
 
-        images.forEach((imageUrl: HTMLImageElement, i: number) => {
+            images.forEach((imageUrl: HTMLImageElement, i: number) => {
 
-            imageLeft = (i % 2 !== 0) ? column2 : column1;
+                imageLeft = (i % 2 !== 0) ? column2 : column1;
 
-            if ((imageTop + imageWidth) >= (pageHeight - 20)) {
-                imageTop = initialTop;
-                this._doc.addPage();
-            }
-            try {
-                this._doc.addImage(
-                    imageUrl,
-                    imageLeft,
-                    imageTop,
-                    imageWidth,
-                    imageWidth
-                );
-            } catch (e) {
-                console.log('Error loading image: ' + imageUrl);
-            }
-            if (i % 2 !== 0) {
-                imageTop += imageWidth + 4;
-            }
-        });
+                if ((imageTop + imageWidth) >= (pageHeight - 20)) {
+                    imageTop = initialTop;
+                    this._doc.addPage();
+                }
+                try {
+                    this._doc.addImage(
+                        imageUrl,
+                        imageLeft,
+                        imageTop,
+                        imageWidth,
+                        imageWidth
+                    );
+                } catch (e) {
+                    console.log('Error loading image: ' + imageUrl);
+                }
+                if (i % 2 !== 0) {
+                    imageTop += imageWidth + 4;
+                }
+            });
+        }
         this._drawLayout();
 
     }
