@@ -163,7 +163,6 @@ export class DocRendererDetail extends IDocRenderer {
                     width: widthColumn
                 };
 
-
                 const div = document.createElement('div');
                 const css = '<style> * { font-family: sans-serif !important; font-size: 11pt !important;}; </style>';
                 div.innerHTML = css + detail.content.replace('–', '-');
