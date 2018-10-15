@@ -34,9 +34,9 @@ export interface Settings {
             bimModels: string;
         },
         booleanValues: {
-            true: string,
+            true: string;
 
-            false: string
+            false: string;
         }
     };
 

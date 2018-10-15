@@ -77,8 +77,19 @@ export class Data {
     }
 
     public translate(value: string): string {
-        const trans = this._settings.translations.booleanValues[value];
-        return trans ? trans : value;
+        let trans: string;
+        if(value === 'true')
+        {
+            trans = this._settings.translations.booleanValues.true;
+            return trans;
+        }
+        else if (value === 'false')
+        {
+            trans = this._settings.translations.booleanValues.false;
+            return trans;
+        }
+        else
+        return value;
     }
 
     private _updateProperties(product: Product): void {

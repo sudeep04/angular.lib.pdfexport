@@ -17080,6 +17080,9 @@ var JsonParser = /** @class */ (function () {
         var data = new data_1.Data(settings, jsonData.property_filters);
         var product = this._parseProduct(jsonData.products[0], data, settings);
         data.setProductDetail(product);
+        if (jsonData.downloads) {
+            data.downloads = jsonData.downloads;
+        }
         return data;
     };
     JsonParser.parseSettings = function (settings) {
@@ -17096,9 +17099,13 @@ var JsonParser = /** @class */ (function () {
                     supplierName: 'Hersteller'
                 },
                 downloadTypes: {
-                    brochure: 'Brosch�re',
+                    brochure: 'Broschüre',
                     cadData: 'CAD Data',
                     bimModels: 'BIM Models'
+                },
+                booleanValues: {
+                    true: 'Yes',
+                    false: 'No'
                 }
             },
             showProductsImage: true,
@@ -17200,7 +17207,7 @@ var JsonParser = /** @class */ (function () {
         if (data.settings.showProductsImage) {
             if (jsonproduct.productData.primaryImage) {
                 var imgUrl = data.settings.productsImageApiPath
-                    + jsonproduct.productData.primaryImage.uuid + '/content/' + jsonproduct.productData.primaryImage.content + '?quality=80&background=white&mode=pad&width=160&height=160';
+                    + jsonproduct.productData.primaryImage.uuid + '/content/' + jsonproduct.productData.primaryImage.content + '?quality=100&background=white&mode=pad&width=720&height=720';
                 product.imageUrl = imgUrl;
             }
             else {
@@ -17311,7 +17318,7 @@ var JsonParser = /** @class */ (function () {
                 var imgUrl = data.settings.productsImageApiPath
                     + image.uuid + '/content/'
                     + image.content
-                    + '?quality=80&background=white&mode=pad&width=160&height=160';
+                    + '?quality=100&background=white&mode=pad&width=720&height=720';
                 product.addImageGallery(imgUrl);
             });
         }
@@ -17549,6 +17556,9 @@ var DocRenderer = /** @class */ (function () {
         };
         var borders = [];
         var checkImages = [];
+        var filtersIndex = [];
+        var spanp = 0;
+        var lastRow = -1;
         var config = {
             styles: styles,
             margin: {
@@ -17564,22 +17574,36 @@ var DocRenderer = /** @class */ (function () {
             showHeader: 'never',
             tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: function (cell, opts) {
+                var filterPos = filtersIndex.findIndex(function (v) { return v === opts.row.index; });
+                _this._doc.setFont(opts.column.dataKey === 'col1' && filterPos === -1 ?
+                    'GothamMedium' : 'GothamLight', 'normal');
+                if (filterPos !== -1) {
+                    cell.textPos.y -= 1.8;
+                    cell.height -= 4;
+                    cell.contentHeight = cell.height;
+                    if (lastRow !== opts.row.index) {
+                        lastRow = opts.row.index;
+                        spanp++;
+                    }
+                }
+                var previousFilter = filtersIndex.findIndex(function (v) { return v === (opts.row.index + 1); });
+                if (previousFilter !== -1) {
+                    cell.textPos.y += 1.8;
+                    if (opts.column.dataKey !== 'col1') {
+                        cell.textPos.y += 1.9;
+                        cell.height += 7;
+                    }
+                }
                 if (opts.column.index !== 0) {
-                    if (group[opts.column.index - 1].properties[opts.row.index].ckeck !== undefined) {
+                    if (group[opts.column.index - 1].properties[opts.row.index - spanp].ckeck !== undefined && filterPos === -1) {
                         checkImages.push({
                             left: cell.x + 3,
                             top: cell.y + cell.height / 2 - 1.5,
                             width: 3,
                             height: 3,
-                            check: group[opts.column.index - 1].properties[opts.row.index].ckeck
+                            check: group[opts.column.index - 1].properties[opts.row.index - spanp].ckeck
                         });
                     }
-                }
-                if (opts.column.dataKey === 'col1') {
-                    _this._doc.setFont('GothamMedium', 'normal');
-                }
-                else {
-                    _this._doc.setFont('GothamLight', 'normal');
                 }
             },
             drawHeaderCell: function (cell, opts) {
@@ -17594,12 +17618,14 @@ var DocRenderer = /** @class */ (function () {
                 });
             },
             drawRow: function (row, opts) {
-                borders.push({
-                    left: _this._docConfig.padding + _this._docConfig.lineWidth / 2,
-                    top: row.y + row.height - 0.1,
-                    width: pageWidth - ((3 - group.length) * _this._docConfig.columnWidth) - 2 * _this._docConfig.padding - _this._docConfig.lineWidth,
-                    height: 0.1
-                });
+                if (filtersIndex.findIndex(function (v) { return v === opts.row.index + 1; }) === -1) {
+                    borders.push({
+                        left: _this._docConfig.padding + _this._docConfig.lineWidth / 2,
+                        top: row.y + row.height - 0.1,
+                        width: pageWidth - ((3 - group.length) * _this._docConfig.columnWidth) - 2 * _this._docConfig.padding - _this._docConfig.lineWidth,
+                        height: 0.1
+                    });
+                }
             },
             addPageContent: function (data) {
                 _this._doc.setFillColor(0, 0, 0);
@@ -17633,7 +17659,6 @@ var DocRenderer = /** @class */ (function () {
             config.columnStyles[product.name] = { columnWidth: _this._docConfig.columnWidth, cellPadding: [2.8, _this._docConfig.lineWidth + 0.5, 2.8, lineW] };
             if (rows.length === 0) {
                 product.properties.forEach(function (property) {
-                    var row = {};
                     if (_this._data.settings.applyFilters) {
                         var direction = property.unit !== undefined && _this._data.settings.unitsBeforeValue.find(function (unit) { return unit === property.unit; }) ?
                             'beforeValue'
@@ -17661,32 +17686,40 @@ var DocRenderer = /** @class */ (function () {
                             else {
                                 filterText_1 = filterValue.toString();
                             }
-                            if (typeof property.unit == 'undefined') {
+                            if (typeof property.unit === 'undefined') {
                                 filterText_1 = filterText_1;
                             }
                             else {
                                 if (direction === 'afterValue') {
-                                    filterText_1 = filterText_1 + ' ' + property.unit;
+                                    filterText_1 = filterText_1 + ' ' + property.unit.toString();
                                 }
                                 else {
                                     filterText_1 = property.unit + ' ' + filterText_1;
                                 }
                             }
-                            row = { col1: property.name + ("\n(" + filterText_1 + ")") };
+                            rows.push({ col1: property.name });
+                            filtersIndex.push(rows.push({ col1: "(" + filterText_1 + ")" }) - 1);
                         }
                         else {
-                            row = { col1: property.name };
+                            rows.push({ col1: property.name });
                         }
                     }
                     else {
-                        row = { col1: property.name };
+                        rows.push({ col1: property.name });
                     }
-                    rows.push(row);
                 });
             }
-            product.properties.forEach(function (property, index) {
-                if (property.value !== undefined) {
-                    rows[index][product.name] = property.value.toString();
+            var span = 0;
+            rows.forEach(function (value, idx) {
+                if (filtersIndex.findIndex(function (e) { return e === idx; }) !== -1) {
+                    span++;
+                    rows[idx][product.name] = '';
+                }
+                else {
+                    var prd = product.properties[idx - span];
+                    if (prd.value !== undefined) {
+                        rows[idx][product.name] = _this._data.translate(prd.value);
+                    }
                 }
             });
         });
@@ -17758,12 +17791,8 @@ var DocRenderer = /** @class */ (function () {
             alternateRowStyles: styles,
             tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: function (cell, opts) {
-                if (opts.column.dataKey === 'col1') {
-                    _this._doc.setFont('GothamMedium', 'normal');
-                }
-                else {
-                    _this._doc.setFont('GothamLight', 'normal');
-                }
+                _this._doc.setFont(opts.column.dataKey === 'col1' ?
+                    'GothamMedium' : 'GothamLight', 'normal');
             },
             drawHeaderCell: function (cell, opts) {
                 _this._doc.setFont('GothamMedium', 'normal');
@@ -17788,9 +17817,9 @@ var DocRenderer = /** @class */ (function () {
         group.forEach(function (product) {
             var productName = product.name;
             if (product.name.length === 26 || product.name.length === 27) {
-                var x = productName.split(" ");
-                x[x.length - 1] = "\n" + x[x.length - 1];
-                productName = x.join(" ");
+                var x = productName.split(' ');
+                x[x.length - 1] = '\n' + x[x.length - 1];
+                productName = x.join(' ');
             }
             columns.push({ dataKey: product.name, title: productName });
             rows[0][product.name] = product.supplier;
@@ -21199,6 +21228,7 @@ var Data = /** @class */ (function () {
         this._properties = [];
         this._groups.push([]);
         this._filters = filters;
+        this._downloads = [];
     }
     Object.defineProperty(Data.prototype, "groups", {
         get: function () {
@@ -21228,6 +21258,16 @@ var Data = /** @class */ (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Data.prototype, "downloads", {
+        get: function () {
+            return this._downloads;
+        },
+        set: function (downloads) {
+            this._downloads = JSON.parse(JSON.stringify(downloads));
+        },
+        enumerable: true,
+        configurable: true
+    });
     Data.prototype.setProductDetail = function (product) {
         this._productDetail = new product_1.Product(product.name, product.supplier);
         this._productDetail.imageUrl = product.imageUrl;
@@ -21243,6 +21283,19 @@ var Data = /** @class */ (function () {
         this._groups[this._groups.length - 1].push(product);
         this._updateProperties(product);
         this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._properties);
+    };
+    Data.prototype.translate = function (value) {
+        var trans;
+        if (value === 'true') {
+            trans = this._settings.translations.booleanValues.true;
+            return trans;
+        }
+        else if (value === 'false') {
+            trans = this._settings.translations.booleanValues.false;
+            return trans;
+        }
+        else
+            return value;
     };
     Data.prototype._updateProperties = function (product) {
         // var filtersMap = new Map(this._filters);
@@ -21465,11 +21518,22 @@ var DocRendererDetail = /** @class */ (function () {
         this._drawDetailsText(details, marginTop, imageMargin.top);
     };
     DocRendererDetail.prototype._drawDetailsText = function (details, marginTop, imageMargin) {
+        var _this = this;
         if (details.length === 0) {
             this._drawBody(marginTop);
         }
         else {
-            var specialElementHandlers = {};
+            var specialElementHandlers = {
+                // element with id of "bypass" - jQuery style selector
+                '#bypassme': function (element, renderer) {
+                    // true = "handled elsewhere, bypass text extraction"
+                    return true;
+                },
+                '.hide': function (element, renderer) {
+                    // true = "handled elsewhere, bypass text extraction"
+                    return true;
+                }
+            };
             if (marginTop + 25 < this._doc.internal.pageSize.getHeight() - 36) {
                 marginTop += 10;
             }
@@ -21488,7 +21552,12 @@ var DocRendererDetail = /** @class */ (function () {
             var detail = details.pop();
             var div = document.createElement('div');
             var css = '<style> * { font-family: sans-serif !important; font-size: 11pt !important;}; </style>';
-            div.innerHTML = css + detail.content.replace('–', '-');
+            if (detail.content !== undefined) {
+                div.innerHTML = css + detail.content.replace('–', '-');
+            }
+            else {
+                div.innerHTML = css;
+            }
             // draw title
             this._drawText(detail.name, margins.width, 20, margins.left, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
             // draw detail
@@ -21496,13 +21565,11 @@ var DocRendererDetail = /** @class */ (function () {
             , {
                 width: margins.width,
                 elementHandlers: specialElementHandlers
-            }, 
-            // (dispose) => {
-            //     const y  = (dispose.y < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
-            //         imageMargin : dispose.y;
-            //     this._drawDetailsText(details, y, imageMargin);
-            // },
-            margins);
+            }, function (dispose) {
+                var y = (dispose.y < imageMargin && _this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
+                    imageMargin : dispose.y;
+                _this._drawDetailsText(details, y, imageMargin);
+            }, margins);
         }
     };
     // draw Page Header and Footer
@@ -21696,7 +21763,7 @@ var DocRendererDetail = /** @class */ (function () {
         }
         product.properties.forEach(function (property, index) {
             if (property.value !== undefined) {
-                rows[index][product.name] = property.value.toString();
+                rows[index][product.name] = _this._data.translate(property.value);
             }
         });
         this._doc.autoTable(columns, rows, config);
@@ -21709,7 +21776,7 @@ var DocRendererDetail = /** @class */ (function () {
         var i = 0;
         var pageWidth = this._doc.internal.pageSize.getWidth();
         var pageHeight = this._doc.internal.pageSize.getHeight();
-        var product = this._data.productDetail;
+        var downloads = this._data.downloads;
         var marginTop = this._doc.autoTable.previous.finalY + 15;
         if (marginTop + 45 < pageHeight) {
             marginTop += 10;
@@ -21733,7 +21800,6 @@ var DocRendererDetail = /** @class */ (function () {
             valign: 'middle'
         };
         var borders = [];
-        var checkImages = [];
         var config = {
             styles: styles,
             margin: {
@@ -21751,18 +21817,6 @@ var DocRendererDetail = /** @class */ (function () {
             showHeader: 'never',
             tableWidth: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: function (cell, opts) {
-                // fix
-                if (opts.column.index !== 0) {
-                    if (product.properties[opts.row.index].ckeck !== undefined) {
-                        checkImages.push({
-                            left: cell.x + 3,
-                            top: cell.y + cell.height / 2 - 1.5,
-                            width: 3,
-                            height: 3,
-                            check: product.properties[opts.row.index].ckeck
-                        });
-                    }
-                }
                 _this._doc.setFont(opts.column.dataKey === 'col1' ?
                     'GothamMedium' : 'GothamLight', 'normal');
             },
@@ -21793,12 +21847,6 @@ var DocRendererDetail = /** @class */ (function () {
                     }
                 });
                 borders = [];
-                checkImages.forEach(function (img) {
-                    (img.check) ?
-                        _this._doc.addImage(check_img_1.checkImg, img.left, img.top, img.width, img.height)
-                        : _this._doc.addImage(uncheck_img_1.unckeckImg, img.left, img.top, img.width, img.height);
-                });
-                checkImages = [];
                 data.settings.margin.top = 40;
                 if (++i !== 1) {
                     _this._drawTableHeader(36, 'Downloads');
@@ -21806,68 +21854,43 @@ var DocRendererDetail = /** @class */ (function () {
             }
         };
         // fill values
-        columns.push({ dataKey: product.name, title: product.name });
+        columns.push({ dataKey: 'col2', title: 'col2' });
         var lineW = this._docConfig.lineWidth + 0.5;
         if (this._data.settings.showHighlights) {
             lineW = lineW + 4;
         }
-        config.columnStyles[product.name] = {
+        config.columnStyles['col2'] = {
             columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 3,
             cellPadding: [2.8, lineW, 2.8, lineW]
         };
         // fix
         if (rows.length === 0) {
-            product.properties.forEach(function (property) {
+            downloads.forEach(function (elem) {
                 var row = {};
-                if (_this._data.settings.applyFilters) {
-                    var direction = property.unit !== undefined &&
-                        _this._data.settings.unitsBeforeValue.find(function (unit) { return unit === property.unit; }) ?
-                        'beforeValue' : 'afterValue';
-                    var filterMap = new Map(_this._data.filters);
-                    var filterValue = filterMap.get(property.ifdguid);
-                    var filterText_2 = '';
-                    if (filterValue) {
-                        if (util_1.isArray(filterValue)) {
-                            // List Values
-                            var listValues = filterValue;
-                            listValues.forEach(function (v, index) {
-                                var val1 = v;
-                                if (index === 0) {
-                                    filterText_2 += val1;
-                                }
-                                else {
-                                    filterText_2 += ', ' + val1;
-                                }
-                            });
-                        }
-                        else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
-                            filterText_2 = filterValue.lower + ' - ' + filterValue.upper;
-                        }
-                        else {
-                            filterText_2 = filterValue.toString();
-                        }
-                        if (direction === 'afterValue') {
-                            filterText_2 = filterText_2 + ' ' + property.unit;
-                        }
-                        else {
-                            filterText_2 = property.unit + ' ' + filterText_2;
-                        }
-                        row = { col1: property.name + ("\n(" + filterText_2 + ")") };
-                    }
-                    else {
-                        row = { col1: property.name };
-                    }
-                }
-                else {
-                    row = { col1: property.name };
-                }
+                row = { col1: elem.label };
                 rows.push(row);
             });
         }
-        product.properties.forEach(function (property, index) {
-            if (property.value !== undefined) {
-                rows[index][product.name] = property.value.toString();
+        downloads.forEach(function (elem, index) {
+            if (elem.singleValue) {
+                rows[index]['col2'] = elem.singleValue.name;
             }
+            else {
+                var item_1 = '';
+                elem.listValues.forEach(function (value, idx) {
+                    if (idx === 0) {
+                        item_1 = value.name;
+                    }
+                    else {
+                        item_1 += "\n" + value.name;
+                    }
+                });
+                rows[index]['col2'] = item_1;
+            }
+            /* if (d.value !== undefined) {
+
+                rows[index][product.name] = this._data.translate(property.value);
+            } */
         });
         this._doc.autoTable(columns, rows, config);
     };

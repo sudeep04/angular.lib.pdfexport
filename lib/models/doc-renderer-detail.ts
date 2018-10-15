@@ -2,7 +2,7 @@ import * as jsPDF from 'jspdf';
 import { IDocRenderer } from './doc-renderer.interface';
 import { DocConfig } from './doc-config';
 import { JsonParser } from './json-parser';
-import { boxShadowImg } from '../../dist/models/imagesBase64/box-shadow-img';
+import { boxShadowImg } from './imagesBase64/box-shadow-img';
 import { logoImg } from './imagesBase64/logo-img';
 import { Property } from './property.interface';
 import { isArray } from 'util';
@@ -137,11 +137,11 @@ export class DocRendererDetail extends IDocRenderer {
             if (detail.content !== undefined) {
                 const specialElementHandlers = {
                     // element with id of "bypass" - jQuery style selector
-                    '#bypassme'(element, renderer) {
+                    '#bypassme'(element: any, renderer: any) {
                         // true = "handled elsewhere, bypass text extraction"
                         return true;
                     },
-                    '.hide'(element, renderer) {
+                    '.hide'(element: any, renderer: any) {
                         // true = "handled elsewhere, bypass text extraction"
                         return true;
                     }
@@ -179,7 +179,7 @@ export class DocRendererDetail extends IDocRenderer {
                         width: margins.width, // max width of content on PDF
                         elementHandlers: specialElementHandlers
                     },
-                    (dispose) => {
+                    (dispose: any) => {
                         const y = (dispose.y < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
                             imageMargin : dispose.y;
                         this._drawDetailsText(details, y, imageMargin);
