@@ -65,7 +65,10 @@ export class DocRendererDetail extends IDocRenderer {
 
     private _splitLines(text: string, maxLineWidth: number, fontSize: number): any {
 
-        return this._doc.setFont('helvetica', 'neue').setFontSize(fontSize).splitTextToSize(text, maxLineWidth);
+        const split = this._doc.setFont('helvetica', 'neue').setFontSize(fontSize).splitTextToSize(text, maxLineWidth);
+        this._doc.setFont('GothamLight', 'normal');
+        this._doc.setFontSize(9);
+        return split;
     }
 
     // draw Primary Image
@@ -125,71 +128,67 @@ export class DocRendererDetail extends IDocRenderer {
     private _drawDetailsText(details: any[], marginTop: number, imageMargin: number) {
 
         if (details.length === 0) {
-
+            if (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) {
+                marginTop = imageMargin;
+            }
             this._drawCheckedImage(marginTop);
         } else {
-
-            const specialElementHandlers = {
-                // element with id of "bypass" - jQuery style selector
-                '#bypassme'(element: any, renderer: any) {
-                    // true = "handled elsewhere, bypass text extraction"
-                    return true;
-                },
-                '.hide'(element: any, renderer: any) {
-                    // true = "handled elsewhere, bypass text extraction"
-                    return true;
-                }
-            };
-
-            if (marginTop + 25 < this._doc.internal.pageSize.getHeight() - 36) {
-                marginTop += 10;
-            } else {
-                this._doc.addPage();
-                marginTop = 40;
-            }
-
-            const widthColumn = (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
-                this._doc.internal.pageSize.getWidth() / 2  - this._docConfig.padding : this._doc.internal.pageSize.getWidth() - 30;
-
-            const margins = {
-                top: 36,
-                bottom: 20,
-                left: 10,
-                width: widthColumn
-            };
-
             const detail = details.pop();
-            const div = document.createElement('div');
-            const css = '<style> * { font-family: sans-serif !important; font-size: 11pt !important;}; </style>';
-            if(detail.content  !== undefined)
-            { 
-               div.innerHTML = css + detail.content.replace('–', '-') ;
-            }
-            else
-            {
-                div.innerHTML = css;
-            }
-        
+            if (detail.content !== undefined) {
+                const specialElementHandlers = {
+                    // element with id of "bypass" - jQuery style selector
+                    '#bypassme'(element: any, renderer: any) {
+                        // true = "handled elsewhere, bypass text extraction"
+                        return true;
+                    },
+                    '.hide'(element: any, renderer: any) {
+                        // true = "handled elsewhere, bypass text extraction"
+                        return true;
+                    }
+                };
+                if (marginTop + 25 < this._doc.internal.pageSize.getHeight() - 36) {
+                    marginTop += 10;
+                } else {
+                    this._doc.addPage();
+                    marginTop = 40;
+                }
 
-            // draw title
-            this._drawText(detail.name, margins.width, 20, margins.left, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
+                const widthColumn = (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
+                    this._doc.internal.pageSize.getWidth() / 2 - this._docConfig.padding : this._doc.internal.pageSize.getWidth() - 30;
 
-            // draw detail
-            this._doc.fromHTML(
-                div,
-                margins.left,
-                marginTop // y coord
-                , {
-                    width: margins.width, // max width of content on PDF
-                    elementHandlers: specialElementHandlers
-                },
-                (dispose: any) => {
-                    const y  = (dispose.y < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
-                        imageMargin : dispose.y;
-                    this._drawDetailsText(details, y, imageMargin);
-                },
-                margins
-            );
+                const margins = {
+                    top: 36,
+                    bottom: 20,
+                    left: 10,
+                    width: widthColumn
+                };
+
+                const div = document.createElement('div');
+                const css = '<style> * { font-family: sans-serif !important; font-size: 11pt !important;}; </style>';
+                div.innerHTML = css + detail.content.replace('–', '-');
+
+                // draw title
+                this._drawText(detail.name, margins.width, 20, margins.left, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
+
+                // draw detail
+                this._doc.fromHTML(
+                    div,
+                    margins.left,
+                    marginTop // y coord
+                    , {
+                        width: margins.width, // max width of content on PDF
+                        elementHandlers: specialElementHandlers
+                    },
+                    (dispose: any) => {
+                        const y = (dispose.y < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
+                            imageMargin : dispose.y;
+                        this._drawDetailsText(details, y, imageMargin);
+                    },
+                    margins
+                );
+            } else {
+                this._drawDetailsText(details, marginTop, imageMargin);
+            }
         }
     }
 
@@ -526,6 +525,7 @@ export class DocRendererDetail extends IDocRenderer {
             fillColor: [255, 255, 255],
             lineWidth: 0,
             fontStyle: 'normal',
+            // top...left
             cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
             fontSize: 9,
             textColor: 0,
@@ -534,7 +534,8 @@ export class DocRendererDetail extends IDocRenderer {
         };
 
         let borders: any[] = [];
-
+        let links: any[] = [];
+        let elemsPage: number[] = [];
         const config: any = {
             styles,
             margin: {
@@ -555,29 +556,47 @@ export class DocRendererDetail extends IDocRenderer {
 
                 this._doc.setFont(opts.column.dataKey === 'col1' ?
                 'GothamMedium' : 'GothamLight', 'normal');
-
-            },
-            drawHeaderCell: (cell: any, opts: any) => {
-
-                this._doc.setFont('GothamMedium', 'normal');
-            },
-            drawHeaderRow: (row: any, opts: any) => {
-
-                borders.push({
-                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                    top: row.y + row.height - 0.1,
-                    width: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
-                    height: 0.1
-                });
             },
             drawRow: (row: any, opts: any) => {
+                if (!row.raw.first && !row.raw.last) {
+                    row.height = 5;
+                }
+                if (!row.raw.single) {
+                    if (row.raw.last) {
+                        row.cells['col1'].styles.cellPadding[0] = 0;
+                        row.cells['col1'].styles.cellPadding[2] = 2.5;
+                        row.cells['col1'].styles.valign = 'top';
+                        row.cells['col2'].styles.cellPadding[0] = 0;
+                        row.cells['col2'].styles.cellPadding[2] = 2.5;
+                        row.cells['col2'].styles.valign = 'top';
+                        row.height = 7;
+                    }
+                    if (row.raw.first) {
+                        row.cells['col1'].styles.cellPadding[2] = 0;
+                        row.cells['col1'].styles.valign = 'bottom';
+                        row.cells['col2'].styles.cellPadding[2] = 0;
+                        row.cells['col2'].styles.valign = 'bottom';
+                        row.height = 7;
+                    }
+                } else {
+                    const split = this._splitLines(downloads[row.raw.index].singleValue.name, this._docConfig.columnWidth + this._docConfig.padding * 2, 11);
+                    row.height += split.length * 3.1;
+                }
 
-                borders.push({
-                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                    top: row.y + row.height - 0.1,
-                    width: pageWidth - this._docConfig.columnWidth * 2 + 2 * this._docConfig.padding,
-                    height: 0.1
-                });
+                if (row.raw.last) {
+
+                    borders.push({
+                        left: this._docConfig.padding + this._docConfig.lineWidth / 2,
+                        top: row.y + row.height - 0.1,
+                        width: pageWidth - this._docConfig.columnWidth * 2 + 2 * this._docConfig.padding,
+                        height: 0.1
+                    });
+                }
+                if (row.raw.index !== undefined) {
+                    elemsPage.push(row.raw.index);
+                }
+
+                links.push(row.cells['col2'].textPos);
             },
             addPageContent: (data: any) => {
 
@@ -585,13 +604,47 @@ export class DocRendererDetail extends IDocRenderer {
                 borders.forEach((border: any, index: number) => {
 
                     if (index < borders.length - 1) {
-
-                        this._doc.rect(
-                            border.left, border.top, border.width, border.height, 'F'
-                        );
+                        this._doc.rect(border.left, border.top, border.width, border.height, 'F');
                     }
                 });
                 borders = [];
+
+                this._doc.setTextColor(0, 172, 165);
+                let iter: number = 0;
+
+                elemsPage.forEach((it: number) => {
+                    const elem = downloads[it];
+                    if (elem.singleValue) {
+                        const elemSplit = this._splitLines(elem.singleValue.name, this._docConfig.columnWidth + this._docConfig.padding * 2, 11);
+
+                        let val = '';
+                        elemSplit.forEach((element: string, index: number) => {
+                            val += (index !== 0) ? '\n' + element : element;
+                        });
+                        this._doc.textWithLink(val, links[iter].x, links[iter].y, {
+                            url: elem.singleValue.link
+                          });
+                        iter++;
+                    } else {
+                        elem.listValues.forEach((value: DownloadValue, idx: number) => {
+                            let y = links[iter].y;
+                            if (idx === 0) {
+                                y -= 1.2;
+                            } else if (idx === elem.listValues.length - 1) {
+                                y += 2.75;
+                            } else {
+                                y += 0.8;
+                            }
+                            this._doc.textWithLink(value.name, links[iter].x + 4 , y , {
+                                url: value.link
+                              });
+                            iter++;
+                        });
+                    }
+                });
+
+                links = [];
+                elemsPage = [];
 
                 data.settings.margin.top = 40;
 
@@ -616,73 +669,67 @@ export class DocRendererDetail extends IDocRenderer {
             cellPadding: [2.8, lineW, 2.8, lineW]
         };
 
-        // fix
-        if (rows.length === 0) {
-            downloads.forEach((elem: DownloadElement) => {
-                let row = {};
-                row = { col1: elem.label };
-                rows.push(row);
-            });
-        }
+        let spanLines = 0;
         downloads.forEach((elem: DownloadElement, index: number) => {
+            rows.push({ col1: elem.label, first: true, index});
             if (elem.singleValue) {
-                rows[index]['col2'] = elem.singleValue.name;
+                rows[spanLines]['col2'] = '';
+                rows[spanLines]['last'] = true;
+                rows[spanLines]['single'] = true;
+                spanLines++;
             } else {
-                let item = '';
                 elem.listValues.forEach((value: DownloadValue, idx: number) => {
-                    if (idx === 0) {
-                        item = value.name;
-                    } else {
-                        item += `\n${value.name}`;
+                    if (idx !== 0) { rows.push({ col1: '' }); }
+                    rows[spanLines]['col2'] = '•';
+                    if (idx === elem.listValues.length - 1) {
+                        rows[spanLines]['last'] = true;
                     }
+                    spanLines++;
                 });
-                rows[index]['col2'] = item;
             }
-            /* if (d.value !== undefined) {
-
-                rows[index][product.name] = this._data.translate(property.value);
-            } */
         });
 
         this._doc.autoTable(columns, rows, config);
     }
 
     private _drawGallery(images: HTMLImageElement[]): void {
-        this._doc.addPage();
+        if (images.length > 0) {
+            this._doc.addPage();
 
-        const pageHeight = this._doc.internal.pageSize.getHeight();
-        const imageWidth = pageHeight / 3 - (this._docConfig.padding * 2 + 2)  ;
+            const pageHeight = this._doc.internal.pageSize.getHeight();
+            const imageWidth = pageHeight / 3 - (this._docConfig.padding * 2 + 2);
 
-        const initialTop = 26;
-        const column1 = 10;
-        const column2 = imageWidth + this._docConfig.padding * 1.7 ;
+            const initialTop = 26;
+            const column1 = 10;
+            const column2 = imageWidth + this._docConfig.padding * 1.7;
 
-        let imageLeft = column1;
-        let imageTop = initialTop;
+            let imageLeft = column1;
+            let imageTop = initialTop;
 
-        images.forEach((imageUrl: HTMLImageElement, i: number) => {
+            images.forEach((imageUrl: HTMLImageElement, i: number) => {
 
-            imageLeft = (i % 2 !== 0) ? column2 : column1;
+                imageLeft = (i % 2 !== 0) ? column2 : column1;
 
-            if ((imageTop + imageWidth) >= (pageHeight - 20)) {
-                imageTop = initialTop;
-                this._doc.addPage();
-            }
-            try {
-                this._doc.addImage(
-                    imageUrl,
-                    imageLeft,
-                    imageTop,
-                    imageWidth,
-                    imageWidth
-                );
-            } catch (e) {
-                console.log('Error loading image: ' + imageUrl);
-            }
-            if (i % 2 !== 0) {
-                imageTop += imageWidth + 4;
-            }
-        });
+                if ((imageTop + imageWidth) >= (pageHeight - 20)) {
+                    imageTop = initialTop;
+                    this._doc.addPage();
+                }
+                try {
+                    this._doc.addImage(
+                        imageUrl,
+                        imageLeft,
+                        imageTop,
+                        imageWidth,
+                        imageWidth
+                    );
+                } catch (e) {
+                    console.log('Error loading image: ' + imageUrl);
+                }
+                if (i % 2 !== 0) {
+                    imageTop += imageWidth + 4;
+                }
+            });
+        }
         this._drawLayout();
 
     }
