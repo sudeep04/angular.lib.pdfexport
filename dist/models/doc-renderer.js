@@ -1,3 +1,13 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 import * as moment from 'moment';
 import { boxShadowImg } from './imagesBase64/box-shadow-img';
 import { checkImg } from './imagesBase64/check-img';
@@ -9,44 +19,77 @@ import 'jspdf-autotable';
 import { logoImg } from './imagesBase64/logo-img';
 import { JsonParser } from './json-parser';
 import { isArray } from 'util';
+import { IDocRenderer } from './doc-renderer.interface';
 var IMAGES_TOP = 35;
 var IMAGES_PADING_TOP = 6.2;
 // const HEADER_TOP = 48;
 var 
 // const HEADER_TOP = 48;
-DocRenderer = /** @class */ (function () {
+DocRenderer = /** @class */ (function (_super) {
+    __extends(DocRenderer, _super);
     function DocRenderer() {
-        this._doc = new jsPDF();
-        this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
-        this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
+        var _this = _super.call(this) || this;
+        _this._doc = new jsPDF();
+        _this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
+        _this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
+        return _this;
     }
     DocRenderer.prototype.draw = function (jsonData, docConfig) {
-        var _this = this;
         this._data = JsonParser.parseData(jsonData);
         this._docConfig = docConfig;
+        this._loadImagesTables();
+    };
+    DocRenderer.prototype._loadImagesTables = function () {
+        //if (this._data.settings.applyFilters) {
+        var elems = [checkImg, unckeckImg, boxShadowImg];
+        var elemsHTML = [];
+        this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
+        // } else {
+        //     this._drawElems([]);
+        // }
+    };
+    DocRenderer.prototype._drawElems = function (output) {
+        if (output && output.length === 3) {
+            this._checkedHTMLImage = output[0];
+            this._uncheckedHTMLImage = output[1];
+            this._boxShadowImage = output[2];
+        }
+        // loadImages
+        if (this._data.settings.showProductsImage) {
+            var elems_1 = [];
+            this._data.groups.forEach(function (group) {
+                group.forEach(function (product) {
+                    elems_1.push(product.imageUrl);
+                });
+            });
+            this._toDataURL(elems_1, this._loadImages.bind(this), this._drawElemsData.bind(this));
+        }
+        else {
+            this._drawElemsData([]);
+        }
+    };
+    DocRenderer.prototype._drawElemsData = function (images) {
+        var _this = this;
         var lastPage = 1;
         this._data.groups.forEach(function (group, index) {
-            _this._drawBody(group);
+            _this._drawBody(group, images, index);
             for (var i = lastPage + 1; i < _this._doc.internal.pages.length; i++) {
                 _this._doc.setPage(i);
-                _this._drawHeader(group, false);
+                _this._drawHeader(group, false, null, null);
             }
             lastPage = _this._doc.internal.pages.length;
             if (index < _this._data.groups.length - 1) {
                 _this._doc.addPage();
             }
         });
-        for (var i = 1; i < this._doc.internal.pages.length; i++) {
-            this._doc.setPage(i);
-            this._drawLayout(i);
-        }
+        this._drawLayout();
     };
-    DocRenderer.prototype.save = function () {
+    DocRenderer.prototype._save = function () {
         this._doc.save(this._data.settings.fileName);
     };
-    DocRenderer.prototype._drawBody = function (group) {
+    DocRenderer.prototype._drawBody = function (group, images, indexParent) {
         var _this = this;
-        this._drawHeader(group, this._data.settings.showProductsImage);
+        this._drawHeader(group, this._data.settings.showProductsImage, images, indexParent);
         var isFirstWithoutImages = !this._data.settings.showProductsImage;
         var pageWidth = this._doc.internal.pageSize.getWidth();
         var columns = [{ dataKey: 'col1', title: '' }];
@@ -145,14 +188,16 @@ DocRenderer = /** @class */ (function () {
                     }
                 });
                 borders = [];
-                checkImages.forEach(function (img) {
-                    if (img.check) {
-                        _this._doc.addImage(checkImg, img.left, img.top, img.width, img.height);
-                    }
-                    else {
-                        _this._doc.addImage(unckeckImg, img.left, img.top, img.width, img.height);
-                    }
-                });
+                if (_this._checkedHTMLImage && _this._uncheckedHTMLImage) {
+                    checkImages.forEach(function (img) {
+                        if (img.check) {
+                            _this._doc.addImage(_this._checkedHTMLImage, img.left, img.top, img.width, img.height);
+                        }
+                        else {
+                            _this._doc.addImage(_this._uncheckedHTMLImage, img.left, img.top, img.width, img.height);
+                        }
+                    });
+                }
                 checkImages = [];
                 if (!isFirstWithoutImages) {
                     isFirstWithoutImages = true;
@@ -235,37 +280,37 @@ DocRenderer = /** @class */ (function () {
         });
         this._doc.autoTable(columns, rows, config);
     };
-    DocRenderer.prototype._drawHeader = function (group, showProductsImage) {
+    DocRenderer.prototype._drawHeader = function (group, showProductsImage, images, indexParent) {
         var _this = this;
         var pageWidth = this._doc.internal.pageSize.getWidth();
         if (showProductsImage) {
             group.forEach(function (product, index) {
                 switch (index) {
                     case 0:
-                        _this._doc.addImage(boxShadowImg, pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
+                        _this._doc.addImage(_this._boxShadowImage, pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
                         try {
-                            _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                            _this._doc.addImage(images[indexParent * 3 + index], pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
                         }
                         catch (e) {
-                            _this._doc.addImage(_this._data.settings.placeholderUrl, pageWidth - (_this._docConfig.columnWidth * 3 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                            console.log('Error loading image by jsPDF ');
                         }
                         break;
                     case 1:
-                        _this._doc.addImage(boxShadowImg, pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
+                        _this._doc.addImage(_this._boxShadowImage, pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
                         try {
-                            _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                            _this._doc.addImage(images[indexParent * 3 + index], pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
                         }
                         catch (e) {
-                            _this._doc.addImage(_this._data.settings.placeholderUrl, pageWidth - (_this._docConfig.columnWidth * 2 + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                            console.log('Error loading image by jsPDF ');
                         }
                         break;
                     case 2:
-                        _this._doc.addImage(boxShadowImg, pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
+                        _this._doc.addImage(_this._boxShadowImage, pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding), IMAGES_TOP + IMAGES_PADING_TOP, _this._docConfig.columnWidth, _this._docConfig.columnWidth);
                         try {
-                            _this._doc.addImage(product.imageUrl, pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                            _this._doc.addImage(images[indexParent * 3 + index], pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
                         }
                         catch (e) {
-                            _this._doc.addImage(_this._data.settings.placeholderUrl, pageWidth - (_this._docConfig.columnWidth + _this._docConfig.padding) + 3.2, IMAGES_TOP + IMAGES_PADING_TOP + 3.2, _this._docConfig.columnWidth - 6.4, _this._docConfig.columnWidth - 6.4);
+                            console.log('Error loading image by jsPDF ');
                         }
                         break;
                 }
@@ -341,7 +386,26 @@ DocRenderer = /** @class */ (function () {
             _this._doc.rect(border.left, border.top, border.width, border.height, 'F');
         });
     };
-    DocRenderer.prototype._drawLayout = function (index) {
+    DocRenderer.prototype._drawLayout = function () {
+        var _this = this;
+        var img = new Image();
+        img.onload = (function () {
+            _this._drawLayoutIter(img);
+        });
+        img.onerror = (function () {
+            _this._drawLayoutIter(null);
+        });
+        img.src = logoImg;
+        img.crossOrigin = 'anonymous';
+    };
+    DocRenderer.prototype._drawLayoutIter = function (img) {
+        for (var i = 1; i < this._doc.internal.pages.length; i++) {
+            this._doc.setPage(i);
+            this._drawLayoutData(i, img);
+        }
+        this._save();
+    };
+    DocRenderer.prototype._drawLayoutData = function (index, logo) {
         var _this = this;
         var pageWidth = this._doc.internal.pageSize.getWidth();
         var pageHeight = this._doc.internal.pageSize.getHeight();
@@ -398,10 +462,12 @@ DocRenderer = /** @class */ (function () {
         this._doc.setFillColor(246, 246, 246);
         this._doc.rect(this._docConfig.padding + this._docConfig.lineWidth / 2, pageHeight - (this._docConfig.padding + this._docConfig.lineWidth / 2 + 10), pageWidth - (2 * this._docConfig.padding + this._docConfig.lineWidth), 10, 'F');
         this._doc.text('Copyright © 2018 Plan.One', 12.9, 283.2);
-        this._doc.addImage(logoImg, 175.5, 280, 21.6, 4.1);
+        if (logo) {
+            this._doc.addImage(logo, 'png', 175.5, 280, 21.6, 4.1);
+        }
     };
     return DocRenderer;
-}());
+}(IDocRenderer));
 // const HEADER_TOP = 48;
 export { DocRenderer };
 //# sourceMappingURL=doc-renderer.js.map
