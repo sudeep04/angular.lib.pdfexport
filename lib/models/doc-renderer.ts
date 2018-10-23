@@ -41,7 +41,7 @@ export class DocRenderer extends IDocRenderer {
     }
 
     private _loadImagesTables(): void {
-        //if (this._data.settings.applyFilters) {
+        // if (this._data.settings.applyFilters) {
             const elems: string[] = [checkImg, unckeckImg, boxShadowImg];
             const elemsHTML: HTMLImageElement[] = [];
             this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
@@ -125,12 +125,15 @@ export class DocRenderer extends IDocRenderer {
             col2: { columnWidth: this._docConfig.columnWidth }
         };
 
+        // Helpers
         let borders: any[] = [];
-
         let checkImages: any[] = [];
-        const filtersIndex: number[] = [];
-        let spanp: number = 0;
-        let lastRow: number = -1;
+        const filtersProp: number[] = [];
+        const propsList: number[] = [];
+        let spanp = 0;
+        let lastRow: number = 0;
+
+        // Autotable configuration
         const config: any = {
             styles,
             margin: {
@@ -147,78 +150,65 @@ export class DocRenderer extends IDocRenderer {
             tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
 
-                const filterPos = filtersIndex.findIndex((v: number) => v === opts.row.index);
-                this._doc.setFont(opts.column.dataKey === 'col1' &&  filterPos === -1 ?
+                // Check if row is a property
+                const filterProp = filtersProp.findIndex((v: number) => v === opts.row.index);
+                const propElem = propsList.findIndex((v: number) => v === opts.row.index);
+
+                // Change fonts in row
+                this._doc.setFont((opts.column.dataKey === 'col1' && (filterProp !== -1 || propElem !== -1)) ?
                 'GothamMedium' : 'GothamLight', 'normal');
 
-                if ( filterPos !== -1 ) {
-                    cell.textPos.y -= 1.8;
-                    cell.height -= 4;
-                    cell.contentHeight = cell.height;
-                    if (lastRow !== opts.row.index) {
-                        lastRow = opts.row.index;
-                        spanp++;
-                    }
-                }
-                const previousFilter = filtersIndex.findIndex((v: number) => v === (opts.row.index + 1));
-                if (previousFilter !== -1) {
-                    cell.textPos.y += 1.8;
-                    if (opts.column.dataKey !== 'col1') {
-                        cell.textPos.y += 1.9;
-                        cell.height += 7;
-                    }
+                // Increase property index (spanp) when jump to another row
+                if (lastRow !== opts.row.index && (filterProp !== -1 || propElem !== -1)) {
+                    lastRow = opts.row.index;
+                    spanp++;
                 }
 
-                if (opts.column.index !== 0) {
-
-                    if (group[opts.column.index - 1].properties[opts.row.index - spanp].ckeck !== undefined && filterPos === -1) {
+                // Insert checkImages positions when is a property, first column and check isn't undefined
+                if (opts.column.index !== 0 && (filterProp !== -1 || propElem !== -1) ) {
+                    if (group[opts.column.index - 1].properties[spanp].ckeck !== undefined) {
 
                         checkImages.push({
                             left: cell.x + 3,
                             top: cell.y + cell.height / 2 - 1.5,
                             width: 3,
                             height: 3,
-                            check: group[opts.column.index - 1].properties[opts.row.index - spanp].ckeck
+                            check: group[opts.column.index - 1].properties[spanp].ckeck
                         });
                     }
                 }
 
             },
-            drawHeaderCell: (cell: any, opts: any) => {
-
-                this._doc.setFont('GothamMedium', 'normal');
-            },
-            drawHeaderRow: (row: any, opts: any) => {
-
-                borders.push({
-                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                    top: row.y + row.height - 0.1,
-                    width: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
-                    height: 0.1
-                });
-            },
             drawRow: (row: any, opts: any) => {
 
-                if ( filtersIndex.findIndex((v: number) => v === opts.row.index + 1 ) === -1 ) {
-                borders.push({
-                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                    top: row.y + row.height - 0.1,
-                    width: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
-                    height: 0.1
-                });
-            }
+                // Change height of row to reduce space between property and filter
+                if (row.raw.isFilter || row.raw.isFilter1) {
+                    row.height = 4;
+                }
+
+                // Insert bottom border when is last row of filters or is a property
+                const propElem = propsList.findIndex((v: number) => v === opts.row.index);
+                if ( row.index < (rows.length - 1) && (row.raw.isLast || propElem !== -1)) {
+                    borders.push({
+                        left: this._docConfig.padding + this._docConfig.lineWidth / 2,
+                        top: row.y + row.height - 0.1,
+                        width: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
+                        height: 0.1,
+                        index: row.index
+                    });
+                }
             },
             addPageContent: (data: any) => {
 
                 this._doc.setFillColor(0, 0, 0);
+
+                // Draw bottom borders by page
                 borders.forEach((border: any, index: number) => {
-
-                    if (index < borders.length - 1) {
-
-                        this._doc.rect(border.left, border.top, border.width, border.height, 'F');
-                    }
+                    this._doc.rect(border.left, border.top, border.width, border.height, 'F');
                 });
                 borders = [];
+
+                // Draw check images by page
                 if (this._checkedHTMLImage && this._uncheckedHTMLImage) {
                     checkImages.forEach((img: any) => {
 
@@ -230,6 +220,8 @@ export class DocRenderer extends IDocRenderer {
                     });
                 }
                 checkImages = [];
+
+                // Check if current page needs images on top
                 if (!isFirstWithoutImages) {
                     isFirstWithoutImages = true;
                     data.settings.margin.top -= IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2;
@@ -237,38 +229,73 @@ export class DocRenderer extends IDocRenderer {
             }
         };
 
-        group.forEach((product: Product) => {
-            columns.push({ dataKey: product.name, title: product.name });
-            let lineW = this._docConfig.lineWidth + 0.5;
-            if (this._data.settings.showHighlights) {
-                lineW = lineW + 4;
-            }
-            config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW] };
-            if (rows.length === 0) {
-                product.properties.forEach((property: Property) => {
-                    if (this._data.settings.applyFilters) {
-                        const direction: 'afterValue' | 'beforeValue'
-                                = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
-                                    'beforeValue'
-                                    : 'afterValue';
-                        const filterMap = new Map(this._data.filters);
-                        const filterValue = filterMap.get(property.ifdguid) as any;
-                        let filterText = '';
+        // For each property row, apply filters, visit each column and insert value
+        if (group.length > 0) {
+            const prd = group[0];
+            prd.properties.forEach((property: Property, indexProp: number) => {
 
-                        if (filterValue) {
-                            if (isArray(filterValue)) {
-                                // List Values
-                                const listValues: string[] = filterValue;
-                                listValues.forEach((v: string, index: number) => {
-                                    const val1 = v;
+                let rowProperty = indexProp;
 
-                                    if (index === 0) {
-                                        filterText += val1;
+                if (this._data.settings.applyFilters) {
+                    const direction: 'afterValue' | 'beforeValue'
+                            = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
+                                'beforeValue'
+                                : 'afterValue';
+                    const filterMap = new Map(this._data.filters);
+                    const filterValue = filterMap.get(property.ifdguid) as any;
+                    let filterText = '';
+
+                    if (filterValue) {
+                        // If filter is an array, insert an empty row in top and bottom of property and filter.
+                        // Then split filter in an string array depending of column width and insert each one in rows
+                        if (isArray(filterValue)) {
+                            rows.push({col1: '', isFilter: true});
+                            rowProperty = rows.push({col1: property.name, isProperty: true});
+                            filtersProp.push(rowProperty - 1);
+
+                            rows[rowProperty - 1]['isFilter'] = true;
+
+                            const listString: string[] = [];
+                            filterValue.forEach((v: string) => {
+                                listString.push(v);
+                            });
+                            if (filterValue.length > 0) {
+                                if (typeof property.unit !== 'undefined') {
+                                    if (direction === 'afterValue') {
+                                        listString[listString.length - 1] = listString[listString.length - 1] + ' ' + property.unit.toString();
                                     } else {
-                                        filterText += ', ' + val1;
+                                        listString[0] = property.unit.toString() + ' ' + listString[0];
+                                    }
+                                }
+                                listString[0] = '(' + listString[0];
+                                listString[listString.length - 1] = listString[listString.length - 1] + ')';
+
+                                listString.forEach((v: string, index: number) => {
+                                    if (index === 0) {
+                                        filterText += v;
+                                    } else {
+                                        const tmp = filterText + ', ' + v;
+                                        if (tmp.length < 22) {
+                                            filterText = tmp;
+                                        } else {
+                                            filterText += ',';
+                                            rows.push({col1: filterText , isFilter: true});
+                                            filterText = v;
+                                        }
+                                    }
+                                    if (index === listString.length - 1) {
+                                        rows.push({ col1: filterText, isFilter: true });
                                     }
                                 });
-                            } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
+                                rows.push({ col1: '', isFilter: true });
+                            }
+                        } else {
+                            // If filter isn't an array, insert an empty row in top and bottom of property and filter
+                            rows.push({col1: '', isFilter: true});
+                            rowProperty = rows.push({col1: property.name, isFilter1: true});
+                            filtersProp.push(rowProperty - 1);
+
+                            if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
                                 filterText = filterValue.lower + ' - ' + filterValue.upper;
                             } else {
                                 filterText = filterValue.toString();
@@ -283,31 +310,83 @@ export class DocRenderer extends IDocRenderer {
                                     filterText = property.unit + ' ' + filterText;
                                 }
                             }
-                            rows.push({ col1: property.name});
-                            filtersIndex.push(rows.push({ col1: `(${filterText})` }) - 1);
-
-                        } else {
-                            rows.push({ col1: property.name });
+                            rows.push({ col1: `(${filterText})`, isFilter: true});
+                            rows.push({col1: '', isFilter: true, isLast: true});
                         }
                     } else {
-                        rows.push({ col1: property.name });
+                        rowProperty = rows.push({col1: property.name});
+                        propsList.push(rowProperty - 1);
                     }
-                });
-            }
-            let span = 0;
-            rows.forEach((value: any, idx: number) => {
-                if (filtersIndex.findIndex((e: number) => e === idx) !== -1) {
-                    span ++;
-                    rows[idx][product.name] = '';
+                    // For each product
+                    group.forEach((product: Product) => {
+                        // Insert dataKey
+                        if (indexProp === 0) {
+                            columns.push({ dataKey: product.name, title: product.name });
+                            let lineW = this._docConfig.lineWidth + 0.5;
+                            if (this._data.settings.showHighlights) {
+                                lineW = lineW + 4;
+                            }
+                            config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW] };
+                        }
+
+                        // Fill data when filterValue is an array
+                        // First split value in an string array, depending of column width and insert each one in rows
+                        const prodVal = product.properties[indexProp].value;
+                        if (filterValue && isArray(filterValue)) {
+                            const prodArray = prodVal.split(',');
+                            let val = '';
+                            let span = 0;
+                            prodArray.forEach((p: string, idxP: number) => {
+                                if (p.length > 0) {
+                                    if (idxP === 0) {
+                                        val += p;
+                                    } else {
+                                        const tmp = val + ', ' + p;
+                                        if (tmp.length < 22) {
+                                            val = tmp;
+                                        } else {
+                                            val += ',';
+                                            rows[rowProperty - 1 + span][product.name] = val;
+                                            span ++;
+                                            val = p.trim();
+                                        }
+                                    }
+                                    if (idxP === prodArray.length - 1) {
+                                        rows[rowProperty - 1 + span][product.name] = val;
+                                    }
+
+                                }
+                            });
+
+                        } else {
+                            // fill data in other cases
+                            rows[rowProperty - 1][product.name] = this._data.translate(prodVal);
+                        }
+                    });
+                    if (filterValue && isArray(filterValue)) {
+                        // filtersIndex.push(rows.push({col1: '', isFilter: true , isLast: true}));
+                        rows.push({col1: '', isFilter: true , isLast: true});
+                    }
                 } else {
-                    const prd = product.properties[idx - span];
-                    if (prd.value !== undefined) {
-                        rows[idx][product.name] =  this._data.translate(prd.value);
-                    }
+                    rowProperty = rows.push({col1: property.name});
+                    propsList.push(rowProperty - 1);
+                    // for each column
+                    group.forEach((product: Product) => {
+                        // insert dataKey
+                        if (indexProp === 0) {
+                            columns.push({ dataKey: product.name, title: product.name });
+                            let lineW = this._docConfig.lineWidth + 0.5;
+                            if (this._data.settings.showHighlights) {
+                                lineW = lineW + 4;
+                            }
+                            config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW] };
+                        }
+                        rows[rowProperty - 1][product.name] = this._data.translate(product.properties[indexProp].value);
+                    });
                 }
             });
-        });
-        this._doc.autoTable(columns, rows, config);
+            this._doc.autoTable(columns, rows, config);
+        }
     }
 
     private _drawHeader(group: Product[], showProductsImage: boolean, images: HTMLImageElement[], indexParent: number) {
