@@ -461,12 +461,11 @@ export class DocRendererDetail extends IDocRenderer {
                             // List Values
                             const listValues: string[] = filterValue;
                             listValues.forEach((v: string, index: number) => {
-                                const val1 = v;
 
                                 if (index === 0) {
-                                    filterText += val1;
+                                    filterText += v;
                                 } else {
-                                    filterText += ', ' + val1;
+                                    filterText += ', ' + v;
                                 }
                             });
                         } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
@@ -474,6 +473,7 @@ export class DocRendererDetail extends IDocRenderer {
                         } else {
                             filterText = filterValue.toString();
                         }
+
                         if (typeof property.unit !== 'undefined') {
                             if (direction === 'afterValue') {
                                 filterText = filterText + ' ' + property.unit;
