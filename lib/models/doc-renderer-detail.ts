@@ -323,9 +323,6 @@ export class DocRendererDetail extends IDocRenderer {
         let borders: any[] = [];
 
         let checkImages: any[] = [];
-        const filtersIndex: number[] = [];
-        let spanp: number = 0;
-        let lastRow: number = -1;
         const config: any = {
             styles,
             margin: {
@@ -344,38 +341,34 @@ export class DocRendererDetail extends IDocRenderer {
             tableWidth: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
 
-                const filterPos = filtersIndex.findIndex((v: number) => v === opts.row.index);
-                this._doc.setFont(opts.column.dataKey === 'col1' &&  filterPos === -1 ?
-                'GothamMedium' : 'GothamLight', 'normal');
+                if (opts.column.dataKey === 'col1') {
+                    this._doc.setFont('GothamMedium', 'normal');
 
-                if ( filterPos !== -1 ) {
-                    cell.textPos.y -= 1.8;
-                    cell.height -= 4;
-                    cell.contentHeight = cell.height;
-                    if (lastRow !== opts.row.index) {
-                        lastRow = opts.row.index;
-                        spanp++;
+                    // If have filters, change font, draw text
+                    // and return false to turn off draw for this cell
+                    if (cell.text.length > 1 && cell.raw.lastIndexOf('(') !== -1) {
+                        cell.text.forEach((element: string, index: number) => {
+                            if (element.startsWith('(')) {
+                                this._doc.setFont('GothamLight', 'normal');
+                            }
+                            this._doc.text(element, cell.textPos.x, cell.textPos.y + index * 4);
+                        });
+                        return false;
                     }
-                }
-                const previousFilter = filtersIndex.findIndex((v: number) => v === (opts.row.index + 1));
-                if (previousFilter !== -1) {
-                    cell.textPos.y += 1.8;
-                    if (opts.column.dataKey !== 'col1') {
-                        cell.textPos.y += 1.9;
-                        cell.height += 7;
-                    }
+                } else {
+                    this._doc.setFont('GothamLight', 'normal');
                 }
 
                 if (opts.column.index !== 0) {
 
-                    if (product.properties[opts.row.index - spanp].ckeck !== undefined && filterPos === -1) {
+                    if (product.properties[opts.row.index].ckeck !== undefined) {
 
                         checkImages.push({
                             left: cell.x + 3,
                             top: cell.y + cell.height / 2 - 1.5,
                             width: 3,
                             height: 3,
-                            check: product.properties[opts.row.index - spanp].ckeck
+                            check: product.properties[opts.row.index].ckeck
                         });
                     }
                 }
@@ -396,14 +389,12 @@ export class DocRendererDetail extends IDocRenderer {
             },
             drawRow: (row: any, opts: any) => {
 
-                if (filtersIndex.findIndex((v: number) => v === opts.row.index + 1) === -1) {
-                    borders.push({
-                        left: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                        top: row.y + row.height - 0.1,
-                        width: pageWidth - 60,
-                        height: 0.1
-                    });
-                }
+                borders.push({
+                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
+                    top: row.y + row.height - 0.1,
+                    width: pageWidth - 60,
+                    height: 0.1
+                });
             },
             addPageContent: (data: any) => {
 
@@ -470,12 +461,11 @@ export class DocRendererDetail extends IDocRenderer {
                             // List Values
                             const listValues: string[] = filterValue;
                             listValues.forEach((v: string, index: number) => {
-                                const val1 = v;
 
                                 if (index === 0) {
-                                    filterText += val1;
+                                    filterText += v;
                                 } else {
-                                    filterText += ', ' + val1;
+                                    filterText += ', ' + v;
                                 }
                             });
                         } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
@@ -483,17 +473,15 @@ export class DocRendererDetail extends IDocRenderer {
                         } else {
                             filterText = filterValue.toString();
                         }
-                        if (typeof property.unit === 'undefined') {
-                            filterText = filterText;
-                        } else {
+
+                        if (typeof property.unit !== 'undefined') {
                             if (direction === 'afterValue') {
                                 filterText = filterText + ' ' + property.unit;
                             } else {
                                 filterText = property.unit + ' ' + filterText;
                             }
                         }
-                        rows.push({ col1: property.name});
-                        filtersIndex.push(rows.push({ col1: `(${filterText})` }) - 1);
+                        rows.push({ col1: property.name + `\n(${filterText})`});
                     } else {
                         rows.push({ col1: property.name });
                     }
@@ -502,16 +490,11 @@ export class DocRendererDetail extends IDocRenderer {
                 }
             });
         }
-        let span = 0;
-        rows.forEach((value: any, idx: number) => {
-            if (filtersIndex.findIndex((e: number) => e === idx) !== -1) {
-                span ++;
-                rows[idx][product.name] = '';
-            } else {
-                const prd = product.properties[idx - span];
-                if (prd.value !== undefined) {
-                    rows[idx][product.name] = prd.value.toString();
-                }
+        product.properties.forEach((property: Property, index: number) => {
+
+            if (property.value !== undefined) {
+
+                rows[index][product.name] = this._data.translate(property.value);
             }
         });
 
