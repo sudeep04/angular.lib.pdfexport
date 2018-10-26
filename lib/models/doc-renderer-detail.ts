@@ -10,6 +10,8 @@ import { checkImg } from './imagesBase64/check-img';
 import { unckeckImg } from './imagesBase64/uncheck-img';
 import { DownloadElement } from './download/download-element.interface';
 import { DownloadValue } from './download/download-value.interface';
+import { Detail } from '../../dist/models/detail/detail.interface';
+import * as htmlToText from 'html-to-text';
 
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
@@ -65,7 +67,9 @@ export class DocRendererDetail extends IDocRenderer {
 
     private _splitLines(text: string, maxLineWidth: number, fontSize: number): any {
 
-        const split = this._doc.setFont('helvetica', 'neue').setFontSize(fontSize).splitTextToSize(text, maxLineWidth);
+        const split = this._doc.setFont('helvetica', 'neue').setFontSize(fontSize)
+                      .splitTextToSize(text, maxLineWidth);
+
         this._doc.setFont('GothamLight', 'normal');
         this._doc.setFontSize(9);
         return split;
@@ -131,65 +135,101 @@ export class DocRendererDetail extends IDocRenderer {
             if (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) {
                 marginTop = imageMargin;
             }
-            this._drawCheckedImage(marginTop);
         } else {
-            const detail = details.pop();
-            if (detail.content !== undefined) {
-                const specialElementHandlers = {
-                    // element with id of "bypass" - jQuery style selector
-                    '#bypassme'(element: any, renderer: any) {
-                        // true = "handled elsewhere, bypass text extraction"
-                        return true;
-                    },
-                    '.hide'(element: any, renderer: any) {
-                        // true = "handled elsewhere, bypass text extraction"
-                        return true;
+
+            const elems = details.sort((a: Detail, b: Detail) => {
+                if (a.content.length > b.content.length) {
+                    return 1;
+                }
+                if (a.content.length < b.content.length) {
+                    return -1;
+                }
+                if (a.content.length === b.content.length) {
+                    return 0;
+                }
+            });
+
+            elems.forEach((detail: Detail, index: number) => {
+                const text: string = htmlToText.fromString(
+                    detail.content,
+                    {
+                        wordwrap: false,
+                        ignoreHref: true,
+                        ignoreImage: true,
+                        preserveNewlines: false,
+                        uppercaseHeadings: false,
+                        format: {
+                            // text, lineBreak, paragraph, anchor, heading, table, orderedList,
+                            // unorderedList, listItem, horizontalLine
+                            heading: ((elem: any, fn: any, options: any) => {
+                                const h = fn(elem.children, options);
+                                return h;
+                            }),
+                            unorderedList: ((elem: any, fn: any, options: any) => {
+                                let resultul = '';
+                                elem.children.filter((e: any) => e.name === 'li').forEach((li: any) => {
+                                    let tmp1 = '';
+                                    li.children.forEach((item: any) => {
+                                        tmp1 += item.data + '\n';
+                                    });
+                                    resultul += ' • ' + tmp1 + '\n';
+                                });
+                                return resultul;
+                            }),
+                            orderedList: ((elem: any, fn: any, options: any) => {
+                                let resultol = '';
+                                elem.children.filter((e: any) => e.name === 'li').forEach((li: any, ind: number) => {
+                                    let tmp2 = '';
+                                    li.children.forEach((item: any) => {
+                                        tmp2 += item.data + '\n';
+                                    });
+                                    resultol += (ind + 1) + '. ' + tmp2 + '\n';
+                                });
+                                return resultol;
+                            })
+                        }
                     }
-                };
-                if (marginTop + 25 < this._doc.internal.pageSize.getHeight() - 36) {
-                    marginTop += 10;
-                } else {
+                );
+                let widthColumn = this.checkWidthFirstPage(marginTop, imageMargin);
+
+                if (index !== 0 && this._doc.internal.getCurrentPageInfo().pageNumber === 1 && marginTop < imageMargin) {
+                    marginTop = imageMargin;
+                }
+
+                // draw title
+                if (marginTop + 10 > this._doc.internal.pageSize.getHeight() - 36) {
                     this._doc.addPage();
                     marginTop = 40;
                 }
 
-                const widthColumn = (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
-                    this._doc.internal.pageSize.getWidth() / 2 - this._docConfig.padding : this._doc.internal.pageSize.getWidth() - 30;
+                this._drawText(detail.name, widthColumn, 20, 10, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
+                marginTop += 5;
 
-                const margins = {
-                    top: 36,
-                    bottom: 20,
-                    left: 10,
-                    width: widthColumn
-                };
+                widthColumn = this.checkWidthFirstPage(marginTop, imageMargin);
+                const splitLines: string[] = this._splitLines(text, widthColumn, 9);
 
-                const div = document.createElement('div');
-                const css = '<style> * { font-family: sans-serif !important; font-size: 11pt !important;}; </style>';
-                div.innerHTML = css + detail.content.replace('–', '-');
+                splitLines.forEach((elemtDetail: string) => {
 
-                // draw title
-                this._drawText(detail.name, margins.width, 20, margins.left, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
-
-                // draw detail
-                this._doc.fromHTML(
-                    div,
-                    margins.left,
-                    marginTop // y coord
-                    , {
-                        width: margins.width, // max width of content on PDF
-                        elementHandlers: specialElementHandlers
-                    },
-                    (dispose: any) => {
-                        const y = (dispose.y < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
-                            imageMargin : dispose.y;
-                        this._drawDetailsText(details, y, imageMargin);
-                    },
-                    margins
-                );
-            } else {
-                this._drawDetailsText(details, marginTop, imageMargin);
-            }
+                    if (marginTop > this._doc.internal.pageSize.getHeight() - 36) {
+                        this._doc.addPage();
+                        marginTop = 30;
+                    } else {
+                        marginTop += 4;
+                    }
+                    this._doc.setFont('GothamLight', 'normal');
+                    this._doc.setFontSize(9);
+                    this._doc.setTextColor(0, 0, 0);
+                    this._doc.text(elemtDetail, 10, marginTop);
+                });
+                marginTop += 15;
+            });
         }
+        this._drawCheckedImage(marginTop);
+    }
+
+    private checkWidthFirstPage(marginTop, imageMargin) {
+        return (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
+                this._doc.internal.pageSize.getWidth() / 2 - this._docConfig.padding * 3 : this._doc.internal.pageSize.getWidth() - 85;
     }
 
     private _drawLayout(): void {
@@ -296,7 +336,7 @@ export class DocRendererDetail extends IDocRenderer {
         const pageHeight = this._doc.internal.pageSize.getHeight();
 
         const product = this._data.productDetail;
-        marginTop += 8;
+        // marginTop += 8;
         if (marginTop + 45 < pageHeight ) {
             marginTop += 10;
         } else {
@@ -523,12 +563,12 @@ export class DocRendererDetail extends IDocRenderer {
         const downloads = this._data.downloads;
         let marginTop = this._doc.autoTable.previous.finalY + 15;
 
-        if (marginTop + 45 < pageHeight ) {
-            marginTop += 10;
-        } else {
-            this._doc.addPage();
-            marginTop = 40;
-        }
+        // if (marginTop + 45 < pageHeight ) {
+        //     marginTop += 10;
+        // } else {
+        this._doc.addPage();
+        marginTop = 40;
+        // }
 
         this._drawTableHeader(marginTop, 'Downloads');
         marginTop += 5;
@@ -641,20 +681,25 @@ export class DocRendererDetail extends IDocRenderer {
                           });
                         iter++;
                     } else {
-                        elem.listValues.forEach((value: DownloadValue, idx: number) => {
-                            let y = links[iter].y;
-                            if (idx === 0) {
-                                y -= 1.2;
-                            } else if (idx === elem.listValues.length - 1) {
-                                y += 2.75;
-                            } else {
-                                y += 0.8;
-                            }
-                            this._doc.textWithLink(value.name, links[iter].x + 4 , y , {
-                                url: value.link
-                              });
-                            iter++;
-                        });
+                        this._doc.setFontSize(9);
+                        if (links.length > 0) {
+                            elem.listValues.forEach((value: DownloadValue, idx: number) => {
+                                if (links[iter] !== undefined) {
+                                    let y = links[iter].y;
+                                    if (idx === 0) {
+                                        y -= 1.2;
+                                    } else if (idx === elem.listValues.length - 1) {
+                                        y += 2.75;
+                                    } else {
+                                        y += 0.8;
+                                    }
+                                    this._doc.textWithLink(value.name, links[iter].x + 4, y, {
+                                        url: value.link
+                                    });
+                                }
+                                iter++;
+                            });
+                        }
                     }
                 });
 
