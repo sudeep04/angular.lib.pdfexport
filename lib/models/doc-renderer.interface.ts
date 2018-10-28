@@ -81,4 +81,9 @@ export class IDocRenderer {
             }
         });
     }
+
+    // replace characters
+    protected _replaceCharacter( word: string): string {
+        return word.replace('ä', '\u00E4');
+    }
 }

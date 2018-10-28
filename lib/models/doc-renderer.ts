@@ -28,8 +28,8 @@ export class DocRenderer extends IDocRenderer {
     constructor() {
         super();
         this._doc = new jsPDF();
-        this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
-        this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
+        this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal', 'UTF-8');
+        this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal', 'UTF-8');
     }
 
     public draw(jsonData: any, docConfig: DocConfig) {
@@ -249,6 +249,7 @@ export class DocRenderer extends IDocRenderer {
 
             if (rows.length === 0) {
                 product.properties.forEach((property: Property) => {
+                    const propName = this._replaceCharacter(property.name);
                     if (this._data.settings.applyFilters) {
                         const direction: 'afterValue' | 'beforeValue'
                                 = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
@@ -284,12 +285,14 @@ export class DocRenderer extends IDocRenderer {
                                     filterText = property.unit + ' ' + filterText;
                                 }
                             }
-                            rows.push({ col1: property.name + `\n(${filterText})`});
+
+                            filterText = this._replaceCharacter(filterText);
+                            rows.push({ col1: propName + `\n(${filterText})`});
                         } else {
-                            rows.push({ col1: property.name });
+                            rows.push({ col1: propName });
                         }
                     } else {
-                        rows.push({ col1: property.name });
+                        rows.push({ col1: propName });
                     }
                 });
             }
@@ -297,10 +300,12 @@ export class DocRenderer extends IDocRenderer {
             product.properties.forEach((property: Property, index: number) => {
 
                 if (property.value !== undefined) {
-                    rows[index][product.name] = this._data.translate(property.value);
+                    const val = this._data.translate(property.value);
+                    rows[index][product.name] = this._replaceCharacter(val);
                 }
             });
         });
+
         this._doc.autoTable(columns, rows, config);
     }
 
