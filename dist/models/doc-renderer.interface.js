@@ -69,6 +69,13 @@ var IDocRenderer = /** @class */ (function () {
             }
         });
     };
+    // replace characters
+    // replace characters
+    IDocRenderer.prototype._replaceCharacter = 
+    // replace characters
+    function (word) {
+        return word.replace('�', '\u00E4');
+    };
     return IDocRenderer;
 }());
 export { IDocRenderer };

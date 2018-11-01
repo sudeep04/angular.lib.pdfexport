@@ -30,8 +30,8 @@ DocRenderer = /** @class */ (function (_super) {
     function DocRenderer() {
         var _this = _super.call(this) || this;
         _this._doc = new jsPDF();
-        _this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
-        _this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
+        _this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal', 'UTF-8');
+        _this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal', 'UTF-8');
         return _this;
     }
     DocRenderer.prototype.draw = function (jsonData, docConfig) {
@@ -40,7 +40,7 @@ DocRenderer = /** @class */ (function (_super) {
         this._loadImagesTables();
     };
     DocRenderer.prototype._loadImagesTables = function () {
-        //if (this._data.settings.applyFilters) {
+        // if (this._data.settings.applyFilters) {
         var elems = [checkImg, unckeckImg, boxShadowImg];
         var elemsHTML = [];
         this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
@@ -107,11 +107,11 @@ DocRenderer = /** @class */ (function (_super) {
         var columnStyles = {
             col2: { columnWidth: this._docConfig.columnWidth }
         };
+        // Helpers
         var borders = [];
         var checkImages = [];
-        var filtersIndex = [];
-        var spanp = 0;
-        var lastRow = -1;
+        // const filtersIndex: number[] = [];
+        // Autotable configuration
         var config = {
             styles: styles,
             margin: {
@@ -127,42 +127,48 @@ DocRenderer = /** @class */ (function (_super) {
             showHeader: 'never',
             tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: function (cell, opts) {
-                var filterPos = filtersIndex.findIndex(function (v) { return v === opts.row.index; });
-                _this._doc.setFont(opts.column.dataKey === 'col1' && filterPos === -1 ?
-                    'GothamMedium' : 'GothamLight', 'normal');
-                if (filterPos !== -1) {
-                    cell.textPos.y -= 1.8;
-                    cell.height -= 4;
-                    cell.contentHeight = cell.height;
-                    if (lastRow !== opts.row.index) {
-                        lastRow = opts.row.index;
-                        spanp++;
+                if (opts.column.dataKey === 'col1') {
+                    _this._doc.setFont('GothamMedium', 'normal');
+                    // If have filters, change font, draw text
+                    // and return false to turn off draw for this cell
+                    if (cell.text.length > 1 && cell.raw.lastIndexOf('(') !== -1) {
+                        // Align text
+                        var FONT_ROW_RATIO = 1.15;
+                        var lineCount = cell.text.length;
+                        var fontSize = opts.doc.internal.getFontSize() / opts.doc.internal.scaleFactor;
+                        var y_1 = cell.textPos.y;
+                        // Align the top
+                        // Align the top
+                        y_1 += fontSize * (2 - FONT_ROW_RATIO);
+                        // Align middle
+                        // Align middle
+                        y_1 -= (lineCount / 2) * fontSize * FONT_ROW_RATIO;
+                        cell.text.forEach(function (element, index) {
+                            if (element.startsWith('(')) {
+                                _this._doc.setFont('GothamLight', 'normal');
+                            }
+                            _this._doc.text(element, cell.textPos.x, y_1 + index * 4);
+                        });
+                        return false;
                     }
                 }
-                var previousFilter = filtersIndex.findIndex(function (v) { return v === (opts.row.index + 1); });
-                if (previousFilter !== -1) {
-                    cell.textPos.y += 1.8;
-                    if (opts.column.dataKey !== 'col1') {
-                        cell.textPos.y += 1.9;
-                        cell.height += 7;
-                    }
+                else {
+                    _this._doc.setFont('GothamLight', 'normal');
                 }
+                // Insert checkImages positions when is a property
                 if (opts.column.index !== 0) {
-                    if (group[opts.column.index - 1].properties[opts.row.index - spanp].ckeck !== undefined && filterPos === -1) {
+                    if (group[opts.column.index - 1].properties[opts.row.index].ckeck !== undefined) {
                         checkImages.push({
                             left: cell.x + 3,
                             top: cell.y + cell.height / 2 - 1.5,
                             width: 3,
                             height: 3,
-                            check: group[opts.column.index - 1].properties[opts.row.index - spanp].ckeck
+                            check: group[opts.column.index - 1].properties[opts.row.index].ckeck
                         });
                     }
                 }
             },
-            drawHeaderCell: function (cell, opts) {
-                _this._doc.setFont('GothamMedium', 'normal');
-            },
-            drawHeaderRow: function (row, opts) {
+            drawRow: function (row, opts) {
                 borders.push({
                     left: _this._docConfig.padding + _this._docConfig.lineWidth / 2,
                     top: row.y + row.height - 0.1,
@@ -170,24 +176,16 @@ DocRenderer = /** @class */ (function (_super) {
                     height: 0.1
                 });
             },
-            drawRow: function (row, opts) {
-                if (filtersIndex.findIndex(function (v) { return v === opts.row.index + 1; }) === -1) {
-                    borders.push({
-                        left: _this._docConfig.padding + _this._docConfig.lineWidth / 2,
-                        top: row.y + row.height - 0.1,
-                        width: pageWidth - ((3 - group.length) * _this._docConfig.columnWidth) - 2 * _this._docConfig.padding - _this._docConfig.lineWidth,
-                        height: 0.1
-                    });
-                }
-            },
             addPageContent: function (data) {
                 _this._doc.setFillColor(0, 0, 0);
+                // Draw bottom borders by page
                 borders.forEach(function (border, index) {
                     if (index < borders.length - 1) {
                         _this._doc.rect(border.left, border.top, border.width, border.height, 'F');
                     }
                 });
                 borders = [];
+                // Draw check images by page
                 if (_this._checkedHTMLImage && _this._uncheckedHTMLImage) {
                     checkImages.forEach(function (img) {
                         if (img.check) {
@@ -199,6 +197,7 @@ DocRenderer = /** @class */ (function (_super) {
                     });
                 }
                 checkImages = [];
+                // Check if current page needs images on top
                 if (!isFirstWithoutImages) {
                     isFirstWithoutImages = true;
                     data.settings.margin.top -= IMAGES_PADING_TOP + _this._docConfig.columnWidth + _this._docConfig.lineWidth / 2;
@@ -211,9 +210,13 @@ DocRenderer = /** @class */ (function (_super) {
             if (_this._data.settings.showHighlights) {
                 lineW = lineW + 4;
             }
-            config.columnStyles[product.name] = { columnWidth: _this._docConfig.columnWidth, cellPadding: [2.8, _this._docConfig.lineWidth + 0.5, 2.8, lineW] };
+            config.columnStyles[product.name] = {
+                columnWidth: _this._docConfig.columnWidth,
+                cellPadding: [2.8, _this._docConfig.lineWidth + 0.5, 2.8, lineW]
+            };
             if (rows.length === 0) {
                 product.properties.forEach(function (property) {
+                    var propName = _this._replaceCharacter(property.name);
                     if (_this._data.settings.applyFilters) {
                         var direction = property.unit !== undefined && _this._data.settings.unitsBeforeValue.find(function (unit) { return unit === property.unit; }) ?
                             'beforeValue'
@@ -226,12 +229,11 @@ DocRenderer = /** @class */ (function (_super) {
                                 // List Values
                                 var listValues = filterValue;
                                 listValues.forEach(function (v, index) {
-                                    var val1 = v;
                                     if (index === 0) {
-                                        filterText_1 += val1;
+                                        filterText_1 += v;
                                     }
                                     else {
-                                        filterText_1 += ', ' + val1;
+                                        filterText_1 += ', ' + v;
                                     }
                                 });
                             }
@@ -252,29 +254,22 @@ DocRenderer = /** @class */ (function (_super) {
                                     filterText_1 = property.unit + ' ' + filterText_1;
                                 }
                             }
-                            rows.push({ col1: property.name });
-                            filtersIndex.push(rows.push({ col1: "(" + filterText_1 + ")" }) - 1);
+                            filterText_1 = _this._replaceCharacter(filterText_1);
+                            rows.push({ col1: propName + ("\n(" + filterText_1 + ")") });
                         }
                         else {
-                            rows.push({ col1: property.name });
+                            rows.push({ col1: propName });
                         }
                     }
                     else {
-                        rows.push({ col1: property.name });
+                        rows.push({ col1: propName });
                     }
                 });
             }
-            var span = 0;
-            rows.forEach(function (value, idx) {
-                if (filtersIndex.findIndex(function (e) { return e === idx; }) !== -1) {
-                    span++;
-                    rows[idx][product.name] = '';
-                }
-                else {
-                    var prd = product.properties[idx - span];
-                    if (prd.value !== undefined) {
-                        rows[idx][product.name] = _this._data.translate(prd.value);
-                    }
+            product.properties.forEach(function (property, index) {
+                if (property.value !== undefined) {
+                    var val = _this._data.translate(property.value);
+                    rows[index][product.name] = _this._replaceCharacter(val);
                 }
             });
         });

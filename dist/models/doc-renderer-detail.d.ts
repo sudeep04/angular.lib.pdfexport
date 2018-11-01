@@ -2,6 +2,7 @@ import { IDocRenderer } from './doc-renderer.interface';
 import { DocConfig } from './doc-config';
 export declare class DocRendererDetail extends IDocRenderer {
     private _marginsPrimaryImage;
+    htmlToText: any;
     constructor();
     draw(jsonData: any, docConfig: DocConfig): void;
     private save();
@@ -12,6 +13,7 @@ export declare class DocRendererDetail extends IDocRenderer {
     private _drawPrimaryImg(images);
     private _drawDetails(topIndex, imageMargin);
     private _drawDetailsText(details, marginTop, imageMargin);
+    private checkWidthFirstPage(marginTop, imageMargin);
     private _drawLayout();
     private _drawLayoutIter(img);
     private _drawLayoutData(index, logo);
