@@ -1,1 +1,1 @@
-[{"__symbolic":"module","version":4,"metadata":{"IDocRenderer":{"__symbolic":"interface"}}}]
+[{"__symbolic":"module","version":4,"metadata":{"IDocRenderer":{"__symbolic":"class","members":{"draw":[{"__symbolic":"method"}],"_loadImages":[{"__symbolic":"method"}],"_toDataURL":[{"__symbolic":"method"}],"_replaceCharacter":[{"__symbolic":"method"}]}}}}]

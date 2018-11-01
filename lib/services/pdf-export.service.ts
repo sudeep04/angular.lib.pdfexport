@@ -33,6 +33,6 @@ export class PdfExportService {
 
     private _generate(jsonData: object, docConfig: DocConfig): void {
         this._docRenderer.draw(jsonData, docConfig);
-        this._docRenderer.save();
+        // this._docRenderer.save();
     }
 }

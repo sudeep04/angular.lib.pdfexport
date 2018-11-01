@@ -1,6 +1,7 @@
 import { Product } from './product';
 import { Property } from './property.interface';
 import { Settings } from './settings.interface';
+import { DownloadElement } from './download/download-element.interface';
 
 export class Data {
 
@@ -24,6 +25,14 @@ export class Data {
         return this._productDetail;
     }
 
+    public get downloads(): DownloadElement[] {
+        return this._downloads;
+    }
+
+    public set downloads(downloads: DownloadElement[]) {
+        this._downloads = JSON.parse(JSON.stringify(downloads));
+    }
+
     private _groups: Product[][];
 
     private _properties: Property[];
@@ -34,6 +43,8 @@ export class Data {
 
     private _productDetail?: Product;
 
+    private _downloads: DownloadElement[];
+
     constructor(settings: Settings, filters: any[]) {
 
         this._settings = settings;
@@ -41,10 +52,11 @@ export class Data {
         this._properties = [];
         this._groups.push([]);
         this._filters = filters;
+        this._downloads = [];
     }
 
     public setProductDetail(product: Product) {
-        
+
         this._productDetail = new Product(product.name, product.supplier);
         this._productDetail.imageUrl = product.imageUrl;
         this._productDetail.imageGallery = product.imageGallery;
@@ -62,6 +74,19 @@ export class Data {
         this._groups[this._groups.length - 1].push(product);
         this._updateProperties(product);
         this._groups[this._groups.length - 1] = this._getProductsStructure(this._groups[this._groups.length - 1], this._properties);
+    }
+
+    public translate(value: string): string {
+        let trans: string;
+        if (value === 'true') {
+            trans = this._settings.translations.booleanValues.true;
+            return trans;
+        } else if (value === 'false') {
+            trans = this._settings.translations.booleanValues.false;
+            return trans;
+        } else {
+            return value;
+        }
     }
 
     private _updateProperties(product: Product): void {

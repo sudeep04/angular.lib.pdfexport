@@ -9,7 +9,7 @@ export class Product {
         return this._name;
     }
 
-    public set name(name: string){
+    public set name(name: string) {
 
         this._name = name;
     }
@@ -58,7 +58,7 @@ export class Product {
 
         return this._downloads;
     }
-    
+
     public set downloads(downloads: Download) {
 
        this._downloads = JSON.parse(JSON.stringify(downloads));
@@ -68,7 +68,7 @@ export class Product {
         return this._details;
     }
 
-    public set details(details: Detail[]){
+    public set details(details: Detail[]) {
 
         this._details = JSON.parse(JSON.stringify(details));
     }

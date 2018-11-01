@@ -1,29 +1,35 @@
 import { Data } from './data';
 import { Check } from './check';
 import { Product } from './product';
-export class JsonParser {
-    static parseData(jsonData) {
+var JsonParser = /** @class */ (function () {
+    function JsonParser() {
+    }
+    JsonParser.parseData = function (jsonData) {
+        var _this = this;
         Check.notNullOrUndefined(jsonData, 'jsonData');
         Check.notEmptyArray(jsonData.products, 'jsonData.products');
-        const settings = JsonParser.parseSettings(jsonData.settings);
-        const data = new Data(settings, jsonData.property_filters);
-        jsonData.products.forEach((jsonproduct) => {
-            const product = this._parseProduct(jsonproduct, data, settings);
+        var settings = JsonParser.parseSettings(jsonData.settings);
+        var data = new Data(settings, jsonData.property_filters);
+        jsonData.products.forEach(function (jsonproduct) {
+            var product = _this._parseProduct(jsonproduct, data, settings);
             data.addProduct(product);
         });
         return data;
-    }
-    static parseDataProduct(jsonData) {
+    };
+    JsonParser.parseDataProduct = function (jsonData) {
         Check.notNullOrUndefined(jsonData, 'jsonData');
         Check.notEmptyArray(jsonData.products, 'jsonData.products');
-        const settings = JsonParser.parseSettings(jsonData.settings);
-        const data = new Data(settings, jsonData.property_filters);
-        const product = this._parseProduct(jsonData.products[0], data, settings);
+        var settings = JsonParser.parseSettings(jsonData.settings);
+        var data = new Data(settings, jsonData.property_filters);
+        var product = this._parseProduct(jsonData.products[0], data, settings);
         data.setProductDetail(product);
+        if (jsonData.downloads) {
+            data.downloads = jsonData.downloads;
+        }
         return data;
-    }
-    static parseSettings(settings) {
-        const result = {
+    };
+    JsonParser.parseSettings = function (settings) {
+        var result = {
             sorting: 'asc',
             captions: {
                 project: 'Projekt',
@@ -36,9 +42,13 @@ export class JsonParser {
                     supplierName: 'Hersteller'
                 },
                 downloadTypes: {
-                    brochure: 'Brosch�re',
+                    brochure: 'Broschüre',
                     cadData: 'CAD Data',
                     bimModels: 'BIM Models'
+                },
+                booleanValues: {
+                    true: 'Yes',
+                    false: 'No'
                 }
             },
             showProductsImage: true,
@@ -78,8 +88,16 @@ export class JsonParser {
                 result.translations.layout.supplierName = settings.translations.layout.supplierName;
             }
         }
+        if (settings.translations.booleanValues) {
+            if (settings.translations.booleanValues.true) {
+                result.translations.booleanValues.true = settings.translations.booleanValues.true;
+            }
+            if (settings.translations.booleanValues.false) {
+                result.translations.booleanValues.false = settings.translations.booleanValues.false;
+            }
+        }
         if (settings.translations.downloadTypes) {
-            const downloadTypes = settings.translations.downloadTypes;
+            var downloadTypes = settings.translations.downloadTypes;
             if (downloadTypes.brochure) {
                 result.translations.downloadTypes.brochure = downloadTypes.brochure;
             }
@@ -130,17 +148,17 @@ export class JsonParser {
             result.fileName = settings.fileName;
         }
         return result;
-    }
-    static _parseProduct(jsonproduct, data, settings) {
+    };
+    JsonParser._parseProduct = function (jsonproduct, data, settings) {
         Check.notNullOrUndefined(jsonproduct.productData, 'productData');
         Check.notNullOrUndefined(jsonproduct.productData.name, 'productData.name');
         Check.notNullOrUndefined(jsonproduct.productData.supplier, 'productData.supplier');
         Check.notNullOrUndefined(jsonproduct.productData.supplier.name, 'supplier.name');
-        const product = new Product(jsonproduct.productData.name, jsonproduct.productData.supplier.name);
+        var product = new Product(jsonproduct.productData.name, jsonproduct.productData.supplier.name);
         if (data.settings.showProductsImage) {
             if (jsonproduct.productData.primaryImage) {
-                const imgUrl = data.settings.productsImageApiPath
-                    + jsonproduct.productData.primaryImage.uuid + '/content/' + jsonproduct.productData.primaryImage.content + '?quality=80&background=white&mode=pad&width=160&height=160';
+                var imgUrl = data.settings.productsImageApiPath
+                    + jsonproduct.productData.primaryImage.uuid + '/content/' + jsonproduct.productData.primaryImage.content + '?quality=100&background=white&mode=pad&width=720&height=720';
                 product.imageUrl = imgUrl;
             }
             else {
@@ -151,17 +169,17 @@ export class JsonParser {
         // parse propertySets
         if (jsonproduct.productData.propertySets !== undefined) {
             Check.isArray(jsonproduct.productData.propertySets, 'productData.propertySets');
-            jsonproduct.productData.propertySets.forEach((propertySet) => {
+            jsonproduct.productData.propertySets.forEach(function (propertySet) {
                 if (propertySet.properties !== undefined) {
                     Check.isArray(propertySet.properties, 'properties');
-                    propertySet.properties.forEach((property) => {
+                    propertySet.properties.forEach(function (property) {
                         Check.notNullOrUndefined(property, 'property');
                         Check.notNullOrUndefined(property.displayName, 'property.displayName');
-                        let originalValue;
-                        let value = '';
-                        let val1 = '';
-                        let val2 = '';
-                        const direction = property.unit !== undefined && settings.unitsBeforeValue.find((unit) => unit === property.unit) ?
+                        var originalValue;
+                        var value = '';
+                        var val1 = '';
+                        var val2 = '';
+                        var direction = property.unit !== undefined && settings.unitsBeforeValue.find(function (unit) { return unit === property.unit; }) ?
                             'beforeValue'
                             : 'afterValue';
                         switch (property.type) {
@@ -179,8 +197,8 @@ export class JsonParser {
                                 originalValue = property.nominalValue;
                                 break;
                             case 1:
-                                const listValues = property.listValues;
-                                listValues.forEach((v, index) => {
+                                var listValues = property.listValues;
+                                listValues.forEach(function (v, index) {
                                     val1 = v;
                                     if (index === 0) {
                                         value += val1;
@@ -217,16 +235,16 @@ export class JsonParser {
                                 };
                                 break;
                         }
-                        const propertyValue = {
+                        var propertyValue = {
                             name: property.displayName,
                             ifdguid: property.ifdguid,
-                            value,
-                            originalValue,
+                            value: value,
+                            originalValue: originalValue,
                             unit: property.unit,
                             type: property.type
                         };
                         if (data.settings.showHighlights && jsonproduct.productScore !== undefined && jsonproduct.productScore.filterScores !== undefined) {
-                            const filterMap = new Map(jsonproduct.productScore.filterScores);
+                            var filterMap = new Map(jsonproduct.productScore.filterScores);
                             if (filterMap.has(property.ifdguid) && filterMap.get(property.ifdguid) !== -1) {
                                 propertyValue.ckeck = filterMap.get(property.ifdguid) === 1 ? true : false;
                             }
@@ -247,15 +265,17 @@ export class JsonParser {
         }
         // parse imagesGallery
         if (jsonproduct.productData.imageGallery !== undefined) {
-            jsonproduct.productData.imageGallery.forEach((image) => {
-                const imgUrl = data.settings.productsImageApiPath
+            jsonproduct.productData.imageGallery.forEach(function (image) {
+                var imgUrl = data.settings.productsImageApiPath
                     + image.uuid + '/content/'
                     + image.content
-                    + '?quality=80&background=white&mode=pad&width=160&height=160';
+                    + '?quality=100&background=white&mode=pad&width=720&height=720';
                 product.addImageGallery(imgUrl);
             });
         }
         return product;
-    }
-}
+    };
+    return JsonParser;
+}());
+export { JsonParser };
 //# sourceMappingURL=json-parser.js.map
