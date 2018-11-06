@@ -131,17 +131,18 @@ export class DocRendererDetail extends IDocRenderer {
 
     private _drawDetailsText(details: any[], marginTop: number, imageMargin: number) {
 
-        if (details.length === 0) {
+        if (details.length === 0 || details.every((detail: Detail) => detail.content === undefined )) {
             if (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) {
                 marginTop = imageMargin;
             }
         } else {
 
             const elems = details.sort((a: Detail, b: Detail) => {
-                if (a.content.length > b.content.length) {
+
+                if ( b.content === undefined || a.content.length > b.content.length) {
                     return 1;
                 }
-                if (a.content.length < b.content.length) {
+                if (a.content === undefined || a.content.length < b.content.length) {
                     return -1;
                 }
                 if (a.content.length === b.content.length) {
@@ -150,78 +151,80 @@ export class DocRendererDetail extends IDocRenderer {
             });
 
             elems.forEach((detail: Detail, index: number) => {
-                const text: string = htmlToText.fromString(
-                    detail.content,
-                    {
-                        wordwrap: false,
-                        ignoreHref: true,
-                        ignoreImage: true,
-                        preserveNewlines: false,
-                        uppercaseHeadings: false,
-                        format: {
-                            // text, lineBreak, paragraph, anchor, heading, table, orderedList,
-                            // unorderedList, listItem, horizontalLine
-                            heading: ((elem: any, fn: any, options: any) => {
-                                const h = fn(elem.children, options);
-                                return h;
-                            }),
-                            unorderedList: ((elem: any, fn: any, options: any) => {
-                                let resultul = '';
-                                elem.children.filter((e: any) => e.name === 'li').forEach((li: any) => {
-                                    let tmp1 = '';
-                                    li.children.forEach((item: any) => {
-                                        tmp1 += item.data + '\n';
+                if (detail.content !== undefined) {
+                    const text: string = htmlToText.fromString(
+                        detail.content,
+                        {
+                            wordwrap: false,
+                            ignoreHref: true,
+                            ignoreImage: true,
+                            preserveNewlines: false,
+                            uppercaseHeadings: false,
+                            format: {
+                                // text, lineBreak, paragraph, anchor, heading, table, orderedList,
+                                // unorderedList, listItem, horizontalLine
+                                heading: ((elem: any, fn: any, options: any) => {
+                                    const h = fn(elem.children, options);
+                                    return h;
+                                }),
+                                unorderedList: ((elem: any, fn: any, options: any) => {
+                                    let resultul = '';
+                                    elem.children.filter((e: any) => e.name === 'li').forEach((li: any) => {
+                                        let tmp1 = '';
+                                        li.children.forEach((item: any) => {
+                                            tmp1 += item.data + '\n';
+                                        });
+                                        resultul += ' • ' + tmp1 + '\n';
                                     });
-                                    resultul += ' • ' + tmp1 + '\n';
-                                });
-                                return resultul;
-                            }),
-                            orderedList: ((elem: any, fn: any, options: any) => {
-                                let resultol = '';
-                                elem.children.filter((e: any) => e.name === 'li').forEach((li: any, ind: number) => {
-                                    let tmp2 = '';
-                                    li.children.forEach((item: any) => {
-                                        tmp2 += item.data + '\n';
+                                    return resultul;
+                                }),
+                                orderedList: ((elem: any, fn: any, options: any) => {
+                                    let resultol = '';
+                                    elem.children.filter((e: any) => e.name === 'li').forEach((li: any, ind: number) => {
+                                        let tmp2 = '';
+                                        li.children.forEach((item: any) => {
+                                            tmp2 += item.data + '\n';
+                                        });
+                                        resultol += (ind + 1) + '. ' + tmp2 + '\n';
                                     });
-                                    resultol += (ind + 1) + '. ' + tmp2 + '\n';
-                                });
-                                return resultol;
-                            })
+                                    return resultol;
+                                })
+                            }
                         }
+                    );
+                    let widthColumn = this.checkWidthFirstPage(marginTop, imageMargin);
+
+                    if (index !== 0 && this._doc.internal.getCurrentPageInfo().pageNumber === 1 && marginTop < imageMargin) {
+                        marginTop = imageMargin;
                     }
-                );
-                let widthColumn = this.checkWidthFirstPage(marginTop, imageMargin);
 
-                if (index !== 0 && this._doc.internal.getCurrentPageInfo().pageNumber === 1 && marginTop < imageMargin) {
-                    marginTop = imageMargin;
-                }
-
-                // draw title
-                if (marginTop + 10 > this._doc.internal.pageSize.getHeight() - 36) {
-                    this._doc.addPage();
-                    marginTop = 40;
-                }
-
-                this._drawText(detail.name, widthColumn, 20, 10, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
-                marginTop += 5;
-
-                widthColumn = this.checkWidthFirstPage(marginTop, imageMargin);
-                const splitLines: string[] = this._splitLines(text, widthColumn, 9);
-
-                splitLines.forEach((elemtDetail: string) => {
-
-                    if (marginTop > this._doc.internal.pageSize.getHeight() - 36) {
+                    // draw title
+                    if (marginTop + 10 > this._doc.internal.pageSize.getHeight() - 36) {
                         this._doc.addPage();
-                        marginTop = 30;
-                    } else {
-                        marginTop += 4;
+                        marginTop = 40;
                     }
-                    this._doc.setFont('GothamLight', 'normal');
-                    this._doc.setFontSize(9);
-                    this._doc.setTextColor(0, 0, 0);
-                    this._doc.text(elemtDetail, 10, marginTop);
-                });
-                marginTop += 15;
+
+                    this._drawText(detail.name, widthColumn, 20, 10, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
+                    marginTop += 5;
+
+                    widthColumn = this.checkWidthFirstPage(marginTop, imageMargin);
+                    const splitLines: string[] = this._splitLines(text, widthColumn, 9);
+
+                    splitLines.forEach((elemtDetail: string) => {
+
+                        if (marginTop > this._doc.internal.pageSize.getHeight() - 36) {
+                            this._doc.addPage();
+                            marginTop = 30;
+                        } else {
+                            marginTop += 4;
+                        }
+                        this._doc.setFont('GothamLight', 'normal');
+                        this._doc.setFontSize(9);
+                        this._doc.setTextColor(0, 0, 0);
+                        this._doc.text(elemtDetail, 10, marginTop);
+                    });
+                    marginTop += 15;
+                }
             });
         }
         this._drawCheckedImage(marginTop);
