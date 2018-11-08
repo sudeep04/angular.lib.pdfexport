@@ -1,4 +1,4 @@
-export const ERRORS = {
+export var ERRORS = {
     ARGUMENT_NULL_EXCEPTION: 'Property {0} can not be null.',
     ARGUMENT_UNDEFINED_EXCEPTION: 'Property {0} can not be undefined.',
     ARRAY_TYPEOFF_EXCEPTION: 'Property {0} must be an array.',

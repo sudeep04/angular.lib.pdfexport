@@ -1,0 +1,1 @@
+//# sourceMappingURL=bim-model-category.interface.js.map

@@ -12,13 +12,32 @@ export interface Settings {
 
     captions: {
 
-        architectureOffice: string;
-
         project: string;
-        
+
         bearbeiter: string;
 
-        id: string;
+    };
+
+    translations: {
+        layout: {
+            page: string;
+
+            date: string;
+
+            supplierName: string;
+        },
+        downloadTypes: {
+            brochure: string;
+
+            cadData: string;
+
+            bimModels: string;
+        },
+        booleanValues: {
+            true: string;
+
+            false: string;
+        }
     };
 
     sorting: 'asc' | 'dsc';
