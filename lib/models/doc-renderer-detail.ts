@@ -10,8 +10,8 @@ import { checkImg } from './imagesBase64/check-img';
 import { unckeckImg } from './imagesBase64/uncheck-img';
 import { DownloadElement } from './download/download-element.interface';
 import { DownloadValue } from './download/download-value.interface';
-import { Detail } from '../../dist/models/detail/detail.interface';
-import * as htmlToText from 'html-to-text';
+import { Detail } from './detail/detail.interface';
+//import * as htmlToText from 'html-to-text'; 
 
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
@@ -19,6 +19,8 @@ const IMAGES_PADING_TOP = 6.2;
 export class DocRendererDetail extends IDocRenderer {
 
     private _marginsPrimaryImage: any;
+
+    public htmlToText = require('html-to-text');
 
     constructor() {
         super();
@@ -230,7 +232,7 @@ export class DocRendererDetail extends IDocRenderer {
         this._drawCheckedImage(marginTop);
     }
 
-    private checkWidthFirstPage(marginTop, imageMargin) {
+    private checkWidthFirstPage(marginTop: any, imageMargin: any) {
         return (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) ?
                 this._doc.internal.pageSize.getWidth() / 2 - this._docConfig.padding * 3 : this._doc.internal.pageSize.getWidth() - 85;
     }

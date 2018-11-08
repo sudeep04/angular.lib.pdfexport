@@ -88,6 +88,14 @@ var JsonParser = /** @class */ (function () {
                 result.translations.layout.supplierName = settings.translations.layout.supplierName;
             }
         }
+        if (settings.translations.booleanValues) {
+            if (settings.translations.booleanValues.true) {
+                result.translations.booleanValues.true = settings.translations.booleanValues.true;
+            }
+            if (settings.translations.booleanValues.false) {
+                result.translations.booleanValues.false = settings.translations.booleanValues.false;
+            }
+        }
         if (settings.translations.downloadTypes) {
             var downloadTypes = settings.translations.downloadTypes;
             if (downloadTypes.brochure) {

@@ -83,6 +83,6 @@ export class IDocRenderer {
 
     // replace characters
     protected _replaceCharacter( word: string): string {
-        return word.replace('aÌˆ', '\u00E4');
+        return word.replace('ä', '\u00E4');
     }
 }

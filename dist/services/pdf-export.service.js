@@ -21,7 +21,7 @@ var PdfExportService = /** @class */ (function () {
     };
     PdfExportService.prototype._generate = function (jsonData, docConfig) {
         this._docRenderer.draw(jsonData, docConfig);
-        this._docRenderer.save();
+        // this._docRenderer.save();
     };
     PdfExportService.decorators = [
         { type: Injectable },
