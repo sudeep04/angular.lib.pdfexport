@@ -378,7 +378,7 @@ export class DocRenderer extends IDocRenderer {
             fillColor: [246, 246, 246],
             lineWidth: 0,
             fontStyle: 'normal',
-            cellPadding: [2.8, this._docConfig.lineWidth + 1, 2.8, this._docConfig.lineWidth + 0.5],
+            cellPadding: [2.8, this._docConfig.lineWidth + 3, 2.8, this._docConfig.lineWidth + 0.5],
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
@@ -436,7 +436,7 @@ export class DocRenderer extends IDocRenderer {
                 productName = x.join(' ');
             }
 
-            columns.push({ dataKey: product.name, title: productName });
+            columns.push({ dataKey: product.name, title: this._replaceCharacter(productName)});
             rows[0][product.name] = product.supplier;
             config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth };
         });
