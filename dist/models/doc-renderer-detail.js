@@ -109,17 +109,17 @@ var DocRendererDetail = /** @class */ (function (_super) {
     };
     DocRendererDetail.prototype._drawDetailsText = function (details, marginTop, imageMargin) {
         var _this = this;
-        if (details.length === 0) {
+        if (details.length === 0 || details.every(function (detail) { return detail.content === undefined; })) {
             if (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) {
                 marginTop = imageMargin;
             }
         }
         else {
             var elems = details.sort(function (a, b) {
-                if (a.content.length > b.content.length) {
+                if (b.content === undefined || a.content.length > b.content.length) {
                     return 1;
                 }
-                if (a.content.length < b.content.length) {
+                if (a.content === undefined || a.content.length < b.content.length) {
                     return -1;
                 }
                 if (a.content.length === b.content.length) {
@@ -127,70 +127,72 @@ var DocRendererDetail = /** @class */ (function (_super) {
                 }
             });
             elems.forEach(function (detail, index) {
-                var text = _this.htmlToText.fromString(detail.content, {
-                    wordwrap: false,
-                    ignoreHref: true,
-                    ignoreImage: true,
-                    preserveNewlines: false,
-                    uppercaseHeadings: false,
-                    format: {
-                        // text, lineBreak, paragraph, anchor, heading, table, orderedList,
-                        // unorderedList, listItem, horizontalLine
-                        heading: (function (elem, fn, options) {
-                            var h = fn(elem.children, options);
-                            return h;
-                        }),
-                        unorderedList: (function (elem, fn, options) {
-                            var resultul = '';
-                            elem.children.filter(function (e) { return e.name === 'li'; }).forEach(function (li) {
-                                var tmp1 = '';
-                                li.children.forEach(function (item) {
-                                    tmp1 += item.data + '\n';
+                if (detail.content !== undefined) {
+                    var text = _this.htmlToText.fromString(detail.content, {
+                        wordwrap: false,
+                        ignoreHref: true,
+                        ignoreImage: true,
+                        preserveNewlines: false,
+                        uppercaseHeadings: false,
+                        format: {
+                            // text, lineBreak, paragraph, anchor, heading, table, orderedList,
+                            // unorderedList, listItem, horizontalLine
+                            heading: (function (elem, fn, options) {
+                                var h = fn(elem.children, options);
+                                return h;
+                            }),
+                            unorderedList: (function (elem, fn, options) {
+                                var resultul = '';
+                                elem.children.filter(function (e) { return e.name === 'li'; }).forEach(function (li) {
+                                    var tmp1 = '';
+                                    li.children.forEach(function (item) {
+                                        tmp1 += item.data + '\n';
+                                    });
+                                    resultul += ' • ' + tmp1 + '\n';
                                 });
-                                resultul += ' • ' + tmp1 + '\n';
-                            });
-                            return resultul;
-                        }),
-                        orderedList: (function (elem, fn, options) {
-                            var resultol = '';
-                            elem.children.filter(function (e) { return e.name === 'li'; }).forEach(function (li, ind) {
-                                var tmp2 = '';
-                                li.children.forEach(function (item) {
-                                    tmp2 += item.data + '\n';
+                                return resultul;
+                            }),
+                            orderedList: (function (elem, fn, options) {
+                                var resultol = '';
+                                elem.children.filter(function (e) { return e.name === 'li'; }).forEach(function (li, ind) {
+                                    var tmp2 = '';
+                                    li.children.forEach(function (item) {
+                                        tmp2 += item.data + '\n';
+                                    });
+                                    resultol += (ind + 1) + '. ' + tmp2 + '\n';
                                 });
-                                resultol += (ind + 1) + '. ' + tmp2 + '\n';
-                            });
-                            return resultol;
-                        })
+                                return resultol;
+                            })
+                        }
+                    });
+                    var widthColumn = _this.checkWidthFirstPage(marginTop, imageMargin);
+                    if (index !== 0 && _this._doc.internal.getCurrentPageInfo().pageNumber === 1 && marginTop < imageMargin) {
+                        marginTop = imageMargin;
                     }
-                });
-                var widthColumn = _this.checkWidthFirstPage(marginTop, imageMargin);
-                if (index !== 0 && _this._doc.internal.getCurrentPageInfo().pageNumber === 1 && marginTop < imageMargin) {
-                    marginTop = imageMargin;
-                }
-                // draw title
-                if (marginTop + 10 > _this._doc.internal.pageSize.getHeight() - 36) {
-                    _this._doc.addPage();
-                    marginTop = 40;
-                }
-                _this._drawText(detail.name, widthColumn, 20, 10, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
-                marginTop += 5;
-                widthColumn = _this.checkWidthFirstPage(marginTop, imageMargin);
-                var splitLines = _this._splitLines(text, widthColumn, 9);
-                splitLines.forEach(function (elemtDetail) {
-                    if (marginTop > _this._doc.internal.pageSize.getHeight() - 36) {
+                    // draw title
+                    if (marginTop + 10 > _this._doc.internal.pageSize.getHeight() - 36) {
                         _this._doc.addPage();
-                        marginTop = 30;
+                        marginTop = 40;
                     }
-                    else {
-                        marginTop += 4;
-                    }
-                    _this._doc.setFont('GothamLight', 'normal');
-                    _this._doc.setFontSize(9);
-                    _this._doc.setTextColor(0, 0, 0);
-                    _this._doc.text(elemtDetail, 10, marginTop);
-                });
-                marginTop += 15;
+                    _this._drawText(detail.name, widthColumn, 20, 10, marginTop, [9, 4, 3], ['GothamMedium', 'normal']);
+                    marginTop += 5;
+                    widthColumn = _this.checkWidthFirstPage(marginTop, imageMargin);
+                    var splitLines = _this._splitLines(text, widthColumn, 9);
+                    splitLines.forEach(function (elemtDetail) {
+                        if (marginTop > _this._doc.internal.pageSize.getHeight() - 36) {
+                            _this._doc.addPage();
+                            marginTop = 30;
+                        }
+                        else {
+                            marginTop += 4;
+                        }
+                        _this._doc.setFont('GothamLight', 'normal');
+                        _this._doc.setFontSize(9);
+                        _this._doc.setTextColor(0, 0, 0);
+                        _this._doc.text(elemtDetail, 10, marginTop);
+                    });
+                    marginTop += 15;
+                }
             });
         }
         this._drawCheckedImage(marginTop);
@@ -493,177 +495,176 @@ var DocRendererDetail = /** @class */ (function (_super) {
         var pageHeight = this._doc.internal.pageSize.getHeight();
         var downloads = this._data.downloads;
         var marginTop = this._doc.autoTable.previous.finalY + 15;
-        // if (marginTop + 45 < pageHeight ) {
-        //     marginTop += 10;
-        // } else {
-        this._doc.addPage();
-        marginTop = 40;
-        // }
-        this._drawTableHeader(marginTop, 'Downloads');
-        marginTop += 5;
-        var columns = [{ dataKey: 'col1', title: '' }];
-        var rows = [];
-        var styles = {
-            fillColor: [255, 255, 255],
-            lineWidth: 0,
-            fontStyle: 'normal',
-            // top...left
-            cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
-            fontSize: 9,
-            textColor: 0,
-            overflow: 'linebreak',
-            valign: 'middle'
-        };
-        var borders = [];
-        var links = [];
-        var elemsPage = [];
-        var config = {
-            styles: styles,
-            margin: {
-                top: marginTop,
-                right: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                bottom: this._docConfig.padding + 3 * this._docConfig.lineWidth / 2 + 10,
-                left: this._docConfig.padding + this._docConfig.lineWidth / 2
-            },
-            columnStyles: {
-                col1: {
-                    columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 2
-                }
-            },
-            alternateRowStyles: styles,
-            showHeader: 'never',
-            tableWidth: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
-            drawCell: function (cell, opts) {
-                _this._doc.setFont(opts.column.dataKey === 'col1' ?
-                    'GothamMedium' : 'GothamLight', 'normal');
-            },
-            drawRow: function (row, opts) {
-                if (!row.raw.first && !row.raw.last) {
-                    row.height = 5;
-                }
-                if (!row.raw.single) {
-                    if (row.raw.last) {
-                        row.cells['col1'].styles.cellPadding[0] = 0;
-                        row.cells['col1'].styles.cellPadding[2] = 2.5;
-                        row.cells['col1'].styles.valign = 'top';
-                        row.cells['col2'].styles.cellPadding[0] = 0;
-                        row.cells['col2'].styles.cellPadding[2] = 2.5;
-                        row.cells['col2'].styles.valign = 'top';
-                        row.height = 7;
+        if (downloads && downloads.length > 0) {
+            this._doc.addPage();
+            marginTop = 40;
+            // }
+            this._drawTableHeader(marginTop, 'Downloads');
+            marginTop += 5;
+            var columns = [{ dataKey: 'col1', title: '' }];
+            var rows_1 = [];
+            var styles = {
+                fillColor: [255, 255, 255],
+                lineWidth: 0,
+                fontStyle: 'normal',
+                // top...left
+                cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
+                fontSize: 9,
+                textColor: 0,
+                overflow: 'linebreak',
+                valign: 'middle'
+            };
+            var borders_1 = [];
+            var links_1 = [];
+            var elemsPage_1 = [];
+            var config = {
+                styles: styles,
+                margin: {
+                    top: marginTop,
+                    right: this._docConfig.padding + this._docConfig.lineWidth / 2,
+                    bottom: this._docConfig.padding + 3 * this._docConfig.lineWidth / 2 + 10,
+                    left: this._docConfig.padding + this._docConfig.lineWidth / 2
+                },
+                columnStyles: {
+                    col1: {
+                        columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 2
                     }
-                    if (row.raw.first) {
-                        row.cells['col1'].styles.cellPadding[2] = 0;
-                        row.cells['col1'].styles.valign = 'bottom';
-                        row.cells['col2'].styles.cellPadding[2] = 0;
-                        row.cells['col2'].styles.valign = 'bottom';
-                        row.height = 7;
+                },
+                alternateRowStyles: styles,
+                showHeader: 'never',
+                tableWidth: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
+                drawCell: function (cell, opts) {
+                    _this._doc.setFont(opts.column.dataKey === 'col1' ?
+                        'GothamMedium' : 'GothamLight', 'normal');
+                },
+                drawRow: function (row, opts) {
+                    if (!row.raw.first && !row.raw.last) {
+                        row.height = 5;
                     }
-                }
-                else {
-                    var split = _this._splitLines(downloads[row.raw.index].singleValue.name, _this._docConfig.columnWidth + _this._docConfig.padding * 2, 11);
-                    row.height += split.length * 3.1;
-                }
-                if (row.raw.last) {
-                    borders.push({
-                        left: _this._docConfig.padding + _this._docConfig.lineWidth / 2,
-                        top: row.y + row.height - 0.1,
-                        width: pageWidth - _this._docConfig.columnWidth * 2 + 2 * _this._docConfig.padding,
-                        height: 0.1
-                    });
-                }
-                if (row.raw.index !== undefined) {
-                    elemsPage.push(row.raw.index);
-                }
-                links.push(row.cells['col2'].textPos);
-            },
-            addPageContent: function (data) {
-                _this._doc.setFillColor(0, 0, 0);
-                borders.forEach(function (border, index) {
-                    if (index < borders.length - 1) {
-                        _this._doc.rect(border.left, border.top, border.width, border.height, 'F');
-                    }
-                });
-                borders = [];
-                _this._doc.setTextColor(0, 172, 165);
-                var iter = 0;
-                elemsPage.forEach(function (it) {
-                    var elem = downloads[it];
-                    if (elem.singleValue) {
-                        var elemSplit = _this._splitLines(elem.singleValue.name, _this._docConfig.columnWidth + _this._docConfig.padding * 2, 11);
-                        var val_1 = '';
-                        elemSplit.forEach(function (element, index) {
-                            val_1 += (index !== 0) ? '\n' + element : element;
-                        });
-                        _this._doc.textWithLink(val_1, links[iter].x, links[iter].y, {
-                            url: elem.singleValue.link
-                        });
-                        iter++;
-                    }
-                    else {
-                        _this._doc.setFontSize(9);
-                        if (links.length > 0) {
-                            elem.listValues.forEach(function (value, idx) {
-                                if (links[iter] !== undefined) {
-                                    var y = links[iter].y;
-                                    if (idx === 0) {
-                                        y -= 1.2;
-                                    }
-                                    else if (idx === elem.listValues.length - 1) {
-                                        y += 2.75;
-                                    }
-                                    else {
-                                        y += 0.8;
-                                    }
-                                    _this._doc.textWithLink(value.name, links[iter].x + 4, y, {
-                                        url: value.link
-                                    });
-                                }
-                                iter++;
-                            });
+                    if (!row.raw.single) {
+                        if (row.raw.last) {
+                            row.cells['col1'].styles.cellPadding[0] = 0;
+                            row.cells['col1'].styles.cellPadding[2] = 2.5;
+                            row.cells['col1'].styles.valign = 'top';
+                            row.cells['col2'].styles.cellPadding[0] = 0;
+                            row.cells['col2'].styles.cellPadding[2] = 2.5;
+                            row.cells['col2'].styles.valign = 'top';
+                            row.height = 7;
+                        }
+                        if (row.raw.first) {
+                            row.cells['col1'].styles.cellPadding[2] = 0;
+                            row.cells['col1'].styles.valign = 'bottom';
+                            row.cells['col2'].styles.cellPadding[2] = 0;
+                            row.cells['col2'].styles.valign = 'bottom';
+                            row.height = 7;
                         }
                     }
-                });
-                links = [];
-                elemsPage = [];
-                data.settings.margin.top = 40;
-                if (++i !== 1) {
-                    _this._drawTableHeader(36, 'Downloads');
+                    else {
+                        var split = _this._splitLines(downloads[row.raw.index].singleValue.name, _this._docConfig.columnWidth + _this._docConfig.padding * 2, 11);
+                        row.height += split.length * 3.1;
+                    }
+                    if (row.raw.last) {
+                        borders_1.push({
+                            left: _this._docConfig.padding + _this._docConfig.lineWidth / 2,
+                            top: row.y + row.height - 0.1,
+                            width: pageWidth - _this._docConfig.columnWidth * 2 + 2 * _this._docConfig.padding,
+                            height: 0.1
+                        });
+                    }
+                    if (row.raw.index !== undefined) {
+                        elemsPage_1.push(row.raw.index);
+                    }
+                    links_1.push(row.cells['col2'].textPos);
+                },
+                addPageContent: function (data) {
+                    _this._doc.setFillColor(0, 0, 0);
+                    borders_1.forEach(function (border, index) {
+                        if (index < borders_1.length - 1) {
+                            _this._doc.rect(border.left, border.top, border.width, border.height, 'F');
+                        }
+                    });
+                    borders_1 = [];
+                    _this._doc.setTextColor(0, 172, 165);
+                    var iter = 0;
+                    elemsPage_1.forEach(function (it) {
+                        var elem = downloads[it];
+                        if (elem.singleValue) {
+                            var elemSplit = _this._splitLines(elem.singleValue.name, _this._docConfig.columnWidth + _this._docConfig.padding * 2, 11);
+                            var val_1 = '';
+                            elemSplit.forEach(function (element, index) {
+                                val_1 += (index !== 0) ? '\n' + element : element;
+                            });
+                            _this._doc.textWithLink(val_1, links_1[iter].x, links_1[iter].y, {
+                                url: elem.singleValue.link
+                            });
+                            iter++;
+                        }
+                        else {
+                            _this._doc.setFontSize(9);
+                            if (links_1.length > 0) {
+                                elem.listValues.forEach(function (value, idx) {
+                                    if (links_1[iter] !== undefined) {
+                                        var y = links_1[iter].y;
+                                        if (idx === 0) {
+                                            y -= 1.2;
+                                        }
+                                        else if (idx === elem.listValues.length - 1) {
+                                            y += 2.75;
+                                        }
+                                        else {
+                                            y += 0.8;
+                                        }
+                                        _this._doc.textWithLink(value.name, links_1[iter].x + 4, y, {
+                                            url: value.link
+                                        });
+                                    }
+                                    iter++;
+                                });
+                            }
+                        }
+                    });
+                    links_1 = [];
+                    elemsPage_1 = [];
+                    data.settings.margin.top = 40;
+                    if (++i !== 1) {
+                        _this._drawTableHeader(36, 'Downloads');
+                    }
                 }
+            };
+            // fill values
+            columns.push({ dataKey: 'col2', title: 'col2' });
+            var lineW = this._docConfig.lineWidth + 0.5;
+            if (this._data.settings.showHighlights) {
+                lineW = lineW + 4;
             }
-        };
-        // fill values
-        columns.push({ dataKey: 'col2', title: 'col2' });
-        var lineW = this._docConfig.lineWidth + 0.5;
-        if (this._data.settings.showHighlights) {
-            lineW = lineW + 4;
+            config.columnStyles['col2'] = {
+                columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 3,
+                cellPadding: [2.8, lineW, 2.8, lineW]
+            };
+            var spanLines_1 = 0;
+            downloads.forEach(function (elem, index) {
+                rows_1.push({ col1: elem.label, first: true, index: index });
+                if (elem.singleValue) {
+                    rows_1[spanLines_1]['col2'] = '';
+                    rows_1[spanLines_1]['last'] = true;
+                    rows_1[spanLines_1]['single'] = true;
+                    spanLines_1++;
+                }
+                else {
+                    elem.listValues.forEach(function (value, idx) {
+                        if (idx !== 0) {
+                            rows_1.push({ col1: '' });
+                        }
+                        rows_1[spanLines_1]['col2'] = '•';
+                        if (idx === elem.listValues.length - 1) {
+                            rows_1[spanLines_1]['last'] = true;
+                        }
+                        spanLines_1++;
+                    });
+                }
+            });
+            this._doc.autoTable(columns, rows_1, config);
         }
-        config.columnStyles['col2'] = {
-            columnWidth: this._docConfig.columnWidth + this._docConfig.padding * 3,
-            cellPadding: [2.8, lineW, 2.8, lineW]
-        };
-        var spanLines = 0;
-        downloads.forEach(function (elem, index) {
-            rows.push({ col1: elem.label, first: true, index: index });
-            if (elem.singleValue) {
-                rows[spanLines]['col2'] = '';
-                rows[spanLines]['last'] = true;
-                rows[spanLines]['single'] = true;
-                spanLines++;
-            }
-            else {
-                elem.listValues.forEach(function (value, idx) {
-                    if (idx !== 0) {
-                        rows.push({ col1: '' });
-                    }
-                    rows[spanLines]['col2'] = '•';
-                    if (idx === elem.listValues.length - 1) {
-                        rows[spanLines]['last'] = true;
-                    }
-                    spanLines++;
-                });
-            }
-        });
-        this._doc.autoTable(columns, rows, config);
     };
     DocRendererDetail.prototype._drawGallery = function (images) {
         var _this = this;

@@ -154,7 +154,7 @@ export class DocRendererDetail extends IDocRenderer {
 
             elems.forEach((detail: Detail, index: number) => {
                 if (detail.content !== undefined) {
-                    const text: string = htmlToText.fromString(
+                    const text: string = this.htmlToText.fromString(
                         detail.content,
                         {
                             wordwrap: false,

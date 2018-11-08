@@ -21,7 +21,6 @@ var IDocRenderer = /** @class */ (function () {
             img.onerror = (function () {
                 console.log('Error loading image:' + url);
                 loaded++;
-                output.push(img);
                 if (loaded === input.length) {
                     callback(output);
                 }
