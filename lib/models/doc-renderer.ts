@@ -42,9 +42,9 @@ export class DocRenderer extends IDocRenderer {
 
     private _loadImagesTables(): void {
         // if (this._data.settings.applyFilters) {
-            const elems: string[] = [checkImg, unckeckImg, boxShadowImg];
-            const elemsHTML: HTMLImageElement[] = [];
-            this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
+        const elems: string[] = [checkImg, unckeckImg, boxShadowImg];
+        const elemsHTML: HTMLImageElement[] = [];
+        this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
         // } else {
         //     this._drawElems([]);
         // }
@@ -121,10 +121,6 @@ export class DocRenderer extends IDocRenderer {
             valign: 'middle'
         };
 
-        const columnStyles = {
-            col2: { columnWidth: this._docConfig.columnWidth }
-        };
-
         // Helpers
         let borders: any[] = [];
         let checkImages: any[] = [];
@@ -140,7 +136,10 @@ export class DocRenderer extends IDocRenderer {
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
-                col1: {}
+                col1: {
+                    // columnWidth: this._docConfig.columnWidth,
+                    cellPadding: [2.8, this._docConfig.lineWidth + 5, 2.8, this._docConfig.lineWidth + 0.5]
+                }
             },
             alternateRowStyles: styles,
             showHeader: 'never',
@@ -164,7 +163,7 @@ export class DocRenderer extends IDocRenderer {
                         y += fontSize * (2 - FONT_ROW_RATIO);
 
                         // Align middle
-                        y -= (lineCount / 2) * fontSize * FONT_ROW_RATIO ;
+                        y -= (lineCount / 2) * fontSize * FONT_ROW_RATIO;
 
                         cell.text.forEach((element: string, index: number) => {
                             if (element.startsWith('(')) {
@@ -240,11 +239,11 @@ export class DocRenderer extends IDocRenderer {
 
             let lineW = this._docConfig.lineWidth + 0.5;
             if (this._data.settings.showHighlights) {
-                lineW = lineW + 4;
+                lineW += 4;
             }
             config.columnStyles[product.name] = {
                 columnWidth: this._docConfig.columnWidth,
-                cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW]
+                cellPadding: [2.8, this._docConfig.lineWidth + 1, 2.8, lineW]
             };
 
             if (rows.length === 0) {
@@ -252,9 +251,9 @@ export class DocRenderer extends IDocRenderer {
                     const propName = this._replaceCharacter(property.name);
                     if (this._data.settings.applyFilters) {
                         const direction: 'afterValue' | 'beforeValue'
-                                = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
-                                    'beforeValue'
-                                    : 'afterValue';
+                            = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
+                                'beforeValue'
+                                : 'afterValue';
                         const filterMap = new Map(this._data.filters);
                         const filterValue = filterMap.get(property.ifdguid) as any;
                         let filterText = '';
@@ -287,7 +286,7 @@ export class DocRenderer extends IDocRenderer {
                             }
 
                             filterText = this._replaceCharacter(filterText);
-                            rows.push({ col1: propName + `\n(${filterText})`});
+                            rows.push({ col1: propName + `\n(${filterText})` });
                         } else {
                             rows.push({ col1: propName });
                         }
@@ -379,15 +378,11 @@ export class DocRenderer extends IDocRenderer {
             fillColor: [246, 246, 246],
             lineWidth: 0,
             fontStyle: 'normal',
-            cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
+            cellPadding: [2.8, this._docConfig.lineWidth + 1, 2.8, this._docConfig.lineWidth + 0.5],
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
             valign: 'middle'
-        };
-
-        const columnStyles = {
-            col2: { columnWidth: this._docConfig.columnWidth }
         };
 
         const borders: any[] = [];
@@ -406,7 +401,7 @@ export class DocRenderer extends IDocRenderer {
             drawCell: (cell: any, opts: any) => {
 
                 this._doc.setFont(opts.column.dataKey === 'col1' ?
-                'GothamMedium' : 'GothamLight', 'normal');
+                    'GothamMedium' : 'GothamLight', 'normal');
             },
             drawHeaderCell: (cell: any, opts: any) => {
 
@@ -437,7 +432,7 @@ export class DocRenderer extends IDocRenderer {
             let productName = product.name;
             if (product.name.length === 26 || product.name.length === 27) {
                 const x = productName.split(' ');
-                x[x.length - 1 ] = '\n' + x[x.length - 1 ];
+                x[x.length - 1] = '\n' + x[x.length - 1];
                 productName = x.join(' ');
             }
 
