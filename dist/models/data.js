@@ -72,8 +72,9 @@ var Data = /** @class */ (function () {
             trans = this._settings.translations.booleanValues.false;
             return trans;
         }
-        else
+        else {
             return value;
+        }
     };
     Data.prototype._updateProperties = function (product) {
         var _this = this;
