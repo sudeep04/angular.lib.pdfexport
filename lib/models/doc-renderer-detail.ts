@@ -27,6 +27,7 @@ export class DocRendererDetail extends IDocRenderer {
         this._doc = new jsPDF();
         this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
         this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
+        this._doc.addFont('Gotham-Office.ttf', 'GothamOffice', 'normal');
     }
 
     public draw(jsonData: any, docConfig: DocConfig): void {
@@ -53,7 +54,7 @@ export class DocRendererDetail extends IDocRenderer {
 
         // subtitles
         topIndex += 9;
-        this._drawText(this._data.productDetail.supplier, maxLineWidth, 20, 10, topIndex, [80, 87, 98], ['GothamLight', 'normal']);
+        this._drawText(this._data.productDetail.supplier, maxLineWidth, 20, 10, topIndex, [70, 70, 70], ['GothamOffice', 'normal']);
 
         return topIndex;
     }
@@ -279,8 +280,8 @@ export class DocRendererDetail extends IDocRenderer {
 
         const verticalOffset = this._verticalOffset(project, 12, 12.9);
 
-        this._doc.setFont('GothamLight', 'normal');
-        this._doc.text(' - ' + this._data.productDetail.name, verticalOffset, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
+        this._doc.setFont('GothamOffice', 'normal');
+        this._doc.text(' – ' + this._data.productDetail.name, verticalOffset, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
 
         this._doc.setFontStyle('bold')
                 .setFont('GothamMedium', 'normal')
