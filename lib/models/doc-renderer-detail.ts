@@ -119,7 +119,17 @@ export class DocRendererDetail extends IDocRenderer {
 
     // draw details
     private _drawDetails(topIndex: number, imageMargin: any) {
-        const details = this._data.productDetail.details;
+        const details = this._data.productDetail.details.sort((a: Detail, b: Detail) => {
+            if (a.content.length > b.content.length) {
+                return 1;
+            }
+            if (a.content.length < b.content.length) {
+                return -1;
+            }
+            if (a.content.length === b.content.length) {
+                return 0;
+            }
+        });
         // fix
         const marginTop = topIndex + 20;
 

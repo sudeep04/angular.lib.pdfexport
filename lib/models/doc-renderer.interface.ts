@@ -29,7 +29,7 @@ export class IDocRenderer {
             img.onerror = (() => {
                 console.log('Error loading image:' + url);
                 loaded++;
-                output.push(img);
+                // output.push(img);
                 if (loaded === input.length) {
                     callback(output);
                 }
