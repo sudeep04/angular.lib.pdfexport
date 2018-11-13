@@ -349,11 +349,24 @@ export class DocRendererDetail extends IDocRenderer {
                     // If have filters, change font, draw text
                     // and return false to turn off draw for this cell
                     if (cell.text.length > 1 && cell.raw.lastIndexOf('(') !== -1) {
+
+                        // Align text
+                        const FONT_ROW_RATIO = 1.15;
+                        const lineCount = cell.text.length;
+                        const fontSize = opts.doc.internal.getFontSize() / opts.doc.internal.scaleFactor;
+                        let y = cell.textPos.y;
+
+                        // Align the top
+                        y += fontSize * (2 - FONT_ROW_RATIO);
+
+                        // Align middle
+                        y -= (lineCount / 2) * fontSize * FONT_ROW_RATIO;
+
                         cell.text.forEach((element: string, index: number) => {
                             if (element.startsWith('(')) {
                                 this._doc.setFont('GothamLight', 'normal');
                             }
-                            this._doc.text(element, cell.textPos.x, cell.textPos.y + index * 4);
+                            this._doc.text(element, cell.textPos.x, y + index * 4);
                         });
                         return false;
                     }
