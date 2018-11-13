@@ -10,6 +10,7 @@ import { checkImg } from './imagesBase64/check-img';
 import { unckeckImg } from './imagesBase64/uncheck-img';
 import { DownloadElement } from './download/download-element.interface';
 import { DownloadValue } from './download/download-value.interface';
+import { Detail } from './detail/detail.interface';
 
 const IMAGES_TOP = 35;
 const IMAGES_PADING_TOP = 6.2;
@@ -23,6 +24,7 @@ export class DocRendererDetail extends IDocRenderer {
         this._doc = new jsPDF();
         this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
         this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
+        this._doc.addFont('Gotham-Office.ttf', 'GothamOffice', 'normal');
     }
 
     public draw(jsonData: any, docConfig: DocConfig): void {
@@ -49,7 +51,7 @@ export class DocRendererDetail extends IDocRenderer {
 
         // subtitles
         topIndex += 9;
-        this._drawText(this._data.productDetail.supplier, maxLineWidth, 20, 10, topIndex, [80, 87, 98], ['GothamLight', 'normal']);
+        this._drawText(this._data.productDetail.supplier, maxLineWidth, 20, 10, topIndex, [70, 70, 70], ['GothamOffice', 'normal']);
 
         return topIndex;
     }
@@ -127,7 +129,7 @@ export class DocRendererDetail extends IDocRenderer {
 
     private _drawDetailsText(details: any[], marginTop: number, imageMargin: number) {
 
-        if (details.length === 0) {
+        if (details.length === 0 || details.every((detail: Detail) => detail.content === undefined )) {
             if (marginTop < imageMargin && this._doc.internal.getCurrentPageInfo().pageNumber === 1) {
                 marginTop = imageMargin;
             }
@@ -235,7 +237,7 @@ export class DocRendererDetail extends IDocRenderer {
         const verticalOffset = this._verticalOffset(project, 12, 12.9);
 
         this._doc.setFont('GothamLight', 'normal');
-        this._doc.text(' - ' + this._data.productDetail.name, verticalOffset, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
+        this._doc.text(' – ' + this._data.productDetail.name, verticalOffset, this._docConfig.padding + this._docConfig.lineWidth * 3 + 0.5);
 
         this._doc.setFontStyle('bold')
                 .setFont('GothamMedium', 'normal')
@@ -296,7 +298,7 @@ export class DocRendererDetail extends IDocRenderer {
         const pageHeight = this._doc.internal.pageSize.getHeight();
 
         const product = this._data.productDetail;
-        marginTop += 8;
+        // marginTop += 8;
         if (marginTop + 45 < pageHeight ) {
             marginTop += 10;
         } else {
@@ -341,6 +343,24 @@ export class DocRendererDetail extends IDocRenderer {
             tableWidth: pageWidth - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
 
+                if (opts.column.dataKey === 'col1') {
+                    this._doc.setFont('GothamMedium', 'normal');
+
+                    // If have filters, change font, draw text
+                    // and return false to turn off draw for this cell
+                    if (cell.text.length > 1 && cell.raw.lastIndexOf('(') !== -1) {
+                        cell.text.forEach((element: string, index: number) => {
+                            if (element.startsWith('(')) {
+                                this._doc.setFont('GothamLight', 'normal');
+                            }
+                            this._doc.text(element, cell.textPos.x, cell.textPos.y + index * 4);
+                        });
+                        return false;
+                    }
+                } else {
+                    this._doc.setFont('GothamLight', 'normal');
+                }
+
                 if (opts.column.index !== 0) {
 
                     if (product.properties[opts.row.index].ckeck !== undefined) {
@@ -354,10 +374,6 @@ export class DocRendererDetail extends IDocRenderer {
                         });
                     }
                 }
-
-                this._doc.setFont(opts.column.dataKey === 'col1' ?
-                'GothamMedium' : 'GothamLight', 'normal');
-
             },
             drawHeaderCell: (cell: any, opts: any) => {
 
@@ -429,7 +445,7 @@ export class DocRendererDetail extends IDocRenderer {
 
         if (rows.length === 0) {
             product.properties.forEach((property: Property) => {
-                let row = {};
+                const propName = this._replaceCharacter(property.name);
                 if (this._data.settings.applyFilters) {
 
                     const direction: 'afterValue' | 'beforeValue'
@@ -446,12 +462,11 @@ export class DocRendererDetail extends IDocRenderer {
                             // List Values
                             const listValues: string[] = filterValue;
                             listValues.forEach((v: string, index: number) => {
-                                const val1 = v;
 
                                 if (index === 0) {
-                                    filterText += val1;
+                                    filterText += v;
                                 } else {
-                                    filterText += ', ' + val1;
+                                    filterText += ', ' + v;
                                 }
                             });
                         } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
@@ -460,26 +475,27 @@ export class DocRendererDetail extends IDocRenderer {
                             filterText = filterValue.toString();
                         }
 
-                        if (direction === 'afterValue') {
-                            filterText = filterText + ' ' + property.unit;
-                        } else {
-                            filterText = property.unit + ' ' + filterText;
+                        if (typeof property.unit !== 'undefined') {
+                            if (direction === 'afterValue') {
+                                filterText = filterText + ' ' + property.unit;
+                            } else {
+                                filterText = property.unit + ' ' + filterText;
+                            }
                         }
-                        row = { col1: property.name + `\n(${filterText})` };
+                        rows.push({ col1: propName + `\n(${filterText})` });
                     } else {
-                        row = { col1: property.name };
+                        rows.push({ col1: propName });
                     }
                 } else {
-                    row = { col1: property.name };
+                    rows.push({ col1: propName });
                 }
-                rows.push(row);
             });
         }
         product.properties.forEach((property: Property, index: number) => {
 
             if (property.value !== undefined) {
-
-                rows[index][product.name] = this._data.translate(property.value);
+                const val = this._data.translate(property.value);
+                rows[index][product.name] = this._replaceCharacter(val);
             }
         });
 
@@ -508,13 +524,9 @@ export class DocRendererDetail extends IDocRenderer {
         const downloads = this._data.downloads;
         let marginTop = this._doc.autoTable.previous.finalY + 15;
 
-        if (marginTop + 45 < pageHeight ) {
-            marginTop += 10;
-        } else {
-            this._doc.addPage();
-            marginTop = 40;
-        }
-
+        if (downloads && downloads.length > 0) {
+        this._doc.addPage();
+        marginTop = 40;
         this._drawTableHeader(marginTop, 'Downloads');
         marginTop += 5;
 
@@ -626,7 +638,10 @@ export class DocRendererDetail extends IDocRenderer {
                           });
                         iter++;
                     } else {
+                        this._doc.setFontSize(9);
+                        if (links.length > 0) {
                         elem.listValues.forEach((value: DownloadValue, idx: number) => {
+                            if (links[iter] !== undefined) {
                             let y = links[iter].y;
                             if (idx === 0) {
                                 y -= 1.2;
@@ -638,8 +653,10 @@ export class DocRendererDetail extends IDocRenderer {
                             this._doc.textWithLink(value.name, links[iter].x + 4 , y , {
                                 url: value.link
                               });
+                            }
                             iter++;
                         });
+                        }
                     }
                 });
 
@@ -690,6 +707,7 @@ export class DocRendererDetail extends IDocRenderer {
         });
 
         this._doc.autoTable(columns, rows, config);
+        }
     }
 
     private _drawGallery(images: HTMLImageElement[]): void {

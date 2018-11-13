@@ -28,8 +28,8 @@ export class DocRenderer extends IDocRenderer {
     constructor() {
         super();
         this._doc = new jsPDF();
-        this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
-        this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
+        this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal', 'UTF-8');
+        this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal', 'UTF-8');
     }
 
     public draw(jsonData: any, docConfig: DocConfig) {
@@ -41,7 +41,7 @@ export class DocRenderer extends IDocRenderer {
     }
 
     private _loadImagesTables(): void {
-        //if (this._data.settings.applyFilters) {
+        // if (this._data.settings.applyFilters) {
             const elems: string[] = [checkImg, unckeckImg, boxShadowImg];
             const elemsHTML: HTMLImageElement[] = [];
             this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
@@ -121,16 +121,10 @@ export class DocRenderer extends IDocRenderer {
             valign: 'middle'
         };
 
-        const columnStyles = {
-            col2: { columnWidth: this._docConfig.columnWidth }
-        };
-
         let borders: any[] = [];
-
         let checkImages: any[] = [];
-        const filtersIndex: number[] = [];
-        let spanp: number = 0;
-        let lastRow: number = -1;
+
+        // Autotable configuration
         const config: any = {
             styles,
             margin: {
@@ -140,77 +134,75 @@ export class DocRenderer extends IDocRenderer {
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
-                col1: {}
+                col1: {
+                    cellPadding: [2.8, this._docConfig.lineWidth + 5, 2.8, this._docConfig.lineWidth + 0.5]
+                }
             },
             alternateRowStyles: styles,
             showHeader: 'never',
             tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
 
-                const filterPos = filtersIndex.findIndex((v: number) => v === opts.row.index);
-                this._doc.setFont(opts.column.dataKey === 'col1' &&  filterPos === -1 ?
-                'GothamMedium' : 'GothamLight', 'normal');
+                if (opts.column.dataKey === 'col1') {
+                    this._doc.setFont('GothamMedium', 'normal');
 
-                if ( filterPos !== -1 ) {
-                    cell.textPos.y -= 1.8;
-                    cell.height -= 4;
-                    cell.contentHeight = cell.height;
-                    if (lastRow !== opts.row.index) {
-                        lastRow = opts.row.index;
-                        spanp++;
+                    // If have filters, change font, draw text
+                    // and return false to turn off draw for this cell
+                    if (cell.text.length > 1 && cell.raw.lastIndexOf('(') !== -1) {
+
+                        // Align text
+                        const FONT_ROW_RATIO = 1.15;
+                        const lineCount = cell.text.length;
+                        const fontSize = opts.doc.internal.getFontSize() / opts.doc.internal.scaleFactor;
+                        let y = cell.textPos.y;
+
+                        // Align the top
+                        y += fontSize * (2 - FONT_ROW_RATIO);
+
+                        // Align middle
+                        y -= (lineCount / 2) * fontSize * FONT_ROW_RATIO;
+
+                        cell.text.forEach((element: string, index: number) => {
+                            if (element.startsWith('(')) {
+                                this._doc.setFont('GothamLight', 'normal');
+                            }
+                            this._doc.text(element, cell.textPos.x, y + index * 4);
+                        });
+                        return false;
                     }
-                }
-                const previousFilter = filtersIndex.findIndex((v: number) => v === (opts.row.index + 1));
-                if (previousFilter !== -1) {
-                    cell.textPos.y += 1.8;
-                    if (opts.column.dataKey !== 'col1') {
-                        cell.textPos.y += 1.9;
-                        cell.height += 7;
-                    }
+                } else {
+                    this._doc.setFont('GothamLight', 'normal');
                 }
 
+                // Insert checkImages positions when is a property
                 if (opts.column.index !== 0) {
-
-                    if (group[opts.column.index - 1].properties[opts.row.index - spanp].ckeck !== undefined && filterPos === -1) {
+                    if (group[opts.column.index - 1].properties[opts.row.index].ckeck !== undefined) {
 
                         checkImages.push({
                             left: cell.x + 3,
                             top: cell.y + cell.height / 2 - 1.5,
                             width: 3,
                             height: 3,
-                            check: group[opts.column.index - 1].properties[opts.row.index - spanp].ckeck
+                            check: group[opts.column.index - 1].properties[opts.row.index].ckeck
                         });
                     }
                 }
 
             },
-            drawHeaderCell: (cell: any, opts: any) => {
-
-                this._doc.setFont('GothamMedium', 'normal');
-            },
-            drawHeaderRow: (row: any, opts: any) => {
-
-                borders.push({
-                    left: this._docConfig.padding + this._docConfig.lineWidth / 2,
-                    top: row.y + row.height - 0.1,
-                    width: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
-                    height: 0.1
-                });
-            },
             drawRow: (row: any, opts: any) => {
 
-                if ( filtersIndex.findIndex((v: number) => v === opts.row.index + 1 ) === -1 ) {
                 borders.push({
                     left: this._docConfig.padding + this._docConfig.lineWidth / 2,
                     top: row.y + row.height - 0.1,
                     width: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
                     height: 0.1
                 });
-            }
             },
             addPageContent: (data: any) => {
 
                 this._doc.setFillColor(0, 0, 0);
+
+                // Draw bottom borders by page
                 borders.forEach((border: any, index: number) => {
 
                     if (index < borders.length - 1) {
@@ -219,6 +211,8 @@ export class DocRenderer extends IDocRenderer {
                     }
                 });
                 borders = [];
+
+                // Draw check images by page
                 if (this._checkedHTMLImage && this._uncheckedHTMLImage) {
                     checkImages.forEach((img: any) => {
 
@@ -230,6 +224,8 @@ export class DocRenderer extends IDocRenderer {
                     });
                 }
                 checkImages = [];
+
+                // Check if current page needs images on top
                 if (!isFirstWithoutImages) {
                     isFirstWithoutImages = true;
                     data.settings.margin.top -= IMAGES_PADING_TOP + this._docConfig.columnWidth + this._docConfig.lineWidth / 2;
@@ -241,11 +237,16 @@ export class DocRenderer extends IDocRenderer {
             columns.push({ dataKey: product.name, title: product.name });
             let lineW = this._docConfig.lineWidth + 0.5;
             if (this._data.settings.showHighlights) {
-                lineW = lineW + 4;
+                lineW += 4;
             }
-            config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth, cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW] };
+            config.columnStyles[product.name] = {
+                columnWidth: this._docConfig.columnWidth,
+                cellPadding: [2.8, this._docConfig.lineWidth + 1, 2.8, lineW]
+            };
+
             if (rows.length === 0) {
                 product.properties.forEach((property: Property) => {
+                    const propName = this._replaceCharacter(property.name);
                     if (this._data.settings.applyFilters) {
                         const direction: 'afterValue' | 'beforeValue'
                                 = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
@@ -260,12 +261,10 @@ export class DocRenderer extends IDocRenderer {
                                 // List Values
                                 const listValues: string[] = filterValue;
                                 listValues.forEach((v: string, index: number) => {
-                                    const val1 = v;
-
                                     if (index === 0) {
-                                        filterText += val1;
+                                        filterText += v;
                                     } else {
-                                        filterText += ', ' + val1;
+                                        filterText += ', ' + v;
                                     }
                                 });
                             } else if (filterValue.upper !== undefined && filterValue.lower !== undefined) {
@@ -283,27 +282,23 @@ export class DocRenderer extends IDocRenderer {
                                     filterText = property.unit + ' ' + filterText;
                                 }
                             }
-                            rows.push({ col1: property.name});
-                            filtersIndex.push(rows.push({ col1: `(${filterText})` }) - 1);
+
+                            rows.push({ col1: propName + `\n(${this._replaceCharacter(filterText)})` });
 
                         } else {
-                            rows.push({ col1: property.name });
+                            rows.push({ col1: propName });
                         }
                     } else {
-                        rows.push({ col1: property.name });
+                        rows.push({ col1: propName });
                     }
                 });
             }
-            let span = 0;
-            rows.forEach((value: any, idx: number) => {
-                if (filtersIndex.findIndex((e: number) => e === idx) !== -1) {
-                    span ++;
-                    rows[idx][product.name] = '';
-                } else {
-                    const prd = product.properties[idx - span];
-                    if (prd.value !== undefined) {
-                        rows[idx][product.name] =  this._data.translate(prd.value);
-                    }
+
+            product.properties.forEach((property: Property, index: number) => {
+
+                if (property.value !== undefined) {
+                    const val = this._data.translate(property.value);
+                    rows[index][product.name] = this._replaceCharacter(val);
                 }
             });
         });
@@ -380,15 +375,11 @@ export class DocRenderer extends IDocRenderer {
             fillColor: [246, 246, 246],
             lineWidth: 0,
             fontStyle: 'normal',
-            cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
+            cellPadding: [2.8, this._docConfig.lineWidth + 3, 2.8, this._docConfig.lineWidth + 0.5],
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
             valign: 'middle'
-        };
-
-        const columnStyles = {
-            col2: { columnWidth: this._docConfig.columnWidth }
         };
 
         const borders: any[] = [];
@@ -442,7 +433,7 @@ export class DocRenderer extends IDocRenderer {
                 productName = x.join(' ');
             }
 
-            columns.push({ dataKey: product.name, title: productName });
+            columns.push({ dataKey: product.name, title: this._replaceCharacter(productName) });
             rows[0][product.name] = product.supplier;
             config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth };
         });
