@@ -325,7 +325,7 @@ export class DocRendererDetail extends IDocRenderer {
             fillColor: [255, 255, 255],
             lineWidth: 0,
             fontStyle: 'normal',
-            cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
+            cellPadding: [2.8, this._docConfig.lineWidth + 6, 2.8, this._docConfig.lineWidth + 0.5],
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
@@ -376,7 +376,7 @@ export class DocRendererDetail extends IDocRenderer {
                             if (element.startsWith('(')) {
                                 this._doc.setFont('GothamLight', 'normal');
                             }
-                            this._doc.text(element, cell.textPos.x, y + index * 4);
+                            this._doc.text(element, cell.textPos.x, y + index * fontSize * 1.15);
                         });
                         return false;
                     }

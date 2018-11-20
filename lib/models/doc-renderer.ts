@@ -167,7 +167,7 @@ export class DocRenderer extends IDocRenderer {
                             if (element.startsWith('(')) {
                                 this._doc.setFont('GothamLight', 'normal');
                             }
-                            this._doc.text(element, cell.textPos.x, y + index * 4);
+                            this._doc.text(element, cell.textPos.x, y + index * fontSize * 1.15);
                         });
                         return false;
                     }
