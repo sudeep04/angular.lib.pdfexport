@@ -118,7 +118,7 @@ export class DocRenderer extends IDocRenderer {
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
-            valign: 'middle'
+            valign: 'top'
         };
 
         let borders: any[] = [];
@@ -143,6 +143,7 @@ export class DocRenderer extends IDocRenderer {
             tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
 
+                const fontSize = opts.doc.internal.getFontSize() / opts.doc.internal.scaleFactor;
                 if (opts.column.dataKey === 'col1') {
                     this._doc.setFont('GothamMedium', 'normal');
 
@@ -150,18 +151,18 @@ export class DocRenderer extends IDocRenderer {
                     // and return false to turn off draw for this cell
                     if (cell.text.length > 1 && cell.raw.lastIndexOf('(') !== -1) {
 
-                        // Align text
-                        const FONT_ROW_RATIO = 1.15;
-                        const lineCount = cell.text.length;
-                        const fontSize = opts.doc.internal.getFontSize() / opts.doc.internal.scaleFactor;
-                        let y = cell.textPos.y;
+                        // // Align text
+                        // const FONT_ROW_RATIO = 1.15;
+                        // const lineCount = cell.text.length;
 
-                        // Align the top
-                        y += fontSize * (2 - FONT_ROW_RATIO);
+                        // let y = cell.textPos.y;
 
-                        // Align middle
-                        y -= (lineCount / 2) * fontSize * FONT_ROW_RATIO;
+                        // // Align the top
+                        // y += fontSize * (2 - FONT_ROW_RATIO);
 
+                        // // Align middle
+                        // y -= (lineCount / 2) * fontSize * FONT_ROW_RATIO;
+                        const y =  cell.textPos.y + fontSize;
                         cell.text.forEach((element: string, index: number) => {
                             if (element.startsWith('(')) {
                                 this._doc.setFont('GothamLight', 'normal');
@@ -180,7 +181,7 @@ export class DocRenderer extends IDocRenderer {
 
                         checkImages.push({
                             left: cell.x + 3,
-                            top: cell.y + cell.height / 2 - 1.5,
+                            top: cell.textPos.y,
                             width: 3,
                             height: 3,
                             check: group[opts.column.index - 1].properties[opts.row.index].ckeck
