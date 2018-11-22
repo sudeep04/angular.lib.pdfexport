@@ -143,10 +143,10 @@ export class DocRendererDetail extends IDocRenderer {
             const elems = details.sort((a: Detail, b: Detail) => {
 
                 if ( b.content === undefined || a.content.length > b.content.length) {
-                    return 1;
+                    return -1;
                 }
                 if (a.content === undefined || a.content.length < b.content.length) {
-                    return -1;
+                    return 1;
                 }
                 if (a.content.length === b.content.length) {
                     return 0;
