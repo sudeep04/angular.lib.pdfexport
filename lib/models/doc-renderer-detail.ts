@@ -505,7 +505,7 @@ export class DocRendererDetail extends IDocRenderer {
                                 filterText = property.unit + ' ' + filterText;
                             }
                         }
-                        rows.push({ col1: propName + `\n(${filterText})` });
+                        rows.push({ col1: propName + `\n(${this._replaceCharacter(filterText)})` });
                     } else {
                         rows.push({ col1: propName });
                     }
