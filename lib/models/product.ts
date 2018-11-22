@@ -60,8 +60,9 @@ export class Product {
     }
 
     public set downloads(downloads: Download) {
-
-       this._downloads = JSON.parse(JSON.stringify(downloads));
+        if (downloads !== undefined) {
+            this._downloads = JSON.parse(JSON.stringify(downloads));
+        }
     }
 
     public get details(): Detail[] {

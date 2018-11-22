@@ -359,11 +359,11 @@ export class DocRendererDetail extends IDocRenderer {
             fillColor: [255, 255, 255],
             lineWidth: 0,
             fontStyle: 'normal',
-            cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
+            cellPadding: [2.8, this._docConfig.lineWidth + 6, 2.8, this._docConfig.lineWidth + 0.5],
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
-            valign: 'middle'
+            valign: 'top'
         };
 
         let borders: any[] = [];
@@ -393,11 +393,14 @@ export class DocRendererDetail extends IDocRenderer {
                     // If have filters, change font, draw text
                     // and return false to turn off draw for this cell
                     if (cell.text.length > 1 && cell.raw.lastIndexOf('(') !== -1) {
+                        const fontSize = opts.doc.internal.getFontSize() / opts.doc.internal.scaleFactor;
+                        const y =  cell.textPos.y + fontSize;
+
                         cell.text.forEach((element: string, index: number) => {
                             if (element.startsWith('(')) {
                                 this._doc.setFont('GothamLight', 'normal');
                             }
-                            this._doc.text(element, cell.textPos.x, cell.textPos.y + index * 4);
+                            this._doc.text(element, cell.textPos.x, y + index * fontSize * 1.15);
                         });
                         return false;
                     }
@@ -411,7 +414,7 @@ export class DocRendererDetail extends IDocRenderer {
 
                         checkImages.push({
                             left: cell.x + 3,
-                            top: cell.y + cell.height / 2 - 1.5,
+                            top: cell.textPos.y,
                             width: 3,
                             height: 3,
                             check: product.properties[opts.row.index].ckeck
