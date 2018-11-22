@@ -121,10 +121,10 @@ export class DocRendererDetail extends IDocRenderer {
     private _drawDetails(topIndex: number, imageMargin: any) {
         const details = this._data.productDetail.details.sort((a: Detail, b: Detail) => {
             if (b.content === undefined || a.content.length > b.content.length) {
-                return 1;
+                return -1;
             }
             if (a.content === undefined || a.content.length < b.content.length) {
-                return -1;
+                return 1;
             }
             if (a.content.length === b.content.length) {
                 return 0;
