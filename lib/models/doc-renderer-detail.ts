@@ -641,6 +641,14 @@ export class DocRendererDetail extends IDocRenderer {
                             row.cells['col2'].styles.valign = 'bottom';
                             row.height = 7;
                         }
+                        if (row.raw.first && row.raw.last) {
+                            row.cells['col1'].styles.valign = 'middle';
+                            row.cells['col2'].styles.cellPadding[0] = 2.5;
+                            row.cells['col2'].styles.cellPadding[2] = 2.5;
+                            row.cells['col2'].styles.valign = 'bottom';
+                            row.height = 9;
+                        }
+
                     } else {
                         const split = this._splitLines(downloads[row.raw.index].singleValue.name, this._docConfig.columnWidth + this._docConfig.padding * 2, 11);
                         row.height += split.length * 3.1;
