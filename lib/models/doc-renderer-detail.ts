@@ -574,8 +574,8 @@ export class DocRendererDetail extends IDocRenderer {
         let marginTop = this._doc.autoTable.previous.finalY + 15;
 
         if (downloads && downloads.length > 0) {
-            this._doc.addPage();
-            marginTop = 40;
+            // this._doc.addPage();
+            // marginTop = 40;
             // }
 
             this._drawTableHeader(marginTop, 'Downloads');
