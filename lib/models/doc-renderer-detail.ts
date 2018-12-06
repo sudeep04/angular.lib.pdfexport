@@ -597,8 +597,8 @@ export class DocRendererDetail extends IDocRenderer {
             };
 
             let borders: any[] = [];
+            let lastPos: number = 0;
             let links: any[] = [];
-            let elemsPage: number[] = [];
             const config: any = {
                 styles,
                 margin: {
@@ -619,6 +619,7 @@ export class DocRendererDetail extends IDocRenderer {
 
                     this._doc.setFont(opts.column.dataKey === 'col1' ?
                         'GothamMedium' : 'GothamLight', 'normal');
+
                 },
                 drawRow: (row: any, opts: any) => {
                     if (!row.raw.first && !row.raw.last) {
@@ -626,18 +627,18 @@ export class DocRendererDetail extends IDocRenderer {
                     }
                     if (!row.raw.single) {
                         if (row.raw.last) {
-                            row.cells['col1'].styles.cellPadding[0] = 0;
+                            row.cells['col1'].styles.cellPadding[0] = 0.8;
                             row.cells['col1'].styles.cellPadding[2] = 2.5;
                             row.cells['col1'].styles.valign = 'top';
-                            row.cells['col2'].styles.cellPadding[0] = 0;
+                            row.cells['col2'].styles.cellPadding[0] = 0.8;
                             row.cells['col2'].styles.cellPadding[2] = 2.5;
                             row.cells['col2'].styles.valign = 'top';
                             row.height = 7;
                         }
                         if (row.raw.first) {
-                            row.cells['col1'].styles.cellPadding[2] = 0;
+                            row.cells['col1'].styles.cellPadding[2] = 0.8;
                             row.cells['col1'].styles.valign = 'bottom';
-                            row.cells['col2'].styles.cellPadding[2] = 0;
+                            row.cells['col2'].styles.cellPadding[2] = 0.8;
                             row.cells['col2'].styles.valign = 'bottom';
                             row.height = 7;
                         }
@@ -663,10 +664,6 @@ export class DocRendererDetail extends IDocRenderer {
                             height: 0.1
                         });
                     }
-                    if (row.raw.index !== undefined) {
-                        elemsPage.push(row.raw.index);
-                    }
-
                     links.push(row.cells['col2'].textPos);
                 },
                 addPageContent: (data: any) => {
@@ -679,55 +676,41 @@ export class DocRendererDetail extends IDocRenderer {
                         }
                     });
                     borders = [];
-
                     this._doc.setTextColor(0, 172, 165);
-                    let iter: number = 0;
-
-                    elemsPage.forEach((it: number) => {
-                        const elem = downloads[it];
-                        if (elem.singleValue) {
-                            const elemSplit = this._splitLines(elem.singleValue.name, this._docConfig.columnWidth + this._docConfig.padding * 2, 11);
+                    links.forEach((pos: any, iter: number) => {
+                        const elem = data.table.rows[iter + lastPos];
+                        if (elem.raw.single) {
+                            const elemSplit = this._splitLines(elem.raw.name, this._docConfig.columnWidth + this._docConfig.padding * 2, 11);
 
                             let val = '';
                             elemSplit.forEach((element: string, index: number) => {
                                 val += (index !== 0) ? '\n' + element : element;
                             });
-                            this._doc.textWithLink(val, links[iter].x, links[iter].y, {
-                                url: elem.singleValue.link
+                            this._doc.textWithLink(val, pos.x, pos.y, {
+                                url: elem.raw.link
                             });
-                            iter++;
                         } else {
                             this._doc.setFontSize(9);
-                            if (links.length > 0) {
-                                elem.listValues.forEach((value: DownloadValue, idx: number) => {
-                                    if (links[iter] !== undefined) {
-                                        let y = links[iter].y;
-                                        if (idx === 0) {
-                                            y -= 1.2;
-                                        } else if (idx === elem.listValues.length - 1) {
-                                            y += 2.75;
-                                        } else {
-                                            y += 0.8;
-                                        }
-                                        this._doc.textWithLink(value.name, links[iter].x + 4, y, {
-                                            url: value.link
-                                        });
-                                    }
-                                    iter++;
-                                });
+                            let y = pos.y;
+                            if (elem.raw.first) {
+                                y -= 1.0;
+                            } else if (elem.raw.last) {
+                                y += 2.65;
+                            } else {
+                                y += 0.70;
                             }
+                            this._doc.textWithLink(elem.raw.name, pos.x + 4, y, {
+                                url: elem.raw.link
+                            });
                         }
                     });
-
+                    lastPos = links.length;
                     links = [];
-                    elemsPage = [];
-
                     data.settings.margin.top = 40;
 
                     if (++i !== 1) {
                         this._drawTableHeader(36, 'Downloads');
                     }
-
                 }
             };
 
@@ -752,11 +735,15 @@ export class DocRendererDetail extends IDocRenderer {
                     rows[spanLines]['col2'] = '';
                     rows[spanLines]['last'] = true;
                     rows[spanLines]['single'] = true;
+                    rows[spanLines]['name'] = elem.singleValue.name;
+                    rows[spanLines]['link'] = elem.singleValue.link;
                     spanLines++;
                 } else {
                     elem.listValues.forEach((value: DownloadValue, idx: number) => {
                         if (idx !== 0) { rows.push({ col1: '' }); }
                         rows[spanLines]['col2'] = '•';
+                        rows[spanLines]['name'] = value.name;
+                        rows[spanLines]['link'] = value.link;
                         if (idx === elem.listValues.length - 1) {
                             rows[spanLines]['last'] = true;
                         }
