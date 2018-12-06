@@ -704,7 +704,7 @@ export class DocRendererDetail extends IDocRenderer {
                             });
                         }
                     });
-                    lastPos = links.length;
+                    lastPos += links.length;
                     links = [];
                     data.settings.margin.top = 40;
 
