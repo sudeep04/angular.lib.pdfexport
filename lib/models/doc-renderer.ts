@@ -546,7 +546,7 @@ export class DocRenderer extends IDocRenderer {
             pageHeight - (this._docConfig.padding + this._docConfig.lineWidth / 2 + 10),
             pageWidth - (2 * this._docConfig.padding + this._docConfig.lineWidth), 10, 'F');
 
-        this._doc.text('Copyright © 2018 Plan.One', 12.9, 283.2);
+        this._doc.text('Copyright © ' + (new Date()).getFullYear() + ' Plan.One', 12.9, 283.2);
 
         if (logo) {
             this._doc.addImage(logo, 'png', 175.5, 280, 21.6, 4.1);
