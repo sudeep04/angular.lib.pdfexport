@@ -2,7 +2,6 @@ import * as moment from 'moment';
 import { boxShadowImg } from './imagesBase64/box-shadow-img';
 import { checkImg } from './imagesBase64/check-img';
 import { unckeckImg } from './imagesBase64/uncheck-img';
-import * as jsPDF from 'jspdf';
 import 'jspdf-customfonts';
 import '../assets/js/default_vfs';
 import 'jspdf-autotable';
@@ -27,9 +26,6 @@ export class DocRenderer extends IDocRenderer {
 
     constructor() {
         super();
-        this._doc = new jsPDF();
-        this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal', 'UTF-8');
-        this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal', 'UTF-8');
     }
 
     public draw(jsonData: any, docConfig: DocConfig) {

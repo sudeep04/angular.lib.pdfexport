@@ -1,5 +1,6 @@
 import { DocConfig } from './doc-config';
 import { Data } from './data';
+import * as jsPDF from 'jspdf';
 
 export class IDocRenderer {
 
@@ -8,6 +9,17 @@ export class IDocRenderer {
     protected _data: Data;
 
     protected _docConfig: DocConfig;
+
+    /**
+     * Initialize jspdf object
+     * Add fonts
+     */
+    constructor() {
+        this._doc = new jsPDF();
+        this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal', 'UTF-8');
+        this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal', 'UTF-8');
+        this._doc.addFont('Gotham-Office.ttf', 'GothamOffice', 'normal');
+    }
 
     public draw(jsonData: any, docConfig: DocConfig): void {
         // to be implemented

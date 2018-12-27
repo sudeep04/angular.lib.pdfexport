@@ -1,4 +1,3 @@
-import * as jsPDF from 'jspdf';
 import { IDocRenderer } from './doc-renderer.interface';
 import { DocConfig } from './doc-config';
 import { JsonParser } from './json-parser';
@@ -24,10 +23,6 @@ export class DocRendererDetail extends IDocRenderer {
 
     constructor() {
         super();
-        this._doc = new jsPDF();
-        this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
-        this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
-        this._doc.addFont('Gotham-Office.ttf', 'GothamOffice', 'normal');
     }
 
     public draw(jsonData: any, docConfig: DocConfig): void {
