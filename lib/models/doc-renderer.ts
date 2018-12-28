@@ -42,9 +42,9 @@ export class DocRenderer extends IDocRenderer {
 
     private _loadImagesTables(): void {
         // if (this._data.settings.applyFilters) {
-            const elems: string[] = [checkImg, unckeckImg, boxShadowImg];
-            const elemsHTML: HTMLImageElement[] = [];
-            this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
+        const elems: string[] = [checkImg, unckeckImg, boxShadowImg];
+        const elemsHTML: HTMLImageElement[] = [];
+        this._loadImages(0, elems, elemsHTML, this._drawElems.bind(this));
         // } else {
         //     this._drawElems([]);
         // }
@@ -118,17 +118,11 @@ export class DocRenderer extends IDocRenderer {
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
-            valign: 'middle'
+            valign: 'top'
         };
 
-        const columnStyles = {
-            col2: { columnWidth: this._docConfig.columnWidth }
-        };
-
-        // Helpers
         let borders: any[] = [];
         let checkImages: any[] = [];
-        // const filtersIndex: number[] = [];
 
         // Autotable configuration
         const config: any = {
@@ -140,13 +134,16 @@ export class DocRenderer extends IDocRenderer {
                 left: this._docConfig.padding + this._docConfig.lineWidth / 2
             },
             columnStyles: {
-                col1: {}
+                col1: {
+                    cellPadding: [2.8, this._docConfig.lineWidth + 5, 2.8, this._docConfig.lineWidth + 0.5]
+                }
             },
             alternateRowStyles: styles,
             showHeader: 'never',
             tableWidth: pageWidth - ((3 - group.length) * this._docConfig.columnWidth) - 2 * this._docConfig.padding - this._docConfig.lineWidth,
             drawCell: (cell: any, opts: any) => {
 
+                const fontSize = opts.doc.internal.getFontSize() / opts.doc.internal.scaleFactor;
                 if (opts.column.dataKey === 'col1') {
                     this._doc.setFont('GothamMedium', 'normal');
 
@@ -154,23 +151,23 @@ export class DocRenderer extends IDocRenderer {
                     // and return false to turn off draw for this cell
                     if (cell.text.length > 1 && cell.raw.lastIndexOf('(') !== -1) {
 
-                        // Align text
-                        const FONT_ROW_RATIO = 1.15;
-                        const lineCount = cell.text.length;
-                        const fontSize = opts.doc.internal.getFontSize() / opts.doc.internal.scaleFactor;
-                        let y = cell.textPos.y;
+                        // // Align text
+                        // const FONT_ROW_RATIO = 1.15;
+                        // const lineCount = cell.text.length;
 
-                        // Align the top
-                        y += fontSize * (2 - FONT_ROW_RATIO);
+                        // let y = cell.textPos.y;
 
-                        // Align middle
-                        y -= (lineCount / 2) * fontSize * FONT_ROW_RATIO ;
+                        // // Align the top
+                        // y += fontSize * (2 - FONT_ROW_RATIO);
 
+                        // // Align middle
+                        // y -= (lineCount / 2) * fontSize * FONT_ROW_RATIO;
+                        const y =  cell.textPos.y + fontSize;
                         cell.text.forEach((element: string, index: number) => {
                             if (element.startsWith('(')) {
                                 this._doc.setFont('GothamLight', 'normal');
                             }
-                            this._doc.text(element, cell.textPos.x, y + index * 4);
+                            this._doc.text(element, cell.textPos.x, y + index * fontSize * 1.15);
                         });
                         return false;
                     }
@@ -184,7 +181,7 @@ export class DocRenderer extends IDocRenderer {
 
                         checkImages.push({
                             left: cell.x + 3,
-                            top: cell.y + cell.height / 2 - 1.5,
+                            top: cell.textPos.y,
                             width: 3,
                             height: 3,
                             check: group[opts.column.index - 1].properties[opts.row.index].ckeck
@@ -240,11 +237,11 @@ export class DocRenderer extends IDocRenderer {
 
             let lineW = this._docConfig.lineWidth + 0.5;
             if (this._data.settings.showHighlights) {
-                lineW = lineW + 4;
+                lineW += 4;
             }
             config.columnStyles[product.name] = {
                 columnWidth: this._docConfig.columnWidth,
-                cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, lineW]
+                cellPadding: [2.8, this._docConfig.lineWidth + 1, 2.8, lineW]
             };
 
             if (rows.length === 0) {
@@ -252,9 +249,9 @@ export class DocRenderer extends IDocRenderer {
                     const propName = this._replaceCharacter(property.name);
                     if (this._data.settings.applyFilters) {
                         const direction: 'afterValue' | 'beforeValue'
-                                = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
-                                    'beforeValue'
-                                    : 'afterValue';
+                            = property.unit !== undefined && this._data.settings.unitsBeforeValue.find((unit: string) => unit === property.unit) ?
+                                'beforeValue'
+                                : 'afterValue';
                         const filterMap = new Map(this._data.filters);
                         const filterValue = filterMap.get(property.ifdguid) as any;
                         let filterText = '';
@@ -287,7 +284,7 @@ export class DocRenderer extends IDocRenderer {
                             }
 
                             filterText = this._replaceCharacter(filterText);
-                            rows.push({ col1: propName + `\n(${filterText})`});
+                            rows.push({ col1: propName + `\n(${filterText})` });
                         } else {
                             rows.push({ col1: propName });
                         }
@@ -379,15 +376,11 @@ export class DocRenderer extends IDocRenderer {
             fillColor: [246, 246, 246],
             lineWidth: 0,
             fontStyle: 'normal',
-            cellPadding: [2.8, this._docConfig.lineWidth + 0.5, 2.8, this._docConfig.lineWidth + 0.5],
+            cellPadding: [2.8, this._docConfig.lineWidth + 3, 2.8, this._docConfig.lineWidth + 0.5],
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
             valign: 'middle'
-        };
-
-        const columnStyles = {
-            col2: { columnWidth: this._docConfig.columnWidth }
         };
 
         const borders: any[] = [];
@@ -406,7 +399,7 @@ export class DocRenderer extends IDocRenderer {
             drawCell: (cell: any, opts: any) => {
 
                 this._doc.setFont(opts.column.dataKey === 'col1' ?
-                'GothamMedium' : 'GothamLight', 'normal');
+                    'GothamMedium' : 'GothamLight', 'normal');
             },
             drawHeaderCell: (cell: any, opts: any) => {
 
@@ -437,11 +430,11 @@ export class DocRenderer extends IDocRenderer {
             let productName = product.name;
             if (product.name.length === 26 || product.name.length === 27) {
                 const x = productName.split(' ');
-                x[x.length - 1 ] = '\n' + x[x.length - 1 ];
+                x[x.length - 1] = '\n' + x[x.length - 1];
                 productName = x.join(' ');
             }
 
-            columns.push({ dataKey: product.name, title: productName });
+            columns.push({ dataKey: product.name, title: this._replaceCharacter(productName)});
             rows[0][product.name] = product.supplier;
             config.columnStyles[product.name] = { columnWidth: this._docConfig.columnWidth };
         });
@@ -553,7 +546,7 @@ export class DocRenderer extends IDocRenderer {
             pageHeight - (this._docConfig.padding + this._docConfig.lineWidth / 2 + 10),
             pageWidth - (2 * this._docConfig.padding + this._docConfig.lineWidth), 10, 'F');
 
-        this._doc.text('Copyright © 2018 Plan.One', 12.9, 283.2);
+        this._doc.text('Copyright © ' + (new Date()).getFullYear() + ' Plan.One', 12.9, 283.2);
 
         if (logo) {
             this._doc.addImage(logo, 'png', 175.5, 280, 21.6, 4.1);
