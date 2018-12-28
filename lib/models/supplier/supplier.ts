@@ -11,6 +11,7 @@ export class Supplier {
 
         this._data = JSON.parse(JSON.stringify(data));
         this._links = JSON.parse(JSON.stringify(links));
+
     }
 
     public get data(): SupplierData {

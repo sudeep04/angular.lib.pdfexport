@@ -5,4 +5,5 @@ export interface Detail {
     name: string;
     contentType: string;
     uuid: string;
+    url?: string;
 }
