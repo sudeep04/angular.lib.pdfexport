@@ -10,7 +10,6 @@ import { DownloadValue } from '../download/download-value.interface';
 
 export class DocRendererSupplier extends IDocRenderer {
 
-    private _marginsPrimaryImage: any;
     private _supplierDetails: SupplierDetails;
 
     private _topIndex: number;
@@ -35,15 +34,16 @@ export class DocRendererSupplier extends IDocRenderer {
         this._doc.save(this._supplierDetails.settings.fileName);
     }
 
+    // title
     private _drawTitle(): void {
         const pageWidth = this._doc.internal.pageSize.getWidth();
         const maxLineWidth = pageWidth / 2 - this._docConfig.padding * 2;
 
-        // title
         this._topIndex = 36;
         this._drawText(this._supplierDetails.supplier.data.name, maxLineWidth, 20, 10, this._topIndex, [15, 15, 15], ['GothamMedium', 'normal']);
     }
 
+    // Address, website urls and emails
     private _drawDataTable(): void {
         this._topIndex += 5;
 
@@ -122,6 +122,7 @@ export class DocRendererSupplier extends IDocRenderer {
         this._doc.autoTable(columns, rows, config);
     }
 
+    // Summary
     private _drawInfo(): void {
         this._topIndex += this._doc.autoTable.previous.finalY - this._doc.autoTable.previous.pageStartY + 10;
 
@@ -129,12 +130,12 @@ export class DocRendererSupplier extends IDocRenderer {
         this._drawText(this._supplierDetails.supplier.data.summary, maxLineWidth, 9, 10, this._topIndex, [15, 15, 15], ['GothamLight', 'normal']);
 
         const dimesions = this._doc.getTextDimensions(this._supplierDetails.supplier.data.summary);
-        this._topIndex += dimesions.h / 2;
+        this._topIndex += dimesions.h / 2 - 5;
     }
 
+    // Links
     private _drawLinks(): void {
 
-        this._topIndex += 10;
         const columns: any [] = [
             {dataKey: 'col1', title: ''},
             {dataKey: 'col2', title: ''},
@@ -242,6 +243,7 @@ export class DocRendererSupplier extends IDocRenderer {
         this._doc.autoTable(columns, rows, config);
     }
 
+    // Layout
     private _drawLayout(): void {
         const img = new Image();
         img.onload = (() => {
@@ -259,6 +261,46 @@ export class DocRendererSupplier extends IDocRenderer {
             this._doc.setPage(i);
             this._drawLayoutData(i, img);
         }
+        this._loadImage();
+    }
+
+    // Image
+    private _loadImage(): void {
+        this._toDataURL(
+            [this._supplierDetails.supplier.data.logo.url],
+            this._loadImages.bind(this),
+            this._drawImage.bind(this)
+        );
+    }
+
+    private _drawImage(images: HTMLImageElement[]) {
+        this._doc.setPage(1);
+
+        // borders
+        this._doc.setDrawColor(0);
+        this._doc.rect(
+            this._doc.internal.pageSize.getWidth() - (this._docConfig.padding * 5 + 5),
+            25,
+            this._doc.internal.pageSize.getWidth() / 6 + 1,
+            this._doc.internal.pageSize.getWidth() / 6 + 1
+        );
+
+        // logo
+        if (images.length > 0) {
+            const img = images[0];
+            try {
+                this._doc.addImage(
+                    img,
+                    this._doc.internal.pageSize.getWidth() - this._docConfig.padding * 5 + 1,
+                    30,
+                    this._doc.internal.pageSize.getWidth() / 6 - 10,
+                    this._doc.internal.pageSize.getWidth() / 6 - 10,
+                );
+            } catch (e) {
+                console.log('The image is corrupted in some way that prevents it from being loaded by jsPDF.');
+            }
+        }
+
         this._save();
     }
 

@@ -39,7 +39,7 @@ export class SupplierDetails {
                 + this.supplier.data.logo.uuid
                 + '/content/'
                 + this.supplier.data.logo.content
-                + '?quality=100&background=white&mode=pad&width=720&height=720';
+                + '?quality=100&background=white&mode=pad&width=320&height=320';
 
             this.supplier.data.logo.url = imgUrl;
         }
