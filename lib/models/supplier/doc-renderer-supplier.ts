@@ -173,11 +173,11 @@ export class DocRendererSupplier extends IDocRenderer {
             fillColor: [255, 255, 255],
             lineWidth: 0,
             fontStyle: 'normal',
-            cellPadding: [0, 7, 0, 0],
+            cellPadding: [ -3, 7, 0, 0],
             fontSize: 9,
             textColor: 0,
             overflow: 'linebreak',
-            valign: 'middle'
+            valign: 'middle',
         };
 
         let lastPos: number = 0;
@@ -193,7 +193,7 @@ export class DocRendererSupplier extends IDocRenderer {
             },
             columnStyles: {
                 col1: {
-                    columnWidth: this._doc.internal.pageSize.getWidth() / 6
+                    columnWidth: this._doc.internal.pageSize.getWidth() / 6,
                 },
                 col2: {
                     columnWidth: this._doc.internal.pageSize.getWidth() * 5 / 6 - 50
