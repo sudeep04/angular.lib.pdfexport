@@ -10,43 +10,48 @@ export interface Settings {
 
     productsImageApiPath: string;
 
-    captions: {
+    captions?: {
 
-        project: string;
+        project?: string;
 
-        bearbeiter: string;
+        bearbeiter?: string;
 
     };
 
     translations: {
-        layout: {
-            page: string;
+        layout?: {
+            page?: string;
 
-            date: string;
+            date?: string;
 
-            supplierName: string;
+            supplierName?: string;
         },
-        downloadTypes: {
+        downloadTypes?: {
             brochure: string;
 
             cadData: string;
 
             bimModels: string;
         },
-        booleanValues: {
+        booleanValues?: {
             true: string;
 
             false: string;
-        }
+        },
+        location?: {
+            address: string,
+            website: string,
+            email: string
+          }
     };
 
-    sorting: 'asc' | 'dsc';
+    sorting?: 'asc' | 'dsc';
 
-    unitsBeforeValue: string[];
+    unitsBeforeValue?: string[];
 
-    applyFilters: boolean;
+    applyFilters?: boolean;
 
-    showHighlights: boolean;
+    showHighlights?: boolean;
 
     placeholderUrl?: string;
 

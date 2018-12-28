@@ -1,4 +1,3 @@
-import * as jsPDF from 'jspdf';
 import { IDocRenderer } from './doc-renderer.interface';
 import { DocConfig } from './doc-config';
 import { JsonParser } from './json-parser';
@@ -24,10 +23,6 @@ export class DocRendererDetail extends IDocRenderer {
 
     constructor() {
         super();
-        this._doc = new jsPDF();
-        this._doc.addFont('Gotham-Medium.ttf', 'GothamMedium', 'normal');
-        this._doc.addFont('Gotham-Light.ttf', 'GothamLight', 'normal');
-        this._doc.addFont('Gotham-Office.ttf', 'GothamOffice', 'normal');
     }
 
     public draw(jsonData: any, docConfig: DocConfig): void {
@@ -57,25 +52,6 @@ export class DocRendererDetail extends IDocRenderer {
         this._drawText(this._data.productDetail.supplier, maxLineWidth, 20, 10, topIndex, [70, 70, 70], ['GothamOffice', 'normal']);
 
         return topIndex;
-    }
-
-    private _drawText(text: string, width: number, fontSize: number, marginLeft: number, marginTop: number, color: number[], font: string[] ) {
-
-        const split = this._splitLines(text, width, fontSize);
-        this._doc.setFont(font[0], font[1]);
-        this._doc.setFontSize(fontSize);
-        this._doc.setTextColor(color[0], color[1], color[2]);
-        this._doc.text(split, marginLeft, marginTop);
-    }
-
-    private _splitLines(text: string, maxLineWidth: number, fontSize: number): any {
-
-        const split = this._doc.setFont('helvetica', 'neue').setFontSize(fontSize)
-                      .splitTextToSize(text, maxLineWidth);
-
-        this._doc.setFont('GothamLight', 'normal');
-        this._doc.setFontSize(9);
-        return split;
     }
 
     // draw Primary Image
@@ -303,11 +279,6 @@ export class DocRendererDetail extends IDocRenderer {
         if (logo) {
             this._doc.addImage(logo, 'png', 175.5, 280, 21.6, 4.1);
         }
-    }
-
-    private _verticalOffset(text: string, size: number, left: number): number {
-
-        return left + this._doc.getStringUnitWidth(text) * size / 2.8;
     }
 
     // load check image

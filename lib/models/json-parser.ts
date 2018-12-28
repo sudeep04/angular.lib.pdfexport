@@ -3,6 +3,8 @@ import { Check } from './check';
 import { Product } from './product';
 import { Property } from './property.interface';
 import { Settings } from './settings.interface';
+import { SupplierDetails } from './supplier/supplier-details';
+import { Supplier } from './supplier/supplier';
 
 export abstract class JsonParser {
 
@@ -40,6 +42,16 @@ export abstract class JsonParser {
         return data;
     }
 
+    public static parseSupplier(jsonData: any): SupplierDetails {
+        Check.notNullOrUndefined(jsonData, 'jsonData');
+        Check.notNullOrUndefined(jsonData.supplier, 'jsonData.supplier');
+
+        const settings: Settings = JsonParser.parseSettings(jsonData.settings);
+        const data = new SupplierDetails(settings, jsonData.supplier);
+
+        return data;
+    }
+
     public static parseSettings(settings: any): Settings {
 
         const result: Settings = {
@@ -62,7 +74,12 @@ export abstract class JsonParser {
                 booleanValues: {
                     true: 'Yes',
                     false: 'No'
-                }
+                },
+                location: {
+                    address: 'Address',
+                    website: 'Web',
+                    email: 'E-Mail'
+                  }
             },
             showProductsImage: true,
             logo: {
