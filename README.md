@@ -52,7 +52,7 @@ export class AppComponent implements OnInit {
 }
 ```
 
-## Json Object Definition
+## Json Object Definition 
 
 ```typescript
 {
